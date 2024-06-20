@@ -1,0 +1,26 @@
+﻿@model List<WebApp.Models.Answer>
+
+@{
+    ViewData["Title"] = "Results";
+}
+
+<h1>
+    نتایج پرسشنامه</ه1>
+
+    <div>
+        <h2>
+            سوالات و پاسخ‌ها:</ه2>
+            <ul>
+                @foreach (var answer in Model)
+                {
+                    if (answer.AnswerOptionId == null)
+                    {
+                        <li>سوال @answer.QuestionId: @answer.AnswerText</li>
+                    }
+                    else
+                    {
+                        <li>سوال @answer.QuestionId: @answer.AnswerOptionId.ToString()</li>
+                    }
+                }
+            </ul>
+    </div>

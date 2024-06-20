@@ -1,0 +1,236 @@
+﻿@{
+    ViewData["Title"] = "Create Questionnaire";
+}
+
+<div class="container">
+    <form id="questionnaire-form">
+        <div class="form-group">
+            <label for="title">Questionnaire Title</label>
+            <input type="text" id="title" name="title" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label for="course">Select Course</label>
+            <select id="course" name="course" class="form-control" required>
+                @foreach (var course in ViewBag.Courses)
+                {
+                    <option value="@course.Id">@course.Name - @course.Class</option>
+                }
+            </select>
+        </div>
+        <div class="right-panel">
+            <div class="question-type" draggable="true" data-type="Text">متنی</div>
+            <div class="question-type" draggable="true" data-type="MultipleChoice">چندگزینه‌ای</div>
+            <div class="question-type" draggable="true" data-type="Range">طیفی</div>
+            <div class="question-type" draggable="true" data-type="Degree">درجه‌بندی</div>
+        </div>
+        <div class="left-panel">
+            <div class="section welcome-section" data-type="welcome">
+                <h3>صفحه خوش آمدگویی</h3>
+            </div>
+            <div id="drop-area" class="drop-area">
+                <p>نوع سوال مورد نظر را از ستون سمت راست به اینجا بکشید</p>
+            </div>
+            <div class="section end-section" data-type="end">
+                <h3>صفحه پایان</h3>
+            </div>
+            <button id="submit-button" class="submit-button">ثبت</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modals for question types -->
+<div id="multiple-choice-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>تنظیمات سوال چندگزینه‌ای</h2>
+        <label for="mc-question-text">سوال:</label>
+        <textarea id="mc-question-text" rows="4"></textarea>
+        <h3>گزینه‌ها</h3>
+        <div id="options-container">
+            <input type="text" class="option-input" placeholder="گزینه 1">
+            <input type="text" class="option-input" placeholder="گزینه 2">
+            <input type="text" class="option-input" placeholder="گزینه 3">
+            <input type="text" class="option-input" placeholder="گزینه 4">
+        </div>
+        <button id="add-option">افزودن گزینه</button>
+    </div>
+</div>
+
+<div id="short-text-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>
+            تنظیمات سوال متنی</ه2>
+            <label for="short-question-text">سوال:</label>
+            <textarea id="short-question-text" rows="4"></textarea>
+    </div>
+</div>
+
+<div id="welcome-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>
+            تنظیمات صفحه خوش آمدگویی</ه2>
+            <label for="welcome-text">متن:</label>
+            <textarea id="welcome-text" rows="4"></textarea>
+    </div>
+</div>
+
+<div id="end-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>
+            تنظیمات صفحه پایان</ه2>
+            <label for="end-text">متن:</label>
+            <textarea id="end-text" rows="4"></textarea>
+    </div>
+</div>
+
+<div id="scale-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>
+            تنظیمات سوال طیفی</ه2>
+            <label for="scale-question-text">سوال:</label>
+            <textarea id="scale-question-text" rows="4"></textarea>
+    </div>
+</div>
+
+<div id="rating-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>
+            تنظیمات سوال درجه‌بندی</ه2>
+            <label for="rating-question-text">سوال:</label>
+            <textarea id="rating-question-text" rows="4"></textarea>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const questionTypes = document.querySelectorAll('.question-type');
+        const dropArea = document.getElementById('drop-area');
+        const modals = {
+            'MultipleChoice': document.getElementById('multiple-choice-modal'),
+            'Text': document.getElementById('short-text-modal'),
+            'Range': document.getElementById('scale-modal'),
+            'Degree': document.getElementById('rating-modal')
+        };
+        const closeModalButtons = document.querySelectorAll('.close');
+        let questionCount = 1;
+
+        const typeMap = {
+            'MultipleChoice': 'چندگزینه‌ای',
+            'Text': 'متنی',
+            'Range': 'طیفی',
+            'Degree': 'درجه‌بندی'
+        };
+
+        questionTypes.forEach(type => {
+            type.addEventListener('dragstart', dragStart);
+        });
+
+        dropArea.addEventListener('dragover', dragOver);
+        dropArea.addEventListener('drop', drop);
+
+        document.querySelector('.welcome-section').addEventListener('click', openModal);
+        document.querySelector('.end-section').addEventListener('click', openModal);
+
+        function dragStart(event) {
+            event.dataTransfer.setData('text', event.target.dataset.type);
+        }
+
+        function dragOver(event) {
+            event.preventDefault();
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const type = event.dataTransfer.getData('text');
+            const newElement = document.createElement('div');
+            newElement.classList.add('question-type');
+            newElement.textContent = `سوال ${questionCount}: ${typeMap[type]}`;
+            newElement.dataset.type = type;
+            newElement.dataset.rank = questionCount++;
+            newElement.addEventListener('click', openModal);
+            dropArea.appendChild(newElement);
+        }
+
+        function openModal(event) {
+            const type = event.currentTarget.dataset.type;
+            if (modals[type]) {
+                modals[type].style.display = "block";
+                modals[type].dataset.currentQuestion = event.currentTarget.textContent.split(':')[0].trim();
+            }
+        }
+
+        closeModalButtons.forEach(button => {
+            button.onclick = function () {
+                button.parentElement.parentElement.style.display = "none";
+            };
+        });
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        };
+
+        document.getElementById('add-option').addEventListener('click', function () {
+            const optionsContainer = document.getElementById('options-container');
+            const optionCount = optionsContainer.querySelectorAll('.option-input').length + 1;
+            const newOption = document.createElement('input');
+            newOption.type = 'text';
+            newOption.classList.add('option-input');
+            newOption.placeholder = `گزینه ${optionCount}`;
+            optionsContainer.appendChild(newOption);
+        });
+
+        document.getElementById('submit-button').addEventListener('click', function () {
+            const title = document.getElementById('title').value;
+            const course = document.getElementById('course').value;
+            const questions = [];
+
+            const questionElements = document.querySelectorAll('.question-type');
+
+            questionElements.forEach((el) => {
+                const type = el.dataset.type;
+                const rank = parseInt(el.dataset.rank, 10);
+                let title = '';
+                const options = [];
+
+                if (type === 'MultipleChoice') {
+                    title = document.getElementById('mc-question-text').value;
+                    const optionElements = document.querySelectorAll('.option-input');
+                    optionElements.forEach(optionEl => {
+                        options.push(optionEl.value);
+                    });
+                } else if (type === 'Text') {
+                    title = document.getElementById('short-question-text').value;
+                } else if (type === 'Range') {
+                    title = document.getElementById('scale-question-text').value;
+                } else if (type === 'Degree') {
+                    title = document.getElementById('rating-question-text').value;
+                }
+
+                if (title && rank !== null) {
+                    questions.push({ rank, type, title, options });
+                }
+            });
+
+            fetch('/Questionnaire/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, course, questions })
+            }).then(response => response.json()).then(data => {
+                if (data.questionnaireId) {
+                    window.location.href = `/Questionnaire/Fill/${data.questionnaireId}`;
+                } else {
+                    alert('مشکلی در ثبت اطلاعات رخ داد.');
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,85 @@
+﻿@model WebApp.Models.Questionnaire
+
+@{
+    ViewData["Title"] = "Fill Questionnaire";
+}
+
+<h1>پاسخ به پرسشنامه</h1>
+
+<form id="questionnaire-form">
+    @foreach (var question in Model.Questions)
+    {
+        <div class="question">
+            <label>@question.Title</label>
+            @switch (question.Type)
+            {
+                case QuestionType.Text:
+                    <input type="text" name="answer-@question.Id" />
+                    break;
+                case QuestionType.MultipleChoice:
+                    var mcQuestion = (MultipleChoiceQuestion)question;
+                    foreach (var option in mcQuestion.Options)
+                    {
+                        <label>
+                            <input type="radio" name="answer-@question.Id" value="@option.Id" /> @option.OptionText
+                        </label>
+                    }
+                    break;
+                case QuestionType.Range:
+                    <input type="range" name="answer-@question.Id" min="0" max="100" />
+                    break;
+                case QuestionType.Degree:
+                    <input type="number" name="answer-@question.Id" min="0" max="5" />
+                    break;
+            }
+        </div>
+    }
+    <button type="submit">ارسال</button>
+</form>
+
+<script>
+    document.getElementById('questionnaire-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = {
+            questionnaireId: @Model.Id,
+            questions: []
+        };
+
+        formData.forEach((value, key) => {
+            const [prefix, id] = key.split('-');
+            if (prefix === 'answer') {
+                const question = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Questions));
+                const q = question.find(q => q.Id.toString() === id);
+                if (q.Type === @Html.Raw((int)QuestionType.Text)) {
+                    data.questions.push({
+                        questionId: parseInt(id),
+                        answerText: value,
+                        questionnaireId: data.questionnaireId
+                    });
+                } else {
+                    data.questions.push({
+                        questionId: parseInt(id),
+                        answerOptionId: parseInt(value),
+                        questionnaireId: data.questionnaireId
+                    });
+                }
+            }
+        });
+
+        fetch('/Questionnaire/SubmitAnswers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data.questions)
+        }).then(response => {
+            if (response.ok) {
+                alert('پاسخ‌ها با موفقیت ثبت شدند.');
+            } else {
+                alert('مشکلی در ثبت پاسخ‌ها رخ داد.');
+            }
+        });
+    });
+</script>

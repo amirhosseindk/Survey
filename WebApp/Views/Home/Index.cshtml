@@ -1,0 +1,26 @@
+﻿@* @model List<WebApp.Models.Course>
+@model List<WebApp.Models.Questionnaire>
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<h1>Courses</h1>
+
+<ul>
+    @foreach (var course in Model)
+    {
+        <li>
+            <a asp-controller="Questionnaire" asp-action="Index" asp-route-courseId="@course.Id">@course.Name - @course.Professor.UserName</a>
+        </li>
+    }
+</ul>
+
+<ul>
+    @foreach (var questionnaire in Model)
+    {
+        <li>
+            <a asp-controller="Questionnaire" asp-action="Fill" asp-route-id="@questionnaire.Id">@questionnaire.Title</a>
+        </li>
+    }
+</ul> *@
