@@ -21,7 +21,8 @@ namespace WebApp.Controllers
         //[Authorize(Roles = "Professor")]
         public IActionResult Create()
         {
-            var courses = _context.Courses.Where(c => c.ProfessorId.ToString() == _userManager.GetUserId(User)).ToList();
+            //var courses = _context.Courses.Where(c => c.ProfessorId.ToString() == _userManager.GetUserId(User)).ToList();
+            var courses = _context.Courses.ToList();
             ViewBag.Courses = courses;
             return View();
         }
@@ -36,17 +37,17 @@ namespace WebApp.Controllers
                 return BadRequest("Data is null.");
             }
 
-            data.questionDtos.RemoveAll(d => d.Rank == null);
+            data.Questions.RemoveAll(d => d.Rank == null);
 
             var questionnaire = new Questionnaire
             {
-                Title = data.QuestionnaireName,
-                CourseId = data.CourseId,
-                ProfessorId = _userManager.GetUserId(User),
+                Title = data.Title,
+                CourseId = int.Parse(data.Course),
+                ProfessorId = "c5e390b4-5a3e-4860-b4d0-05e08280f7f8",
                 Questions = new List<Question>()
             };
 
-            foreach (var question in data.questionDtos)
+            foreach (var question in data.Questions)
             {
                 Console.WriteLine($"Processing question: {question.Title} of type {question.Type}");
                 switch (question.Type)
@@ -116,7 +117,8 @@ namespace WebApp.Controllers
                     QuestionnaireId = answer.QuestionnaireId,
                     QuestionId = answer.QuestionId,
                     AnswerText = answer.AnswerText,
-                    AnswerOptionId = answer.AnswerOptionId
+                    AnswerOptionId = answer.AnswerOptionId,
+                    StudentId = "c5e390b4-5a3e-4860-b4d0-05e08280f7f8"
                 });
             }
 
@@ -125,7 +127,7 @@ namespace WebApp.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "Professor")]
+        //[Authorize(Roles = "Professor")]
         public async Task<IActionResult> Results(int id)
         {
             var results = await _context.Answers

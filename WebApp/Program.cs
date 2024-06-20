@@ -19,11 +19,11 @@ builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 // Seed roles and admin user
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await DataSeeder.SeedRolesAndAdminAsync(services);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    await DataSeeder.SeedRolesAndAdminAsync(services);
+//}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -2,8 +2,8 @@
 {
     public class QuestionnaireDto
     {
-        public string QuestionnaireName { get; set; }
-        public int CourseId { get; set; }
-        public List<QuestionDto> questionDtos { get; set; }
+        public string Title { get; set; }
+        public string Course { get; set; }
+        public List<QuestionDto> Questions { get; set; }
     }
 }

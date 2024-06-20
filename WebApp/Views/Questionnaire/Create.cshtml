@@ -2,12 +2,19 @@
     ViewData["Title"] = "Create Questionnaire";
 }
 
+<link rel="stylesheet" href="~/css/QCreate.css" />
+
+<!-- Main container for the flexbox layout -->
 <div class="container">
+    <!-- Form for creating the questionnaire -->
     <form id="questionnaire-form">
+        <!-- Form group for the questionnaire title -->
         <div class="form-group">
             <label for="title">Questionnaire Title</label>
             <input type="text" id="title" name="title" class="form-control" required />
         </div>
+
+        <!-- Form group for selecting the course -->
         <div class="form-group">
             <label for="course">Select Course</label>
             <select id="course" name="course" class="form-control" required>
@@ -17,28 +24,35 @@
                 }
             </select>
         </div>
-        <div class="right-panel">
-            <div class="question-type" draggable="true" data-type="Text">متنی</div>
-            <div class="question-type" draggable="true" data-type="MultipleChoice">چندگزینه‌ای</div>
-            <div class="question-type" draggable="true" data-type="Range">طیفی</div>
-            <div class="question-type" draggable="true" data-type="Degree">درجه‌بندی</div>
-        </div>
-        <div class="left-panel">
-            <div class="section welcome-section" data-type="welcome">
-                <h3>صفحه خوش آمدگویی</h3>
+
+        <!-- Flexbox container for panels -->
+        <div class="flex-container">
+            <!-- Left panel for the questionnaire sections and drop area -->
+            <div class="left-panel">
+                <div class="section welcome-section" data-type="welcome">
+                    <h3>صفحه خوش آمدگویی</h3>
+                </div>
+                <div id="drop-area" class="drop-area">
+                    <p>نوع سوال مورد نظر را از ستون سمت راست به اینجا بکشید</p>
+                </div>
+                <div class="section end-section" data-type="end">
+                    <h3>صفحه پایان</h3>
+                </div>
+                <button id="submit-button" class="submit-button">ثبت</button>
             </div>
-            <div id="drop-area" class="drop-area">
-                <p>نوع سوال مورد نظر را از ستون سمت راست به اینجا بکشید</p>
+
+            <!-- Right panel for question types -->
+            <div class="right-panel">
+                <div class="question-type" draggable="true" data-type="Text">متنی</div>
+                <div class="question-type" draggable="true" data-type="MultipleChoice">چندگزینه‌ای</div>
+                <div class="question-type" draggable="true" data-type="Range">طیفی</div>
+                <div class="question-type" draggable="true" data-type="Degree">درجه‌بندی</div>
             </div>
-            <div class="section end-section" data-type="end">
-                <h3>صفحه پایان</h3>
-            </div>
-            <button id="submit-button" class="submit-button">ثبت</button>
         </div>
     </form>
 </div>
 
-<!-- Modals for question types -->
+<!-- Modals for question settings -->
 <div id="multiple-choice-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -59,20 +73,18 @@
 <div id="short-text-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>
-            تنظیمات سوال متنی</ه2>
-            <label for="short-question-text">سوال:</label>
-            <textarea id="short-question-text" rows="4"></textarea>
+        <h2>تنظیمات سوال متنی</h2>
+        <label for="short-question-text">سوال:</label>
+        <textarea id="short-question-text" rows="4"></textarea>
     </div>
 </div>
 
 <div id="welcome-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>
-            تنظیمات صفحه خوش آمدگویی</ه2>
-            <label for="welcome-text">متن:</label>
-            <textarea id="welcome-text" rows="4"></textarea>
+        <h2>تنظیمات صفحه خوش آمدگویی</h2>
+        <label for="welcome-text">متن:</label>
+        <textarea id="welcome-text" rows="4"></textarea>
     </div>
 </div>
 
