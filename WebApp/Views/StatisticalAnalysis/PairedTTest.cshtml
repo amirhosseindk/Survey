@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Paired T-Test Analysis";
+}
+
+<h2>Paired T-Test Analysis</h2>
+
+@if (ViewBag.TStat != null && ViewBag.PValue != null)
+{
+    <h3>Results</h3>
+    <p>T-statistic: @ViewBag.TStat</p>
+    <p>P-value: @ViewBag.PValue</p>
+    <p>@(ViewBag.PValue < 0.05 ? "There is a significant difference between the groups." : "There is no significant difference between the groups.")</p>
+}

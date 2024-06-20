@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebApp;
+using WebApp.IServices;
 using WebApp.Models;
+using WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,8 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IStatisticalAnalysisService, StatisticalAnalysisService>();
 
 var app = builder.Build();
 
