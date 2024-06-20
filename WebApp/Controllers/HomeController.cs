@@ -25,6 +25,8 @@ namespace WebApp.Controllers
                 .Where(c => c.Class == user.Class)
                 .ToList();
 
+            ViewBag.courses = courses;
+
             //var questionnaires = await _context.Questionnaires
             //    .Where(q => q.CourseId == CourseId)
             //    .ToListAsync();

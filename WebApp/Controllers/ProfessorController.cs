@@ -38,5 +38,10 @@ namespace WebApp.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public IActionResult CreateQuestionnaire()
+        {
+            return RedirectToAction("Create", "Questionnaire");
+        }
     }
 }

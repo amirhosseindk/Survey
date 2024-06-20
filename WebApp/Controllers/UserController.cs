@@ -47,13 +47,15 @@ namespace WebApp.Controllers
                     if (model.IsProfessor)
                     {
                         await _userManager.AddToRoleAsync(user, "Professor");
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Index", "Professor");
                     }
                     else
                     {
                         await _userManager.AddToRoleAsync(user, "Student");
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Index", "Home");
                     }
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
                 }
 
                 foreach (var error in result.Errors)
@@ -80,7 +82,18 @@ namespace WebApp.Controllers
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Index", "Home");
+                    var user = await _userManager.FindByNameAsync(model.StudentNumber);
+                    if (user != null)
+                    {
+                        if (await _userManager.IsInRoleAsync(user, "Professor"))
+                        {
+                            return RedirectToAction("Index", "Professor");
+                        }
+                        else if (await _userManager.IsInRoleAsync(user, "Student"))
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
                 }
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -93,7 +106,7 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "User");
         }
     }
 }

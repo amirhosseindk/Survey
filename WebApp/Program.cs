@@ -43,6 +43,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Questionnaire}/{action=Create}/{id?}");
+    pattern: "{controller=User}/{action=Login}");
 
 app.Run();

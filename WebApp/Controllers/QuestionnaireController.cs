@@ -18,17 +18,15 @@ namespace WebApp.Controllers
             _userManager = userManager;
         }
 
-        //[Authorize(Roles = "Professor")]
+        [Authorize(Roles = "Professor")]
         public IActionResult Create()
         {
-            //var courses = _context.Courses.Where(c => c.ProfessorId.ToString() == _userManager.GetUserId(User)).ToList();
-            var courses = _context.Courses.ToList();
+            var courses = _context.Courses.Where(c => c.ProfessorId.ToString() == _userManager.GetUserId(User)).ToList();
             ViewBag.Courses = courses;
             return View();
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Professor")]
         public async Task<IActionResult> Create([FromBody] QuestionnaireDto data)
         {
             if (data == null)
@@ -127,7 +125,7 @@ namespace WebApp.Controllers
             return Ok();
         }
 
-        //[Authorize(Roles = "Professor")]
+        [Authorize(Roles = "Professor")]
         public async Task<IActionResult> Results(int id)
         {
             var results = await _context.Answers
