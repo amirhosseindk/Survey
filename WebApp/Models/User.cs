@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Models
 {
@@ -7,9 +6,9 @@ namespace WebApp.Models
     {
         public string StudentNumber { get; set; }
         public string Field { get; set; }
-        public string Class { get; set; }
         public bool IsProfessor { get; set; }
-        public ICollection<Course> Courses { get; set; }
+        public ICollection<Course> EnrolledCourses { get; set; } = new List<Course>();
+        public ICollection<Course> TaughtCourses { get; set; } = new List<Course>();
         public ICollection<Questionnaire> Questionnaires { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }

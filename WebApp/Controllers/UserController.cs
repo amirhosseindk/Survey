@@ -9,38 +9,41 @@ namespace WebApp.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly AppDbContext _appDbContext;
 
-        public UserController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, AppDbContext appDbContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _appDbContext = appDbContext;
         }
 
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            var courses = _appDbContext.Courses.ToList();
+            var model = new RegisterViewModel
+            {
+                Courses = courses
+            };
+            return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
-            {
 
                 var user = new User
                 {
                     UserName = model.StudentNumber,
-                    Email = "user@example.com",
+                    Email = model.Email,
                     EmailConfirmed = true,
                     IsProfessor = model.IsProfessor,
                     StudentNumber = model.StudentNumber,
-                    Field = model.Field,
-                    Class = model.Class
+                    Field = model.Field
                 };
 
                 string userPassword = model.ConfirmPassword;
-
                 var result = await _userManager.CreateAsync(user, userPassword);
                 if (result.Succeeded)
                 {
@@ -54,16 +57,23 @@ namespace WebApp.Controllers
                     {
                         await _userManager.AddToRoleAsync(user, "Student");
                         await _signInManager.SignInAsync(user, isPersistent: false);
+
+                        var courses = _appDbContext.Courses
+                            .Where(c => model.SelectedCourseIds.Contains(c.Id))
+                            .ToList();
+
+                        foreach (var course in courses)
+                        {
+                            course.Students.Add(user);
+                        }
+
+                        await _appDbContext.SaveChangesAsync();
+
                         return RedirectToAction("Index", "Home");
                     }
                 }
 
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
+            model.Courses = _appDbContext.Courses.ToList();
             return View(model);
         }
 

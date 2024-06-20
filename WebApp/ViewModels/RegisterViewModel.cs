@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using WebApp.Models;
 
 namespace WebApp.ViewModels
 {
@@ -21,10 +22,13 @@ namespace WebApp.ViewModels
         public string Field { get; set; }
 
         [Required]
-        public string Class { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
 
         [Required]
-        public string Lesson { get; set; }
+        public List<int> SelectedCourseIds { get; set; } = new List<int>();
+
+        public List<Course> Courses { get; set; }
 
         public bool IsProfessor { get; set; }
     }

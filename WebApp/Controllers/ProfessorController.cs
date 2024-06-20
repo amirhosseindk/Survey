@@ -28,8 +28,7 @@ namespace WebApp.Controllers
             var user = await _userManager.GetUserAsync(User);
             var course = new Course
             {
-                Name = courseName,
-                Class = className,
+                Name = courseName+"-"+className,
                 ProfessorId = user.Id.ToString()
             };
 

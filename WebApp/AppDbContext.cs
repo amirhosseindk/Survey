@@ -21,33 +21,34 @@ namespace WebApp
         {
             base.OnModelCreating(modelBuilder);
 
-            // Ensure that deleting a Course does not cascade to Questionnaires
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Professor)
+                .WithMany(u => u.TaughtCourses)
+                .HasForeignKey(c => c.ProfessorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Questionnaire>()
                 .HasOne(q => q.Course)
                 .WithMany(c => c.Questionnaires)
                 .HasForeignKey(q => q.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Ensure that deleting a User does not cascade to Answers
+            modelBuilder.Entity<Questionnaire>()
+                .HasOne(q => q.Professor)
+                .WithMany(u => u.Questionnaires)
+                .HasForeignKey(q => q.ProfessorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Answer>()
                 .HasOne(a => a.Student)
                 .WithMany(u => u.Answers)
                 .HasForeignKey(a => a.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Ensure that deleting a User does not cascade to Courses
             modelBuilder.Entity<Course>()
-                .HasOne(c => c.Professor)
-                .WithMany(u => u.Courses)
-                .HasForeignKey(c => c.ProfessorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Ensure that deleting a User does not cascade to Questionnaires
-            modelBuilder.Entity<Questionnaire>()
-                .HasOne(q => q.Professor)
-                .WithMany(u => u.Questionnaires)
-                .HasForeignKey(q => q.ProfessorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasMany(c => c.Students)
+                .WithMany(s => s.EnrolledCourses)
+                .UsingEntity(j => j.ToTable("CourseStudents"));
         }
     }
 }

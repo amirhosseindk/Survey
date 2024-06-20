@@ -9,8 +9,9 @@ namespace WebApp
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
+            var context = serviceProvider.GetRequiredService<AppDbContext>();
 
-            string[] roleNames = { "Admin", "Professor", "Student" };
+            string[] roleNames = { "Professor", "Student" };
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)
@@ -29,8 +30,7 @@ namespace WebApp
                 EmailConfirmed = true,
                 IsProfessor = true,
                 StudentNumber = "4003333004",
-                Field = "CS",
-                Class = "A"
+                Field = "CS"
             };
 
             string adminPassword = "Admin@123";
@@ -41,7 +41,30 @@ namespace WebApp
                 var createAdmin = await userManager.CreateAsync(adminUser, adminPassword);
                 if (createAdmin.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(adminUser, "Professor");
+
+                    var course = new Course
+                    {
+                        Name = "Ehtemal-CS",
+                        ProfessorId = adminUser.Id
+                    };
+
+                    context.Courses.Add(course);
+                    await context.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                if (!context.Courses.Any(c => c.Name == "Ehtemal-CS"))
+                {
+                    var course = new Course
+                    {
+                        Name = "Ehtemal-CS",
+                        ProfessorId = admin.Id
+                    };
+
+                    context.Courses.Add(course);
+                    await context.SaveChangesAsync();
                 }
             }
         }
