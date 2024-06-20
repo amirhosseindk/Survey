@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApp.Models;
 
 namespace WebApp.Controllers
@@ -17,9 +18,14 @@ namespace WebApp.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var user = await _userManager.GetUserAsync(User);
+            var questionnaires = await _context.Questionnaires
+                .Where(q => q.ProfessorId == user.Id)
+                .ToListAsync();
+
+            return View(questionnaires);
         }
 
         [HttpPost]
@@ -28,7 +34,7 @@ namespace WebApp.Controllers
             var user = await _userManager.GetUserAsync(User);
             var course = new Course
             {
-                Name = courseName+"-"+className,
+                Name = courseName + "-" + className,
                 ProfessorId = user.Id.ToString()
             };
 

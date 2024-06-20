@@ -41,7 +41,7 @@ namespace WebApp.Controllers
             {
                 Title = data.Title,
                 CourseId = int.Parse(data.Course),
-                ProfessorId = "c5e390b4-5a3e-4860-b4d0-05e08280f7f8",
+                ProfessorId = _userManager.GetUserId(User),
                 Questions = new List<Question>()
             };
 
@@ -116,7 +116,7 @@ namespace WebApp.Controllers
                     QuestionId = answer.QuestionId,
                     AnswerText = answer.AnswerText,
                     AnswerOptionId = answer.AnswerOptionId,
-                    StudentId = "c5e390b4-5a3e-4860-b4d0-05e08280f7f8"
+                    StudentId = _userManager.GetUserId(User)
                 });
             }
 
@@ -131,6 +131,11 @@ namespace WebApp.Controllers
             var results = await _context.Answers
                 .Where(a => a.QuestionnaireId == id)
                 .ToListAsync();
+
+            if (!results.Any())
+            {
+                return NotFound();
+            }
 
             return View(results);
         }

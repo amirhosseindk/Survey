@@ -20,7 +20,7 @@
             <select id="course" name="course" class="form-control" required>
                 @foreach (var course in ViewBag.Courses)
                 {
-                    <option value="@course.Id">@course.Name - @course.Class</option>
+                    <option value="@course.Id">@course.Name</option>
                 }
             </select>
         </div>
