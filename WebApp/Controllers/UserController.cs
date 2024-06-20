@@ -27,17 +27,21 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
+
                 var user = new User
                 {
                     UserName = model.StudentNumber,
+                    Email = "user@example.com",
+                    EmailConfirmed = true,
+                    IsProfessor = model.IsProfessor,
                     StudentNumber = model.StudentNumber,
                     Field = model.Field,
-                    Class = model.Class,
-                    IsProfessor = model.IsProfessor
+                    Class = model.Class
                 };
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+                string userPassword = model.ConfirmPassword;
 
+                var result = await _userManager.CreateAsync(user, userPassword);
                 if (result.Succeeded)
                 {
                     if (model.IsProfessor)
@@ -48,7 +52,6 @@ namespace WebApp.Controllers
                     {
                         await _userManager.AddToRoleAsync(user, "Student");
                     }
-
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");
                 }
