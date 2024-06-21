@@ -94,5 +94,20 @@ namespace WebApp.Controllers
             ViewBag.Deviation = deviation;
             return View();
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Professor")]
+        public async Task<IActionResult> PerformOneSampleTTest(int questionnaireId, double collegeAverage = 2.4)
+        {
+            var courseId = await _context.Questionnaires
+                .Where(q => q.Id == questionnaireId)
+                .Select(q => q.CourseId)
+                .FirstOrDefaultAsync();
+
+            var (tStatistic, pValue) = await _statisticalAnalysisService.PerformOneSampleTTestAsync(courseId, collegeAverage);
+            ViewBag.TStatistic = tStatistic;
+            ViewBag.PValue = pValue;
+            return View();
+        }
     }
 }

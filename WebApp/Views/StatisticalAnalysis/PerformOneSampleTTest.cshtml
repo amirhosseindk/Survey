@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "One-Sample T-Test Analysis";
+}
+
+<h2>One-Sample T-Test Analysis</h2>
+
+@if (ViewBag.TStatistic != null && ViewBag.PValue != null)
+{
+    <h3>Results</h3>
+    <p>T-Statistic: @ViewBag.TStatistic</p>
+    <p>P-value: @ViewBag.PValue</p>
+    <p>@(ViewBag.PValue < 0.05 ? "Statistically significant difference from the college average." : "No statistically significant difference from the college average.")</p>
+}

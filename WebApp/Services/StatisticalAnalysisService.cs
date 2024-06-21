@@ -1,6 +1,6 @@
-﻿using MathNet.Numerics.Distributions;
+﻿using Microsoft.EntityFrameworkCore;
 using MathNet.Numerics.Statistics;
-using Microsoft.EntityFrameworkCore;
+using MathNet.Numerics.Distributions;
 using WebApp.IServices;
 
 namespace WebApp.Services
@@ -38,6 +38,13 @@ namespace WebApp.Services
             var answers = await GetMultipleChoiceAnswersAsync(courseId);
 
             return CompareWithCollegeAverage(answers, collegeAverage);
+        }
+
+        public async Task<(double tStatistic, double pValue)> PerformOneSampleTTestAsync(int courseId, double collegeAverage)
+        {
+            var answers = await GetMultipleChoiceAnswersAsync(courseId);
+
+            return PerformOneSampleTTest(answers, collegeAverage);
         }
 
         private async Task<double[]> GetMultipleChoiceAnswersAsync(int courseId)
@@ -90,6 +97,21 @@ namespace WebApp.Services
             double deviation = overallMean - collegeAverage;
 
             return (overallMean, deviation);
+        }
+
+        private (double tStatistic, double pValue) PerformOneSampleTTest(double[] data, double populationMean)
+        {
+            int sampleSize = data.Length;
+            double sampleMean = Statistics.Mean(data);
+            double sampleStdDev = Statistics.StandardDeviation(data);
+
+            double tStatistic = (sampleMean - populationMean) / (sampleStdDev / Math.Sqrt(sampleSize));
+            int degreesOfFreedom = sampleSize - 1;
+
+            var tDistribution = new StudentT(0, 1, degreesOfFreedom);
+            double pValue = 2 * tDistribution.CumulativeDistribution(-Math.Abs(tStatistic)); // آزمون دو طرفه
+
+            return (tStatistic, pValue);
         }
     }
 }
