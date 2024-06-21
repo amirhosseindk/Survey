@@ -35,9 +35,30 @@
     <button type="submit" class="btn btn-primary">Paired T-Test</button>
 </form>
 
+<form id="group-means-form" asp-controller="StatisticalAnalysis" asp-action="CalculateGroupMeans" method="post">
+    <ul>
+        @foreach (var questionnaire in Model)
+        {
+            <li>
+                <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" />
+                <label>@questionnaire.Title</label>
+            </li>
+        }
+    </ul>
+    <button type="submit" class="btn btn-primary">Calculate Group Means</button>
+</form>
+
 <script>
     document.getElementById('paired-t-test-form').addEventListener('submit', function (event) {
-        var checkboxes = document.querySelectorAll('input[name="questionnaireIds"]:checked');
+        var checkboxes = document.querySelectorAll('#paired-t-test-form input[name="questionnaireIds"]:checked');
+        if (checkboxes.length !== 2) {
+            event.preventDefault();
+            alert('Please select exactly two questionnaires.');
+        }
+    });
+
+    document.getElementById('group-means-form').addEventListener('submit', function (event) {
+        var checkboxes = document.querySelectorAll('#group-means-form input[name="questionnaireIds"]:checked');
         if (checkboxes.length !== 2) {
             event.preventDefault();
             alert('Please select exactly two questionnaires.');

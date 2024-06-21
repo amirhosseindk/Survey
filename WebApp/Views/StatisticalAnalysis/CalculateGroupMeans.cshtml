@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Group Means Analysis";
+}
+
+<h2>Group Means Analysis</h2>
+
+@if (ViewBag.MeanGroup1 != null && ViewBag.MeanGroup2 != null)
+{
+    <h3>Results</h3>
+    <p>Group 1 Mean: @ViewBag.MeanGroup1</p>
+    <p>Group 2 Mean: @ViewBag.MeanGroup2</p>
+}
