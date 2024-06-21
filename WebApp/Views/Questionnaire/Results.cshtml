@@ -1,29 +1,45 @@
-﻿@model List<WebApp.Models.Answer>
+﻿@model WebApp.ViewModels.SurveyResultsViewModel
 
 @{
     ViewData["Title"] = "Results";
 }
 
-<h1>
-    نتایج پرسشنامه</ه1>
+<h1>نتایج پرسشنامه</h1>
 
-    <div>
-        <h2>
-            سوالات و پاسخ‌ها:</ه2>
-            <ul>
-                @foreach (var answer in Model)
-                {
-                    if (answer.AnswerOptionId == null)
-                    {
-                        <li>سوال @answer.QuestionId: @answer.AnswerText</li>
-                    }
-                    else
-                    {
-                        <li>سوال @answer.QuestionId: @answer.AnswerOptionId.ToString()</li>
-                    }
-                }
-            </ul>
-    </div>
+<div>
+    <h2>سوالات و پاسخ‌ها:</h2>
+    @foreach (var question in Model.Questionnaire.Questions)
+    {
+        <div>
+            <h3>@question.Title</h3>
+            @if (question.Type == QuestionType.MultipleChoice && ((MultipleChoiceQuestion)question).Options != null)
+            {
+                var chartLabels = ((MultipleChoiceQuestion)question).Options.Select(o => o.OptionText).ToArray();
+                var chartData = ((MultipleChoiceQuestion)question).Options.Select(o => Model.MultipleChoiceResults.FirstOrDefault(r => r.QuestionId == question.Id && r.AnswerOptionId == o.Id)?.Count ?? 0).ToArray();
+                <canvas id="chart-@question.Id" data-chart-type="bar" data-labels='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(chartLabels))' data-data='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(chartData))'></canvas>
+            }
+            else if (question.Type == QuestionType.Text)
+            {
+                <div>تعداد پاسخ‌دهنده‌ها: @(Model.TextQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Count ?? 0)</div>
+            }
+        </div>
+    }
+</div>
 
-    <a asp-controller="StatisticalAnalysis" asp-action="CompareWithCollegeAverage" asp-route-questionnaireId="@Model.First().QuestionnaireId" class="btn btn-primary">Compare With College Average</a>
-    <a asp-controller="StatisticalAnalysis" asp-action="PerformOneSampleTTest" asp-route-questionnaireId="@Model.First().QuestionnaireId" class="btn btn-primary">Perform One-Sample T-Test</a>
+<div>
+    <h2>پاسخ‌های دانشجویان:</h2>
+    @{
+        var pieLabels = new[] { "پاسخ‌دهنده", "غیر پاسخ‌دهنده" };
+        var pieData = new[] { Model.AnsweredStudents, Model.TotalStudents - Model.AnsweredStudents };
+    }
+    <canvas id="respondentsChart" data-chart-type="pie" data-labels='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(pieLabels))' data-data='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(pieData))'></canvas>
+</div>
+
+<a asp-controller="StatisticalAnalysis" asp-action="CompareWithCollegeAverage" asp-route-questionnaireId="@Model.Questionnaire.Id" class="btn btn-primary">Compare With College Average</a>
+<a asp-controller="StatisticalAnalysis" asp-action="PerformOneSampleTTest" asp-route-questionnaireId="@Model.Questionnaire.Id" class="btn btn-primary">Perform One-Sample T-Test</a>
+
+<!-- اضافه کردن فایل Chart.js و results.js -->
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/results.js"></script>
+}

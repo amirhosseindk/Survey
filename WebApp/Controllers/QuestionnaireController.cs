@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using WebApp.Models;
+using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
@@ -128,16 +129,54 @@ namespace WebApp.Controllers
         [Authorize(Roles = "Professor")]
         public async Task<IActionResult> Results(int id)
         {
-            var results = await _context.Answers
-                .Where(a => a.QuestionnaireId == id)
-                .ToListAsync();
+            var questionnaire = await _context.Questionnaires
+                .Include(q => q.Course)
+                .ThenInclude(c => c.Students)
+                .Include(q => q.Questions)
+                .ThenInclude(q => ((MultipleChoiceQuestion)q).Options) // اطمینان از بارگذاری Options
+                .FirstOrDefaultAsync(q => q.Id == id);
 
-            if (!results.Any())
+            if (questionnaire == null)
             {
                 return NotFound();
             }
 
-            return View(results);
+            var totalStudents = questionnaire.Course.Students.Count;
+            var answeredStudents = await _context.Answers
+                .Where(a => a.QuestionnaireId == id)
+                .Select(a => a.StudentId)
+                .Distinct()
+                .CountAsync();
+
+            var multipleChoiceResults = await _context.Answers
+                .Where(a => a.QuestionnaireId == id && a.AnswerOptionId != null)
+                .GroupBy(a => new { a.QuestionId, a.AnswerOptionId })
+                .Select(g => new MultipleChoiceResult
+                {
+                    QuestionId = g.Key.QuestionId,
+                    AnswerOptionId = g.Key.AnswerOptionId,
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            var textQuestionResults = await _context.Answers
+                .Where(a => a.QuestionnaireId == id && a.AnswerText != null)
+                .GroupBy(a => a.QuestionId)
+                .Select(g => new TextQuestionResult
+                {
+                    QuestionId = g.Key,
+                    Count = g.Count()
+                })
+                .ToListAsync();
+
+            return View(new SurveyResultsViewModel
+            {
+                Questionnaire = questionnaire,
+                MultipleChoiceResults = multipleChoiceResults,
+                TextQuestionResults = textQuestionResults,
+                TotalStudents = totalStudents,
+                AnsweredStudents = answeredStudents
+            });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
