@@ -137,5 +137,33 @@ namespace WebApp.Controllers
             ViewBag.IsSignificant = result.IsSignificant;
             return View();
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Professor")]
+        public IActionResult PerformRepeatedMeasuresANOVA()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Professor")]
+        public async Task<IActionResult> PerformRepeatedMeasuresANOVA(int[] questionnaireIds)
+        {
+            if (questionnaireIds == null || questionnaireIds.Length < 3)
+            {
+                return BadRequest("At least three questionnaires must be selected.");
+            }
+
+            var courseIds = await _context.Questionnaires
+                .Where(q => questionnaireIds.Contains(q.Id))
+                .Select(q => q.CourseId)
+                .ToArrayAsync();
+
+            var result = await _statisticalAnalysisService.PerformRepeatedMeasuresANOVAAsync(courseIds, questionnaireIds.Length);
+            ViewBag.FStatistic = result.FStatistic;
+            ViewBag.PValue = result.PValue;
+            ViewBag.IsSignificant = result.IsSignificant;
+            return View();
+        }
     }
 }

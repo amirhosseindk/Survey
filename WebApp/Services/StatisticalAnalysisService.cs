@@ -2,8 +2,8 @@
 using MathNet.Numerics.Statistics;
 using MathNet.Numerics.Distributions;
 using WebApp.Models;
-using WebApp.IServices;
 using Accord.Statistics.Testing;
+using WebApp.IServices;
 
 namespace WebApp.Services
 {
@@ -58,6 +58,17 @@ namespace WebApp.Services
             }
 
             return PerformANOVA(responses);
+        }
+
+        public async Task<AnovaResult> PerformRepeatedMeasuresANOVAAsync(int[] courseIds, int timePoints)
+        {
+            var responses = new double[courseIds.Length][];
+            for (int i = 0; i < courseIds.Length; i++)
+            {
+                responses[i] = await GetMultipleChoiceAnswersAsync(courseIds[i]);
+            }
+
+            return PerformRepeatedMeasuresANOVA(responses, timePoints);
         }
 
         private async Task<double[]> GetMultipleChoiceAnswersAsync(int courseId)
@@ -145,6 +156,51 @@ namespace WebApp.Services
 
             double[] flatData = data.SelectMany(d => d).ToArray();
             OneWayAnova anova = new OneWayAnova(flatData, groups);
+
+            bool isSignificant = anova.FTest.PValue < 0.05;
+
+            return new AnovaResult
+            {
+                FStatistic = anova.FTest.Statistic,
+                PValue = anova.FTest.PValue,
+                IsSignificant = isSignificant
+            };
+        }
+
+        private AnovaResult PerformRepeatedMeasuresANOVA(double[][] data, int timePoints)
+        {
+            int numGroups = data.Length;
+            int numUsers = data[0].Length / timePoints;
+            int totalResponses = numUsers * timePoints * numGroups;
+
+            // فلت کردن داده‌ها برای ANOVA
+            double[] flatData = new double[totalResponses];
+            int index = 0;
+
+            for (int i = 0; i < numGroups; i++)
+            {
+                for (int j = 0; j < numUsers * timePoints; j++)
+                {
+                    flatData[index] = data[i][j];
+                    index++;
+                }
+            }
+
+            // برچسب‌های زمانی
+            int[] timeLabels = new int[totalResponses];
+            index = 0;
+
+            for (int t = 0; t < timePoints; t++)
+            {
+                for (int i = 0; i < numGroups * numUsers; i++)
+                {
+                    timeLabels[index] = t + 1;
+                    index++;
+                }
+            }
+
+            // انجام ANOVA
+            OneWayAnova anova = new OneWayAnova(flatData, timeLabels);
 
             bool isSignificant = anova.FTest.PValue < 0.05;
 

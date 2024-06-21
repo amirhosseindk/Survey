@@ -9,5 +9,6 @@ namespace WebApp.IServices
         Task<(double overallMean, double deviation)> CompareWithCollegeAverageAsync(int courseId, double collegeAverage);
         Task<(double tStatistic, double pValue)> PerformOneSampleTTestAsync(int courseId, double collegeAverage);
         Task<AnovaResult> PerformANOVAAsync(int[] courseIds);
+        Task<AnovaResult> PerformRepeatedMeasuresANOVAAsync(int[] courseIds, int timePoints);
     }
 }

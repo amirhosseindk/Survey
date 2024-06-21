@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Repeated Measures ANOVA Analysis";
+}
+
+<h2>Repeated Measures ANOVA Analysis</h2>
+
+@if (ViewBag.FStatistic != null && ViewBag.PValue != null)
+{
+    <h3>Results</h3>
+    <p>F-Statistic: @ViewBag.FStatistic</p>
+    <p>P-value: @ViewBag.PValue</p>
+    <p>@(ViewBag.IsSignificant ? "There is a significant difference over time." : "There is no significant difference over time.")</p>
+}
