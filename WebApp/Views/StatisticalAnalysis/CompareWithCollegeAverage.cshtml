@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Compare With College Average";
+}
+
+<h2>Compare With College Average</h2>
+
+@if (ViewBag.OverallMean != null && ViewBag.Deviation != null)
+{
+    <h3>Results</h3>
+    <p>Overall Mean: @ViewBag.OverallMean</p>
+    <p>Deviation from College Average: @ViewBag.Deviation</p>
+}

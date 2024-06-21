@@ -28,7 +28,7 @@
         {
             <li>
                 <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" />
-                <label>@questionnaire.Title</label>
+                <a asp-controller="Questionnaire" asp-action="Results" asp-route-id="@questionnaire.Id">@questionnaire.Title</a>
             </li>
         }
     </ul>
@@ -41,7 +41,7 @@
         {
             <li>
                 <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" />
-                <label>@questionnaire.Title</label>
+                <a asp-controller="Questionnaire" asp-action="Results" asp-route-id="@questionnaire.Id">@questionnaire.Title</a>
             </li>
         }
     </ul>

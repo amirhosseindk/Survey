@@ -33,6 +33,13 @@ namespace WebApp.Services
             return CalculateGroupMeans(answersGroup1, answersGroup2);
         }
 
+        public async Task<(double overallMean, double deviation)> CompareWithCollegeAverageAsync(int courseId, double collegeAverage)
+        {
+            var answers = await GetMultipleChoiceAnswersAsync(courseId);
+
+            return CompareWithCollegeAverage(answers, collegeAverage);
+        }
+
         private async Task<double[]> GetMultipleChoiceAnswersAsync(int courseId)
         {
             return await _context.Answers
@@ -74,6 +81,15 @@ namespace WebApp.Services
             double meanGroup2 = group2.Average();
 
             return (meanGroup1, meanGroup2);
+        }
+
+        private (double, double) CompareWithCollegeAverage(double[] group, double collegeAverage)
+        {
+            double total = group.Sum();
+            double overallMean = total / group.Length;
+            double deviation = overallMean - collegeAverage;
+
+            return (overallMean, deviation);
         }
     }
 }

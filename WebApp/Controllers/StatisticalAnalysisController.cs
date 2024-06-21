@@ -79,5 +79,20 @@ namespace WebApp.Controllers
             ViewBag.MeanGroup2 = meanGroup2;
             return View();
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Professor")]
+        public async Task<IActionResult> CompareWithCollegeAverage(int questionnaireId, double collegeAverage=2.4)
+        {
+            var courseId = await _context.Questionnaires
+                .Where(q => q.Id == questionnaireId)
+                .Select(q => q.CourseId)
+                .FirstOrDefaultAsync();
+
+            var (overallMean, deviation) = await _statisticalAnalysisService.CompareWithCollegeAverageAsync(courseId, collegeAverage);
+            ViewBag.OverallMean = overallMean;
+            ViewBag.Deviation = deviation;
+            return View();
+        }
     }
 }
