@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MathNet.Numerics.Statistics;
 using MathNet.Numerics.Distributions;
+using WebApp.Models;
 using WebApp.IServices;
+using Accord.Statistics.Testing;
 
 namespace WebApp.Services
 {
@@ -45,6 +47,17 @@ namespace WebApp.Services
             var answers = await GetMultipleChoiceAnswersAsync(courseId);
 
             return PerformOneSampleTTest(answers, collegeAverage);
+        }
+
+        public async Task<AnovaResult> PerformANOVAAsync(int[] courseIds)
+        {
+            var responses = new double[courseIds.Length][];
+            for (int i = 0; i < courseIds.Length; i++)
+            {
+                responses[i] = await GetMultipleChoiceAnswersAsync(courseIds[i]);
+            }
+
+            return PerformANOVA(responses);
         }
 
         private async Task<double[]> GetMultipleChoiceAnswersAsync(int courseId)
@@ -112,6 +125,35 @@ namespace WebApp.Services
             double pValue = 2 * tDistribution.CumulativeDistribution(-Math.Abs(tStatistic)); // آزمون دو طرفه
 
             return (tStatistic, pValue);
+        }
+
+        private AnovaResult PerformANOVA(double[][] data)
+        {
+            int numGroups = data.Length;
+            int totalResponses = data.Sum(d => d.Length);
+            int[] groups = new int[totalResponses];
+            int index = 0;
+
+            for (int groupIndex = 0; groupIndex < numGroups; groupIndex++)
+            {
+                for (int i = 0; i < data[groupIndex].Length; i++)
+                {
+                    groups[index] = groupIndex + 1;
+                    index++;
+                }
+            }
+
+            double[] flatData = data.SelectMany(d => d).ToArray();
+            OneWayAnova anova = new OneWayAnova(flatData, groups);
+
+            bool isSignificant = anova.FTest.PValue < 0.05;
+
+            return new AnovaResult
+            {
+                FStatistic = anova.FTest.Statistic,
+                PValue = anova.FTest.PValue,
+                IsSignificant = isSignificant
+            };
         }
     }
 }

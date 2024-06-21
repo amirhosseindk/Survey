@@ -109,5 +109,33 @@ namespace WebApp.Controllers
             ViewBag.PValue = pValue;
             return View();
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Professor")]
+        public IActionResult PerformANOVA()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Professor")]
+        public async Task<IActionResult> PerformANOVA(int[] questionnaireIds)
+        {
+            if (questionnaireIds == null || questionnaireIds.Length < 3)
+            {
+                return BadRequest("At least three questionnaires must be selected.");
+            }
+
+            var courseIds = await _context.Questionnaires
+                .Where(q => questionnaireIds.Contains(q.Id))
+                .Select(q => q.CourseId)
+                .ToArrayAsync();
+
+            var result = await _statisticalAnalysisService.PerformANOVAAsync(courseIds);
+            ViewBag.FStatistic = result.FStatistic;
+            ViewBag.PValue = result.PValue;
+            ViewBag.IsSignificant = result.IsSignificant;
+            return View();
+        }
     }
 }

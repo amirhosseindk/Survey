@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "ANOVA Analysis";
+}
+
+<h2>ANOVA Analysis</h2>
+
+@if (ViewBag.FStatistic != null && ViewBag.PValue != null)
+{
+    <h3>Results</h3>
+    <p>F-Statistic: @ViewBag.FStatistic</p>
+    <p>P-value: @ViewBag.PValue</p>
+    <p>@(ViewBag.IsSignificant ? "There is a significant difference between the groups." : "There is no significant difference between the groups.")</p>
+}
