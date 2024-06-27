@@ -21,7 +21,7 @@ builder.Services.AddScoped<IStatisticalAnalysisService, StatisticalAnalysisServi
 
 var app = builder.Build();
 
-// Seed roles and admin user
+//Seed roles and admin user
 //using (var scope = app.Services.CreateScope())
 //{
 //    var services = scope.ServiceProvider;

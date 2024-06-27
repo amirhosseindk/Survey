@@ -32,17 +32,17 @@ namespace WebApp.Controllers
                 return BadRequest("Exactly two questionnaires must be selected.");
             }
 
-            var courseId1 = await _context.Questionnaires
+            var classId1 = await _context.Questionnaires
                 .Where(q => q.Id == questionnaireIds[0])
-                .Select(q => q.CourseId)
-            .FirstOrDefaultAsync();
-
-            var courseId2 = await _context.Questionnaires
-                .Where(q => q.Id == questionnaireIds[1])
-                .Select(q => q.CourseId)
+                .Select(q => q.ClassId)
                 .FirstOrDefaultAsync();
 
-            var (tStat, pValue) = await _statisticalAnalysisService.PerformPairedTTestAsync(courseId1, courseId2);
+            var classId2 = await _context.Questionnaires
+                .Where(q => q.Id == questionnaireIds[1])
+                .Select(q => q.ClassId)
+                .FirstOrDefaultAsync();
+
+            var (tStat, pValue) = await _statisticalAnalysisService.PerformPairedTTestAsync(classId1, classId2);
             ViewBag.TStat = tStat;
             ViewBag.PValue = pValue;
             return View();
@@ -64,17 +64,17 @@ namespace WebApp.Controllers
                 return BadRequest("Exactly two questionnaires must be selected.");
             }
 
-            var courseId1 = await _context.Questionnaires
+            var classId1 = await _context.Questionnaires
                 .Where(q => q.Id == questionnaireIds[0])
-                .Select(q => q.CourseId)
-            .FirstOrDefaultAsync();
-
-            var courseId2 = await _context.Questionnaires
-                .Where(q => q.Id == questionnaireIds[1])
-                .Select(q => q.CourseId)
+                .Select(q => q.ClassId)
                 .FirstOrDefaultAsync();
 
-            var (meanGroup1, meanGroup2) = await _statisticalAnalysisService.CalculateGroupMeansAsync(courseId1, courseId2);
+            var classId2 = await _context.Questionnaires
+                .Where(q => q.Id == questionnaireIds[1])
+                .Select(q => q.ClassId)
+                .FirstOrDefaultAsync();
+
+            var (meanGroup1, meanGroup2) = await _statisticalAnalysisService.CalculateGroupMeansAsync(classId1, classId2);
             ViewBag.MeanGroup1 = meanGroup1;
             ViewBag.MeanGroup2 = meanGroup2;
             return View();
@@ -82,14 +82,14 @@ namespace WebApp.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Professor")]
-        public async Task<IActionResult> CompareWithCollegeAverage(int questionnaireId, double collegeAverage=2.4)
+        public async Task<IActionResult> CompareWithCollegeAverage(int questionnaireId, double collegeAverage = 2.4)
         {
-            var courseId = await _context.Questionnaires
+            var classId = await _context.Questionnaires
                 .Where(q => q.Id == questionnaireId)
-                .Select(q => q.CourseId)
+                .Select(q => q.ClassId)
                 .FirstOrDefaultAsync();
 
-            var (overallMean, deviation) = await _statisticalAnalysisService.CompareWithCollegeAverageAsync(courseId, collegeAverage);
+            var (overallMean, deviation) = await _statisticalAnalysisService.CompareWithCollegeAverageAsync(classId, collegeAverage);
             ViewBag.OverallMean = overallMean;
             ViewBag.Deviation = deviation;
             return View();
@@ -99,12 +99,12 @@ namespace WebApp.Controllers
         [Authorize(Roles = "Professor")]
         public async Task<IActionResult> PerformOneSampleTTest(int questionnaireId, double collegeAverage = 2.4)
         {
-            var courseId = await _context.Questionnaires
+            var classId = await _context.Questionnaires
                 .Where(q => q.Id == questionnaireId)
-                .Select(q => q.CourseId)
+                .Select(q => q.ClassId)
                 .FirstOrDefaultAsync();
 
-            var (tStatistic, pValue) = await _statisticalAnalysisService.PerformOneSampleTTestAsync(courseId, collegeAverage);
+            var (tStatistic, pValue) = await _statisticalAnalysisService.PerformOneSampleTTestAsync(classId, collegeAverage);
             ViewBag.TStatistic = tStatistic;
             ViewBag.PValue = pValue;
             return View();
@@ -126,12 +126,12 @@ namespace WebApp.Controllers
                 return BadRequest("At least three questionnaires must be selected.");
             }
 
-            var courseIds = await _context.Questionnaires
+            var classIds = await _context.Questionnaires
                 .Where(q => questionnaireIds.Contains(q.Id))
-                .Select(q => q.CourseId)
+                .Select(q => q.ClassId)
                 .ToArrayAsync();
 
-            var result = await _statisticalAnalysisService.PerformANOVAAsync(courseIds);
+            var result = await _statisticalAnalysisService.PerformANOVAAsync(classIds);
             ViewBag.FStatistic = result.FStatistic;
             ViewBag.PValue = result.PValue;
             ViewBag.IsSignificant = result.IsSignificant;
@@ -154,12 +154,12 @@ namespace WebApp.Controllers
                 return BadRequest("At least three questionnaires must be selected.");
             }
 
-            var courseIds = await _context.Questionnaires
+            var classIds = await _context.Questionnaires
                 .Where(q => questionnaireIds.Contains(q.Id))
-                .Select(q => q.CourseId)
+                .Select(q => q.ClassId)
                 .ToArrayAsync();
 
-            var result = await _statisticalAnalysisService.PerformRepeatedMeasuresANOVAAsync(courseIds, questionnaireIds.Length);
+            var result = await _statisticalAnalysisService.PerformRepeatedMeasuresANOVAAsync(classIds, questionnaireIds.Length);
             ViewBag.FStatistic = result.FStatistic;
             ViewBag.PValue = result.PValue;
             ViewBag.IsSignificant = result.IsSignificant;

@@ -32,46 +32,45 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            var user = new User
+            {
+                UserName = model.StudentNumber,
+                Email = model.Email,
+                EmailConfirmed = true,
+                IsProfessor = model.IsProfessor,
+                StudentNumber = model.StudentNumber,
+                Field = model.Field
+            };
 
-                var user = new User
+            string userPassword = model.ConfirmPassword;
+            var result = await _userManager.CreateAsync(user, userPassword);
+            if (result.Succeeded)
+            {
+                if (model.IsProfessor)
                 {
-                    UserName = model.StudentNumber,
-                    Email = model.Email,
-                    EmailConfirmed = true,
-                    IsProfessor = model.IsProfessor,
-                    StudentNumber = model.StudentNumber,
-                    Field = model.Field
-                };
-
-                string userPassword = model.ConfirmPassword;
-                var result = await _userManager.CreateAsync(user, userPassword);
-                if (result.Succeeded)
-                {
-                    if (model.IsProfessor)
-                    {
-                        await _userManager.AddToRoleAsync(user, "Professor");
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("Index", "Professor");
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "Student");
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-
-                        var courses = _appDbContext.Courses
-                            .Where(c => model.SelectedCourseIds.Contains(c.Id))
-                            .ToList();
-
-                        foreach (var course in courses)
-                        {
-                            course.Students.Add(user);
-                        }
-
-                        await _appDbContext.SaveChangesAsync();
-
-                        return RedirectToAction("Index", "Home");
-                    }
+                    await _userManager.AddToRoleAsync(user, "Professor");
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Professor");
                 }
+                else
+                {
+                    await _userManager.AddToRoleAsync(user, "Student");
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    var classes = _appDbContext.Classes
+                        .Where(c => model.SelectedCourseIds.Contains(c.CourseId))
+                        .ToList();
+
+                    foreach (var classEntity in classes)
+                    {
+                        classEntity.Students.Add(user);
+                    }
+
+                    await _appDbContext.SaveChangesAsync();
+
+                    return RedirectToAction("Index", "Home");
+                }
+            }
 
             model.Courses = _appDbContext.Courses.ToList();
             return View(model);

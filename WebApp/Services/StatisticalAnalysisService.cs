@@ -16,10 +16,10 @@ namespace WebApp.Services
             _context = context;
         }
 
-        public async Task<(double tStat, double pValue)> PerformPairedTTestAsync(int courseId1, int courseId2)
+        public async Task<(double tStat, double pValue)> PerformPairedTTestAsync(int classId1, int classId2)
         {
-            var answersGroup1 = await GetMultipleChoiceAnswersAsync(courseId1);
-            var answersGroup2 = await GetMultipleChoiceAnswersAsync(courseId2);
+            var answersGroup1 = await GetMultipleChoiceAnswersAsync(classId1);
+            var answersGroup2 = await GetMultipleChoiceAnswersAsync(classId2);
 
             if (answersGroup1.Length != answersGroup2.Length)
                 throw new InvalidOperationException("The number of responses must be equal for both groups.");
@@ -27,55 +27,55 @@ namespace WebApp.Services
             return PerformPairedTTest(answersGroup1, answersGroup2);
         }
 
-        public async Task<(double meanGroup1, double meanGroup2)> CalculateGroupMeansAsync(int courseId1, int courseId2)
+        public async Task<(double meanGroup1, double meanGroup2)> CalculateGroupMeansAsync(int classId1, int classId2)
         {
-            var answersGroup1 = await GetMultipleChoiceAnswersAsync(courseId1);
-            var answersGroup2 = await GetMultipleChoiceAnswersAsync(courseId2);
+            var answersGroup1 = await GetMultipleChoiceAnswersAsync(classId1);
+            var answersGroup2 = await GetMultipleChoiceAnswersAsync(classId2);
 
             return CalculateGroupMeans(answersGroup1, answersGroup2);
         }
 
-        public async Task<(double overallMean, double deviation)> CompareWithCollegeAverageAsync(int courseId, double collegeAverage)
+        public async Task<(double overallMean, double deviation)> CompareWithCollegeAverageAsync(int classId, double collegeAverage)
         {
-            var answers = await GetMultipleChoiceAnswersAsync(courseId);
+            var answers = await GetMultipleChoiceAnswersAsync(classId);
 
             return CompareWithCollegeAverage(answers, collegeAverage);
         }
 
-        public async Task<(double tStatistic, double pValue)> PerformOneSampleTTestAsync(int courseId, double collegeAverage)
+        public async Task<(double tStatistic, double pValue)> PerformOneSampleTTestAsync(int classId, double collegeAverage)
         {
-            var answers = await GetMultipleChoiceAnswersAsync(courseId);
+            var answers = await GetMultipleChoiceAnswersAsync(classId);
 
             return PerformOneSampleTTest(answers, collegeAverage);
         }
 
-        public async Task<AnovaResult> PerformANOVAAsync(int[] courseIds)
+        public async Task<AnovaResult> PerformANOVAAsync(int[] classIds)
         {
-            var responses = new double[courseIds.Length][];
-            for (int i = 0; i < courseIds.Length; i++)
+            var responses = new double[classIds.Length][];
+            for (int i = 0; i < classIds.Length; i++)
             {
-                responses[i] = await GetMultipleChoiceAnswersAsync(courseIds[i]);
+                responses[i] = await GetMultipleChoiceAnswersAsync(classIds[i]);
             }
 
             return PerformANOVA(responses);
         }
 
-        public async Task<AnovaResult> PerformRepeatedMeasuresANOVAAsync(int[] courseIds, int timePoints)
+        public async Task<AnovaResult> PerformRepeatedMeasuresANOVAAsync(int[] classIds, int timePoints)
         {
-            var responses = new double[courseIds.Length][];
-            for (int i = 0; i < courseIds.Length; i++)
+            var responses = new double[classIds.Length][];
+            for (int i = 0; i < classIds.Length; i++)
             {
-                responses[i] = await GetMultipleChoiceAnswersAsync(courseIds[i]);
+                responses[i] = await GetMultipleChoiceAnswersAsync(classIds[i]);
             }
 
             return PerformRepeatedMeasuresANOVA(responses, timePoints);
         }
 
-        private async Task<double[]> GetMultipleChoiceAnswersAsync(int courseId)
+        private async Task<double[]> GetMultipleChoiceAnswersAsync(int classId)
         {
             return await _context.Answers
                 .Where(a => _context.Questionnaires
-                                    .Where(q => q.CourseId == courseId)
+                                    .Where(q => q.ClassId == classId)
                                     .Select(q => q.Id)
                                     .Contains(a.QuestionnaireId) &&
                             a.AnswerOptionId.HasValue &&

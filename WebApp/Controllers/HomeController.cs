@@ -22,14 +22,14 @@ namespace WebApp.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            var courses = await _context.Courses
-                .Where(c => c.Students.Any(s => s.Id == user.Id))
+            var classes = await _context.Classes
+                .Where(cl => cl.Students.Any(s => s.Id == user.Id))
                 .ToListAsync();
 
-            var courseIds = courses.Select(c => c.Id).ToList();
+            var classIds = classes.Select(cl => cl.Id).ToList();
 
             var questionnaires = await _context.Questionnaires
-                .Where(q => courseIds.Contains(q.CourseId))
+                .Where(q => classIds.Contains(q.ClassId))
                 .ToListAsync();
 
             return View(questionnaires);

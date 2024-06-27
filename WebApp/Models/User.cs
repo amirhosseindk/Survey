@@ -11,5 +11,6 @@ namespace WebApp.Models
         public ICollection<Course> TaughtCourses { get; set; } = new List<Course>();
         public ICollection<Questionnaire> Questionnaires { get; set; }
         public ICollection<Answer> Answers { get; set; }
+        public ICollection<Class> Classes { get; set; } = new List<Class>();
     }
 }

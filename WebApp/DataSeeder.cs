@@ -25,7 +25,7 @@ namespace WebApp
 
             var adminUser = new User
             {
-                UserName = "admin",
+                UserName = "4003333004",
                 Email = "admin@example.com",
                 EmailConfirmed = true,
                 IsProfessor = true,
@@ -45,7 +45,7 @@ namespace WebApp
 
                     var course = new Course
                     {
-                        Name = "Ehtemal-CS",
+                        Name = "Ehtemal",
                         ProfessorId = adminUser.Id
                     };
 
@@ -55,11 +55,11 @@ namespace WebApp
             }
             else
             {
-                if (!context.Courses.Any(c => c.Name == "Ehtemal-CS"))
+                if (!context.Courses.Any(c => c.Name == "Ehtemal"))
                 {
                     var course = new Course
                     {
-                        Name = "Ehtemal-CS",
+                        Name = "Ehtemal",
                         ProfessorId = admin.Id
                     };
 

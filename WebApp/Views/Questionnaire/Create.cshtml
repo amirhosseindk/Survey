@@ -1,20 +1,20 @@
-﻿@{
+﻿@using WebApp.Models
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@model WebApp.Models.QuestionnaireDto
+
+@{
     ViewData["Title"] = "Create Questionnaire";
 }
 
 <link rel="stylesheet" href="~/css/QCreate.css" />
 
-<!-- Main container for the flexbox layout -->
 <div class="container">
-    <!-- Form for creating the questionnaire -->
     <form id="questionnaire-form">
-        <!-- Form group for the questionnaire title -->
         <div class="form-group">
             <label for="title">Questionnaire Title</label>
             <input type="text" id="title" name="title" class="form-control" required />
         </div>
 
-        <!-- Form group for selecting the course -->
         <div class="form-group">
             <label for="course">Select Course</label>
             <select id="course" name="course" class="form-control" required>
@@ -25,28 +25,38 @@
             </select>
         </div>
 
-        <!-- Flexbox container for panels -->
+        <div class="form-group">
+            <label for="class">Select Class</label>
+            <select id="class" name="class" class="form-control" required>
+                @foreach (var course in ViewBag.Courses)
+                {
+                    @foreach (var cls in course.Classes)
+                    {
+                        <option value="@cls.Id">@course.Name - @cls.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
         <div class="flex-container">
-            <!-- Left panel for the questionnaire sections and drop area -->
             <div class="left-panel">
                 <div class="section welcome-section" data-type="welcome">
-                    <h3>صفحه خوش آمدگویی</h3>
+                    <h3>Welcome Page</h3>
                 </div>
                 <div id="drop-area" class="drop-area">
-                    <p>نوع سوال مورد نظر را از ستون سمت راست به اینجا بکشید</p>
+                    <p>Drag question types here</p>
                 </div>
                 <div class="section end-section" data-type="end">
-                    <h3>صفحه پایان</h3>
+                    <h3>End Page</h3>
                 </div>
-                <button id="submit-button" class="submit-button">ثبت</button>
+                <button id="submit-button" class="submit-button" type="button">Submit</button>
             </div>
 
-            <!-- Right panel for question types -->
             <div class="right-panel">
-                <div class="question-type" draggable="true" data-type="Text">متنی</div>
-                <div class="question-type" draggable="true" data-type="MultipleChoice">چندگزینه‌ای</div>
-                <div class="question-type" draggable="true" data-type="Range">طیفی</div>
-                <div class="question-type" draggable="true" data-type="Degree">درجه‌بندی</div>
+                <div class="question-type" draggable="true" data-type="Text">Text</div>
+                <div class="question-type" draggable="true" data-type="MultipleChoice">Multiple Choice</div>
+                <div class="question-type" draggable="true" data-type="Range">Range</div>
+                <div class="question-type" draggable="true" data-type="Degree">Degree</div>
             </div>
         </div>
     </form>
@@ -56,25 +66,25 @@
 <div id="multiple-choice-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>تنظیمات سوال چندگزینه‌ای</h2>
-        <label for="mc-question-text">سوال:</label>
+        <h2>Multiple Choice Question Settings</h2>
+        <label for="mc-question-text">Question:</label>
         <textarea id="mc-question-text" rows="4"></textarea>
-        <h3>گزینه‌ها</h3>
+        <h3>Options</h3>
         <div id="options-container">
-            <input type="text" class="option-input" placeholder="گزینه 1">
-            <input type="text" class="option-input" placeholder="گزینه 2">
-            <input type="text" class="option-input" placeholder="گزینه 3">
-            <input type="text" class="option-input" placeholder="گزینه 4">
+            <input type="text" class="option-input" placeholder="Option 1">
+            <input type="text" class="option-input" placeholder="Option 2">
+            <input type="text" class="option-input" placeholder="Option 3">
+            <input type="text" class="option-input" placeholder="Option 4">
         </div>
-        <button id="add-option">افزودن گزینه</button>
+        <button id="add-option">Add Option</button>
     </div>
 </div>
 
 <div id="short-text-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>تنظیمات سوال متنی</h2>
-        <label for="short-question-text">سوال:</label>
+        <h2>Short Text Question Settings</h2>
+        <label for="short-question-text">Question:</label>
         <textarea id="short-question-text" rows="4"></textarea>
     </div>
 </div>
@@ -82,8 +92,8 @@
 <div id="welcome-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>تنظیمات صفحه خوش آمدگویی</h2>
-        <label for="welcome-text">متن:</label>
+        <h2>Welcome Page Settings</h2>
+        <label for="welcome-text">Text:</label>
         <textarea id="welcome-text" rows="4"></textarea>
     </div>
 </div>
@@ -91,30 +101,27 @@
 <div id="end-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>
-            تنظیمات صفحه پایان</ه2>
-            <label for="end-text">متن:</label>
-            <textarea id="end-text" rows="4"></textarea>
+        <h2>End Page Settings</h2>
+        <label for="end-text">Text:</label>
+        <textarea id="end-text" rows="4"></textarea>
     </div>
 </div>
 
 <div id="scale-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>
-            تنظیمات سوال طیفی</ه2>
-            <label for="scale-question-text">سوال:</label>
-            <textarea id="scale-question-text" rows="4"></textarea>
+        <h2>Scale Question Settings</h2>
+        <label for="scale-question-text">Question:</label>
+        <textarea id="scale-question-text" rows="4"></textarea>
     </div>
 </div>
 
 <div id="rating-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>
-            تنظیمات سوال درجه‌بندی</ه2>
-            <label for="rating-question-text">سوال:</label>
-            <textarea id="rating-question-text" rows="4"></textarea>
+        <h2>Rating Question Settings</h2>
+        <label for="rating-question-text">Question:</label>
+        <textarea id="rating-question-text" rows="4"></textarea>
     </div>
 </div>
 
@@ -132,10 +139,10 @@
         let questionCount = 1;
 
         const typeMap = {
-            'MultipleChoice': 'چندگزینه‌ای',
-            'Text': 'متنی',
-            'Range': 'طیفی',
-            'Degree': 'درجه‌بندی'
+            'MultipleChoice': 'Multiple Choice',
+            'Text': 'Text',
+            'Range': 'Range',
+            'Degree': 'Degree'
         };
 
         questionTypes.forEach(type => {
@@ -161,7 +168,7 @@
             const type = event.dataTransfer.getData('text');
             const newElement = document.createElement('div');
             newElement.classList.add('question-type');
-            newElement.textContent = `سوال ${questionCount}: ${typeMap[type]}`;
+            newElement.textContent = `Question ${questionCount}: ${typeMap[type]}`;
             newElement.dataset.type = type;
             newElement.dataset.rank = questionCount++;
             newElement.addEventListener('click', openModal);
@@ -194,13 +201,13 @@
             const newOption = document.createElement('input');
             newOption.type = 'text';
             newOption.classList.add('option-input');
-            newOption.placeholder = `گزینه ${optionCount}`;
+            newOption.placeholder = `Option ${optionCount}`;
             optionsContainer.appendChild(newOption);
         });
 
         document.getElementById('submit-button').addEventListener('click', function () {
             const title = document.getElementById('title').value;
-            const course = document.getElementById('course').value;
+            const classId = document.getElementById('class').value;
             const questions = [];
 
             const questionElements = document.querySelectorAll('.question-type');
@@ -235,12 +242,12 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ title, course, questions })
+                body: JSON.stringify({ title, class: classId, questions })
             }).then(response => response.json()).then(data => {
                 if (data.questionnaireId) {
                     window.location.href = `/Questionnaire/Fill/${data.questionnaireId}`;
                 } else {
-                    alert('مشکلی در ثبت اطلاعات رخ داد.');
+                    alert('Error submitting the questionnaire.');
                 }
             });
         });

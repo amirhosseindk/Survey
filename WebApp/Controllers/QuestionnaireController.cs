@@ -22,7 +22,11 @@ namespace WebApp.Controllers
         [Authorize(Roles = "Professor")]
         public IActionResult Create()
         {
-            var courses = _context.Courses.Where(c => c.ProfessorId.ToString() == _userManager.GetUserId(User)).ToList();
+            var userId = _userManager.GetUserId(User);
+            var courses = _context.Courses
+                .Where(c => c.ProfessorId == userId)
+                .Include(c => c.Classes)
+                .ToList();
             ViewBag.Courses = courses;
             return View();
         }
@@ -38,24 +42,25 @@ namespace WebApp.Controllers
 
             data.Questions.RemoveAll(d => d.Rank == null);
 
+            var title = data.Title;
+            var classId = int.Parse(data.Class);
+            var professorId = _userManager.GetUserId(User);
+            var questions = new List<Question>();
+
             var questionnaire = new Questionnaire
             {
-                Title = data.Title,
-                CourseId = int.Parse(data.Course),
-                ProfessorId = _userManager.GetUserId(User),
-                Questions = new List<Question>()
+                Title = title,
+                ClassId = classId,
+                ProfessorId = professorId,
+                Questions = questions
             };
 
             foreach (var question in data.Questions)
             {
-                Console.WriteLine($"Processing question: {question.Title} of type {question.Type}");
                 switch (question.Type)
                 {
                     case "Text":
-                        questionnaire.Questions.Add(new TextQuestion(Convert.ToInt16(question.Rank), question.Title)
-                        {
-                            Type = QuestionType.Text
-                        });
+                        questionnaire.Questions.Add(new TextQuestion(Convert.ToInt16(question.Rank), question.Title) { Type = QuestionType.Text });
                         break;
                     case "MultipleChoice":
                         questionnaire.Questions.Add(new MultipleChoiceQuestion(Convert.ToInt16(question.Rank), question.Title)
@@ -65,25 +70,18 @@ namespace WebApp.Controllers
                         });
                         break;
                     case "Range":
-                        questionnaire.Questions.Add(new RangeQuestion(Convert.ToInt16(question.Rank), question.Title)
-                        {
-                            Type = QuestionType.Range
-                        });
+                        questionnaire.Questions.Add(new RangeQuestion(Convert.ToInt16(question.Rank), question.Title) { Type = QuestionType.Range });
                         break;
                     case "Degree":
-                        questionnaire.Questions.Add(new DegreeQuestion(Convert.ToInt16(question.Rank), question.Title)
-                        {
-                            Type = QuestionType.Degree
-                        });
+                        questionnaire.Questions.Add(new DegreeQuestion(Convert.ToInt16(question.Rank), question.Title) { Type = QuestionType.Degree });
                         break;
                 }
             }
 
             _context.Questionnaires.Add(questionnaire);
             await _context.SaveChangesAsync();
-
             return Ok(new { questionnaireId = questionnaire.Id });
-        }
+        }   
 
         public async Task<IActionResult> Fill(int id)
         {
@@ -91,12 +89,10 @@ namespace WebApp.Controllers
                 .Include(q => q.Questions)
                 .ThenInclude(q => (q as MultipleChoiceQuestion).Options)
                 .FirstOrDefaultAsync(q => q.Id == id);
-
             if (questionnaire == null)
             {
                 return NotFound();
             }
-
             return View(questionnaire);
         }
 
@@ -122,7 +118,6 @@ namespace WebApp.Controllers
             }
 
             await _context.SaveChangesAsync();
-
             return Ok();
         }
 
@@ -130,18 +125,17 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Results(int id)
         {
             var questionnaire = await _context.Questionnaires
-                .Include(q => q.Course)
+                .Include(q => q.Class)
                 .ThenInclude(c => c.Students)
                 .Include(q => q.Questions)
-                .ThenInclude(q => ((MultipleChoiceQuestion)q).Options) // اطمینان از بارگذاری Options
+                .ThenInclude(q => ((MultipleChoiceQuestion)q).Options)
                 .FirstOrDefaultAsync(q => q.Id == id);
-
             if (questionnaire == null)
             {
                 return NotFound();
             }
 
-            var totalStudents = questionnaire.Course.Students.Count;
+            var totalStudents = questionnaire.Class.Students.Count;
             var answeredStudents = await _context.Answers
                 .Where(a => a.QuestionnaireId == id)
                 .Select(a => a.StudentId)
@@ -151,22 +145,13 @@ namespace WebApp.Controllers
             var multipleChoiceResults = await _context.Answers
                 .Where(a => a.QuestionnaireId == id && a.AnswerOptionId != null)
                 .GroupBy(a => new { a.QuestionId, a.AnswerOptionId })
-                .Select(g => new MultipleChoiceResult
-                {
-                    QuestionId = g.Key.QuestionId,
-                    AnswerOptionId = g.Key.AnswerOptionId,
-                    Count = g.Count()
-                })
+                .Select(g => new MultipleChoiceResult { QuestionId = g.Key.QuestionId, AnswerOptionId = g.Key.AnswerOptionId, Count = g.Count() })
                 .ToListAsync();
 
             var textQuestionResults = await _context.Answers
                 .Where(a => a.QuestionnaireId == id && a.AnswerText != null)
                 .GroupBy(a => a.QuestionId)
-                .Select(g => new TextQuestionResult
-                {
-                    QuestionId = g.Key,
-                    Count = g.Count()
-                })
+                .Select(g => new TextQuestionResult { QuestionId = g.Key, Count = g.Count() })
                 .ToListAsync();
 
             return View(new SurveyResultsViewModel

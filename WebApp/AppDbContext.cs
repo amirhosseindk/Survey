@@ -16,6 +16,7 @@ namespace WebApp
         public DbSet<DegreeQuestion> DegreeQuestions { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<Class> Classes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,11 +28,20 @@ namespace WebApp
                 .HasForeignKey(c => c.ProfessorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Questionnaire>()
-                .HasOne(q => q.Course)
-                .WithMany(c => c.Questionnaires)
-                .HasForeignKey(q => q.CourseId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Course>()
+                .HasMany(c => c.Classes)
+                .WithOne(cl => cl.Course)
+                .HasForeignKey(cl => cl.CourseId);
+
+            modelBuilder.Entity<Class>()
+                .HasMany(cl => cl.Students)
+                .WithMany(u => u.Classes)
+                .UsingEntity(j => j.ToTable("ClassStudents"));
+
+            modelBuilder.Entity<Class>()
+                .HasMany(cl => cl.Questionnaires)
+                .WithOne(q => q.Class)
+                .HasForeignKey(q => q.ClassId);
 
             modelBuilder.Entity<Questionnaire>()
                 .HasOne(q => q.Professor)
@@ -44,11 +54,6 @@ namespace WebApp
                 .WithMany(u => u.Answers)
                 .HasForeignKey(a => a.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Course>()
-                .HasMany(c => c.Students)
-                .WithMany(s => s.EnrolledCourses)
-                .UsingEntity(j => j.ToTable("CourseStudents"));
         }
     }
 }
