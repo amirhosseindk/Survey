@@ -22,7 +22,10 @@ namespace WebApp.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            var classes = _appDbContext.Classes.ToList();
+            var classes = _appDbContext.Classes
+                                       .GroupBy(c => c.Name)
+                                       .Select(g => g.First())
+                                       .ToList();
             var model = new RegisterViewModel
             {
                 Classes = classes
@@ -33,46 +36,56 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            var user = new User
-            {
-                UserName = model.StudentNumber,
-                Email = model.Email,
-                EmailConfirmed = true,
-                IsProfessor = model.IsProfessor,
-                StudentNumber = model.StudentNumber
-            };
 
-            string userPassword = model.ConfirmPassword;
-            var result = await _userManager.CreateAsync(user, userPassword);
-            if (result.Succeeded)
-            {
-                if (model.IsProfessor)
+                var user = new User
                 {
-                    await _userManager.AddToRoleAsync(user, "Professor");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Professor");
-                }
-                else
+                    UserName = model.StudentNumber,
+                    Email = model.Email,
+                    EmailConfirmed = true,
+                    IsProfessor = model.IsProfessor,
+                    StudentNumber = model.StudentNumber,
+                };
+
+                string userPassword = model.ConfirmPassword;
+                var result = await _userManager.CreateAsync(user, userPassword);
+                if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, "Student");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    var classes = _appDbContext.Classes
-                        .Where(c => model.SelectedClassIds.Contains(c.Id))
-                        .ToList();
-
-                    foreach (var classEntity in classes)
+                    if (model.IsProfessor)
                     {
-                        classEntity.Students.Add(user);
+                        await _userManager.AddToRoleAsync(user, "Professor");
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction("Index", "Professor");
                     }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "Student");
+                        await _signInManager.SignInAsync(user, isPersistent: false);
 
-                    await _appDbContext.SaveChangesAsync();
+                        var selectedClassNames = _appDbContext.Classes
+                                                              .Where(c => c.Name == model.SelectedClassName)
+                                                              .ToList();
 
-                    return RedirectToAction("Index", "Home");
+                        foreach (var classEntity in selectedClassNames)
+                        {
+                            classEntity.Students.Add(user);
+                        }
+
+                        await _appDbContext.SaveChangesAsync();
+
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
-            }
 
-            model.Classes = _appDbContext.Classes.ToList();
+                model.Classes = _appDbContext.Classes
+                                              .GroupBy(c => c.Name)
+                                              .Select(g => g.First())
+                                              .ToList();
+                return View(model);
+
+            model.Classes = _appDbContext.Classes
+                                          .GroupBy(c => c.Name)
+                                          .Select(g => g.First())
+                                          .ToList();
             return View(model);
         }
 

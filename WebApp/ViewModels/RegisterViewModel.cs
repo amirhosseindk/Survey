@@ -23,10 +23,12 @@ namespace WebApp.ViewModels
         public string Email { get; set; }
 
         [Required]
-        public List<int> SelectedClassIds { get; set; } = new List<int>();
+        [Display(Name = "Class")]
+        public string SelectedClassName { get; set; }
 
-        public List<Class> Classes { get; set; }
+        public List<Class>? Classes { get; set; }
 
+        [Display(Name = "Are you a professor?")]
         public bool IsProfessor { get; set; }
     }
 }

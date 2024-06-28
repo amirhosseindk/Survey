@@ -1,41 +1,43 @@
 ﻿@model WebApp.ViewModels.RegisterViewModel
 
-<h2>Register</h2>
-
-<form asp-action="Register" method="post">
-    <div class="form-group">
-        <label asp-for="StudentNumber"></label>
-        <input asp-for="StudentNumber" class="form-control" />
-        <span asp-validation-for="StudentNumber" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ConfirmPassword"></label>
-        <input asp-for="ConfirmPassword" class="form-control" type="password" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" type="email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="SelectedClassIds">Classes</label>
-        <select asp-for="SelectedClassIds" asp-items="@(new SelectList(Model.Classes, "Id", "Name"))" class="form-control" multiple="multiple">
-        </select>
-        <span asp-validation-for="SelectedClassIds" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <input type="checkbox" asp-for="IsProfessor" />
-        <label asp-for="IsProfessor">Are you a professor?</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Register";
 }
+
+<div class="auth-form">
+    <h2 class="auth-title">ثبت نام</h2>
+    <form asp-action="Register" method="post">
+        <div class="form-group">
+            <label asp-for="StudentNumber"></label>
+            <input asp-for="StudentNumber" class="form-control" placeholder="شماره دانشجویی" />
+            <span asp-validation-for="StudentNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" type="email" placeholder="ایمیل" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" type="password" placeholder="رمز عبور" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ConfirmPassword"></label>
+            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="تایید رمز عبور" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="SelectedClassName">کلاس</label>
+            <select asp-for="SelectedClassName" asp-items="@(new SelectList(Model.Classes, "Name", "Name"))" class="form-control">
+            </select>
+            <span asp-validation-for="SelectedClassName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <input asp-for="IsProfessor" type="checkbox" />
+            <label asp-for="IsProfessor">Are you a professor?</label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">ثبت نام</button>
+    </form>
+</div>
