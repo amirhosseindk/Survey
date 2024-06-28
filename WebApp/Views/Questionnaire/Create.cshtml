@@ -137,6 +137,7 @@
         };
         const closeModalButtons = document.querySelectorAll('.close');
         let questionCount = 1;
+        const questionData = {};
 
         const typeMap = {
             'MultipleChoice': 'Multiple Choice',
@@ -171,26 +172,78 @@
             newElement.textContent = `Question ${questionCount}: ${typeMap[type]}`;
             newElement.dataset.type = type;
             newElement.dataset.rank = questionCount++;
+            newElement.dataset.id = Date.now();
             newElement.addEventListener('click', openModal);
             dropArea.appendChild(newElement);
         }
 
         function openModal(event) {
             const type = event.currentTarget.dataset.type;
+            const id = event.currentTarget.dataset.id;
             if (modals[type]) {
                 modals[type].style.display = "block";
-                modals[type].dataset.currentQuestion = event.currentTarget.textContent.split(':')[0].trim();
+                modals[type].dataset.currentQuestion = id;
+                if (questionData[id]) {
+                    loadQuestionData(type, id);
+                } else {
+                    clearModalData(type);
+                }
+            }
+        }
+
+        function loadQuestionData(type, id) {
+            if (type === 'MultipleChoice') {
+                document.getElementById('mc-question-text').value = questionData[id].title || '';
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+                (questionData[id].options || []).forEach((option, index) => {
+                    const newOption = document.createElement('input');
+                    newOption.type = 'text';
+                    newOption.classList.add('option-input');
+                    newOption.placeholder = `Option ${index + 1}`;
+                    newOption.value = option;
+                    optionsContainer.appendChild(newOption);
+                });
+            } else if (type === 'Text') {
+                document.getElementById('short-question-text').value = questionData[id].title || '';
+            } else if (type === 'Range') {
+                document.getElementById('scale-question-text').value = questionData[id].title || '';
+            } else if (type === 'Degree') {
+                document.getElementById('rating-question-text').value = questionData[id].title || '';
+            }
+        }
+
+        function clearModalData(type) {
+            if (type === 'MultipleChoice') {
+                document.getElementById('mc-question-text').value = '';
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+                for (let i = 1; i <= 4; i++) {
+                    const newOption = document.createElement('input');
+                    newOption.type = 'text';
+                    newOption.classList.add('option-input');
+                    newOption.placeholder = `Option ${i}`;
+                    optionsContainer.appendChild(newOption);
+                }
+            } else if (type === 'Text') {
+                document.getElementById('short-question-text').value = '';
+            } else if (type === 'Range') {
+                document.getElementById('scale-question-text').value = '';
+            } else if (type === 'Degree') {
+                document.getElementById('rating-question-text').value = '';
             }
         }
 
         closeModalButtons.forEach(button => {
             button.onclick = function () {
+                saveModalData(button.parentElement.parentElement.dataset.currentQuestion);
                 button.parentElement.parentElement.style.display = "none";
             };
         });
 
         window.onclick = function (event) {
             if (event.target.classList.contains('modal')) {
+                saveModalData(event.target.dataset.currentQuestion);
                 event.target.style.display = "none";
             }
         };
@@ -205,37 +258,41 @@
             optionsContainer.appendChild(newOption);
         });
 
+        function saveModalData(id) {
+            const type = document.querySelector(`[data-id='${id}']`).dataset.type;
+            if (!questionData[id]) {
+                questionData[id] = { type, title: '', options: [] };
+            }
+
+            if (type === 'MultipleChoice') {
+                questionData[id].title = document.getElementById('mc-question-text').value;
+                const options = [];
+                document.querySelectorAll('.option-input').forEach(optionEl => {
+                    options.push(optionEl.value);
+                });
+                questionData[id].options = options;
+            } else if (type === 'Text') {
+                questionData[id].title = document.getElementById('short-question-text').value;
+            } else if (type === 'Range') {
+                questionData[id].title = document.getElementById('scale-question-text').value;
+            } else if (type === 'Degree') {
+                questionData[id].title = document.getElementById('rating-question-text').value;
+            }
+        }
+
         document.getElementById('submit-button').addEventListener('click', function () {
             const title = document.getElementById('title').value;
             const classId = document.getElementById('class').value;
             const questions = [];
 
-            const questionElements = document.querySelectorAll('.question-type');
-
-            questionElements.forEach((el) => {
-                const type = el.dataset.type;
-                const rank = parseInt(el.dataset.rank, 10);
-                let title = '';
-                const options = [];
-
-                if (type === 'MultipleChoice') {
-                    title = document.getElementById('mc-question-text').value;
-                    const optionElements = document.querySelectorAll('.option-input');
-                    optionElements.forEach(optionEl => {
-                        options.push(optionEl.value);
-                    });
-                } else if (type === 'Text') {
-                    title = document.getElementById('short-question-text').value;
-                } else if (type === 'Range') {
-                    title = document.getElementById('scale-question-text').value;
-                } else if (type === 'Degree') {
-                    title = document.getElementById('rating-question-text').value;
-                }
-
-                if (title && rank !== null) {
-                    questions.push({ rank, type, title, options });
-                }
-            });
+            for (const [id, data] of Object.entries(questionData)) {
+                questions.push({
+                    rank: parseInt(document.querySelector(`[data-id='${id}']`).dataset.rank, 10),
+                    type: data.type,
+                    title: data.title,
+                    options: data.options
+                });
+            }
 
             fetch('/Questionnaire/Create', {
                 method: 'POST',
@@ -245,6 +302,7 @@
                 body: JSON.stringify({ title, class: classId, questions })
             }).then(response => response.json()).then(data => {
                 if (data.questionnaireId) {
+                    alert('Questionnaire were successfully recorded.');
                     window.location.href = `/Professor/Index`;
                 } else {
                     alert('Error submitting the questionnaire.');

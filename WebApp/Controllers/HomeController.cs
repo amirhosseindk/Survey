@@ -24,12 +24,15 @@ namespace WebApp.Controllers
 
             var classes = await _context.Classes
                 .Where(cl => cl.Students.Any(s => s.Id == user.Id))
+                .Include(cl => cl.Course)
                 .ToListAsync();
 
             var classIds = classes.Select(cl => cl.Id).ToList();
 
             var questionnaires = await _context.Questionnaires
                 .Where(q => classIds.Contains(q.ClassId))
+                .Include(q => q.Class)
+                .ThenInclude(cl => cl.Course)
                 .ToListAsync();
 
             return View(questionnaires);

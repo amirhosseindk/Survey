@@ -157,6 +157,7 @@
             }).then(response => {
                 if (response.ok) {
                     alert('Responses were successfully recorded.');
+                    window.location.href = `/Home/Index`;
                 } else {
                     alert('There was an issue recording the responses.');
                 }
