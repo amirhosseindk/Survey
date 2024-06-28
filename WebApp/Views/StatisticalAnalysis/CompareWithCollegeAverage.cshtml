@@ -2,11 +2,63 @@
     ViewData["Title"] = "Compare With College Average";
 }
 
-<h2>Compare With College Average</h2>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-@if (ViewBag.OverallMean != null && ViewBag.Deviation != null)
-{
-    <h3>Results</h3>
-    <p>Overall Mean: @ViewBag.OverallMean</p>
-    <p>Deviation from College Average: @ViewBag.Deviation</p>
-}
+<div class="container mt-5">
+    <h2 class="text-center">Compare With College Average</h2>
+    @if (ViewBag.OverallMean != null && ViewBag.Deviation != null)
+    {
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Results</h3>
+                <canvas id="collegeComparisonChart"></canvas>
+                <p>Overall Mean: <strong>@ViewBag.OverallMean</strong></p>
+                <p>Deviation from College Average: <strong>@ViewBag.Deviation</strong></p>
+                <div class="alert alert-info">
+                    @if (ViewBag.Deviation > 0)
+                    {
+                        <p>The class mean is higher than the college average 😃</p>
+                    }
+                    else if (ViewBag.Deviation < 0)
+                    {
+                        <p>The class mean is lower than the college average 😟</p>
+                    }
+                    else
+                    {
+                        <p>The class mean is equal to the college average 😐</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <script>
+            var ctx = document.getElementById('collegeComparisonChart').getContext('2d');
+            var collegeComparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Class Mean', 'College Average'],
+                    datasets: [{
+                        label: 'Mean',
+                        data: [@ViewBag.OverallMean, @ViewBag.CollegeAverage],
+                        backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 206, 86, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-4">
+            <p>No data available. Please select the questionnaire properly and try again.</p>
+        </div>
+    }
+</div>

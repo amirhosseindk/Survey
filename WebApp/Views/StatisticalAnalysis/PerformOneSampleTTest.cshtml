@@ -2,12 +2,59 @@
     ViewData["Title"] = "One-Sample T-Test Analysis";
 }
 
-<h2>One-Sample T-Test Analysis</h2>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-@if (ViewBag.TStatistic != null && ViewBag.PValue != null)
-{
-    <h3>Results</h3>
-    <p>T-Statistic: @ViewBag.TStatistic</p>
-    <p>P-value: @ViewBag.PValue</p>
-    <p>@(ViewBag.PValue < 0.05 ? "Statistically significant difference from the college average." : "No statistically significant difference from the college average.")</p>
-}
+<div class="container mt-5">
+    <h2 class="text-center">One-Sample T-Test Analysis</h2>
+    @if (ViewBag.TStatistic != null && ViewBag.PValue != null)
+    {
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Results</h3>
+                <canvas id="oneSampleTTestChart"></canvas>
+                <p>T-Statistic: <strong>@ViewBag.TStatistic</strong></p>
+                <p>P-value: <strong>@ViewBag.PValue</strong></p>
+                <div class="alert alert-info">
+                    @if (ViewBag.PValue < 0.05)
+                    {
+                        <p>There is a statistically significant difference from the college average 😃</p>
+                    }
+                    else
+                    {
+                        <p>There is no statistically significant difference from the college average 😐</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <script>
+            var ctx = document.getElementById('oneSampleTTestChart').getContext('2d');
+            var oneSampleTTestChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Class Mean', 'College Average'],
+                    datasets: [{
+                        label: 'Mean',
+                        data: [@ViewBag.ClassMean, @ViewBag.CollegeAverage],
+                        backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 206, 86, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-4">
+            <p>No data available. Please select the questionnaire properly and try again.</p>
+        </div>
+    }
+</div>

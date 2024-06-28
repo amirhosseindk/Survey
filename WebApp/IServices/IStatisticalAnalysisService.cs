@@ -4,11 +4,11 @@ namespace WebApp.IServices
 {
     public interface IStatisticalAnalysisService
     {
-        Task<(double tStat, double pValue)> PerformPairedTTestAsync(int courseId1, int courseId2);
-        Task<(double meanGroup1, double meanGroup2)> CalculateGroupMeansAsync(int courseId1, int courseId2);
-        Task<(double overallMean, double deviation)> CompareWithCollegeAverageAsync(int courseId, double collegeAverage);
-        Task<(double tStatistic, double pValue)> PerformOneSampleTTestAsync(int courseId, double collegeAverage);
-        Task<AnovaResult> PerformANOVAAsync(int[] courseIds);
-        Task<AnovaResult> PerformRepeatedMeasuresANOVAAsync(int[] courseIds, int timePoints);
+        Task<(double tStat, double pValue, double group1Mean, double group2Mean)> PerformPairedTTestAsync(int classId1, int classId2);
+        Task<(double meanGroup1, double meanGroup2)> CalculateGroupMeansAsync(int classId1, int classId2);
+        Task<(double overallMean, double deviation)> CompareWithCollegeAverageAsync(int classId, double collegeAverage);
+        Task<(double tStatistic, double pValue, double classMean)> PerformOneSampleTTestAsync(int classId, double collegeAverage);
+        Task<(double fStatistic, double pValue, bool isSignificant, double[] groupMeans)> PerformANOVAAsync(int[] classIds);
+        Task<(double fStatistic, double pValue, bool isSignificant, double[] timePointMeans)> PerformRepeatedMeasuresANOVAAsync(int[] classIds, int timePoints);
     }
 }

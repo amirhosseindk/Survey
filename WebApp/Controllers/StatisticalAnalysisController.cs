@@ -42,9 +42,11 @@ namespace WebApp.Controllers
                 .Select(q => q.ClassId)
                 .FirstOrDefaultAsync();
 
-            var (tStat, pValue) = await _statisticalAnalysisService.PerformPairedTTestAsync(classId1, classId2);
+            var (tStat, pValue, group1Mean, group2Mean) = await _statisticalAnalysisService.PerformPairedTTestAsync(classId1, classId2);
             ViewBag.TStat = tStat;
             ViewBag.PValue = pValue;
+            ViewBag.Group1Mean = group1Mean;
+            ViewBag.Group2Mean = group2Mean;
             return View();
         }
 
@@ -92,6 +94,7 @@ namespace WebApp.Controllers
             var (overallMean, deviation) = await _statisticalAnalysisService.CompareWithCollegeAverageAsync(classId, collegeAverage);
             ViewBag.OverallMean = overallMean;
             ViewBag.Deviation = deviation;
+            ViewBag.CollegeAverage = collegeAverage; // Add this line to pass the college average to the view
             return View();
         }
 
@@ -104,9 +107,11 @@ namespace WebApp.Controllers
                 .Select(q => q.ClassId)
                 .FirstOrDefaultAsync();
 
-            var (tStatistic, pValue) = await _statisticalAnalysisService.PerformOneSampleTTestAsync(classId, collegeAverage);
+            var (tStatistic, pValue, classMean) = await _statisticalAnalysisService.PerformOneSampleTTestAsync(classId, collegeAverage);
             ViewBag.TStatistic = tStatistic;
             ViewBag.PValue = pValue;
+            ViewBag.ClassMean = classMean; // Add this line to pass the class mean to the view
+            ViewBag.CollegeAverage = collegeAverage; // Add this line to pass the college average to the view
             return View();
         }
 
@@ -131,10 +136,11 @@ namespace WebApp.Controllers
                 .Select(q => q.ClassId)
                 .ToArrayAsync();
 
-            var result = await _statisticalAnalysisService.PerformANOVAAsync(classIds);
-            ViewBag.FStatistic = result.FStatistic;
-            ViewBag.PValue = result.PValue;
-            ViewBag.IsSignificant = result.IsSignificant;
+            var (fStatistic, pValue, isSignificant, groupMeans) = await _statisticalAnalysisService.PerformANOVAAsync(classIds);
+            ViewBag.FStatistic = fStatistic;
+            ViewBag.PValue = pValue;
+            ViewBag.IsSignificant = isSignificant;
+            ViewBag.GroupMeans = groupMeans; // Add this line to pass the group means to the view
             return View();
         }
 
@@ -159,10 +165,11 @@ namespace WebApp.Controllers
                 .Select(q => q.ClassId)
                 .ToArrayAsync();
 
-            var result = await _statisticalAnalysisService.PerformRepeatedMeasuresANOVAAsync(classIds, questionnaireIds.Length);
-            ViewBag.FStatistic = result.FStatistic;
-            ViewBag.PValue = result.PValue;
-            ViewBag.IsSignificant = result.IsSignificant;
+            var (fStatistic, pValue, isSignificant, timePointMeans) = await _statisticalAnalysisService.PerformRepeatedMeasuresANOVAAsync(classIds, questionnaireIds.Length);
+            ViewBag.FStatistic = fStatistic;
+            ViewBag.PValue = pValue;
+            ViewBag.IsSignificant = isSignificant;
+            ViewBag.TimePointMeans = timePointMeans; // Add this line to pass the time point means to the view
             return View();
         }
     }

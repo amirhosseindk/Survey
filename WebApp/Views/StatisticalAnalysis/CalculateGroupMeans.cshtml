@@ -2,11 +2,63 @@
     ViewData["Title"] = "Group Means Analysis";
 }
 
-<h2>Group Means Analysis</h2>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-@if (ViewBag.MeanGroup1 != null && ViewBag.MeanGroup2 != null)
-{
-    <h3>Results</h3>
-    <p>Group 1 Mean: @ViewBag.MeanGroup1</p>
-    <p>Group 2 Mean: @ViewBag.MeanGroup2</p>
-}
+<div class="container mt-5">
+    <h2 class="text-center">Group Means Analysis</h2>
+    @if (ViewBag.MeanGroup1 != null && ViewBag.MeanGroup2 != null)
+    {
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Results</h3>
+                <canvas id="groupMeansChart"></canvas>
+                <p>Group 1 Mean: <strong>@ViewBag.MeanGroup1</strong></p>
+                <p>Group 2 Mean: <strong>@ViewBag.MeanGroup2</strong></p>
+                <div class="alert alert-info">
+                    @if (ViewBag.MeanGroup1 > ViewBag.MeanGroup2)
+                    {
+                        <p>Group 1 has a higher mean than Group 2 😃</p>
+                    }
+                    else if (ViewBag.MeanGroup1 < ViewBag.MeanGroup2)
+                    {
+                        <p>Group 2 has a higher mean than Group 1 😃</p>
+                    }
+                    else
+                    {
+                        <p>Both groups have the same mean 😐</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <script>
+            var ctx = document.getElementById('groupMeansChart').getContext('2d');
+            var groupMeansChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Group 1', 'Group 2'],
+                    datasets: [{
+                        label: 'Mean',
+                        data: [@ViewBag.MeanGroup1, @ViewBag.MeanGroup2],
+                        backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-4">
+            <p>No data available. Please select the questionnaires properly and try again.</p>
+        </div>
+    }
+</div>

@@ -16,7 +16,7 @@ namespace WebApp.Services
             _context = context;
         }
 
-        public async Task<(double tStat, double pValue)> PerformPairedTTestAsync(int classId1, int classId2)
+        public async Task<(double tStat, double pValue, double group1Mean, double group2Mean)> PerformPairedTTestAsync(int classId1, int classId2)
         {
             var answersGroup1 = await GetMultipleChoiceAnswersAsync(classId1);
             var answersGroup2 = await GetMultipleChoiceAnswersAsync(classId2);
@@ -24,7 +24,11 @@ namespace WebApp.Services
             if (answersGroup1.Length != answersGroup2.Length)
                 throw new InvalidOperationException("The number of responses must be equal for both groups.");
 
-            return PerformPairedTTest(answersGroup1, answersGroup2);
+            var (tStat, pValue) = PerformPairedTTest(answersGroup1, answersGroup2);
+            var group1Mean = answersGroup1.Average();
+            var group2Mean = answersGroup2.Average();
+
+            return (tStat, pValue, group1Mean, group2Mean);
         }
 
         public async Task<(double meanGroup1, double meanGroup2)> CalculateGroupMeansAsync(int classId1, int classId2)
@@ -42,14 +46,16 @@ namespace WebApp.Services
             return CompareWithCollegeAverage(answers, collegeAverage);
         }
 
-        public async Task<(double tStatistic, double pValue)> PerformOneSampleTTestAsync(int classId, double collegeAverage)
+        public async Task<(double tStatistic, double pValue, double classMean)> PerformOneSampleTTestAsync(int classId, double collegeAverage)
         {
             var answers = await GetMultipleChoiceAnswersAsync(classId);
+            var (tStatistic, pValue) = PerformOneSampleTTest(answers, collegeAverage);
+            var classMean = answers.Average();
 
-            return PerformOneSampleTTest(answers, collegeAverage);
+            return (tStatistic, pValue, classMean);
         }
 
-        public async Task<AnovaResult> PerformANOVAAsync(int[] classIds)
+        public async Task<(double fStatistic, double pValue, bool isSignificant, double[] groupMeans)> PerformANOVAAsync(int[] classIds)
         {
             var responses = new double[classIds.Length][];
             for (int i = 0; i < classIds.Length; i++)
@@ -57,10 +63,13 @@ namespace WebApp.Services
                 responses[i] = await GetMultipleChoiceAnswersAsync(classIds[i]);
             }
 
-            return PerformANOVA(responses);
+            var result = PerformANOVA(responses);
+            var groupMeans = responses.Select(r => r.Average()).ToArray();
+
+            return (result.FStatistic, result.PValue, result.IsSignificant, groupMeans);
         }
 
-        public async Task<AnovaResult> PerformRepeatedMeasuresANOVAAsync(int[] classIds, int timePoints)
+        public async Task<(double fStatistic, double pValue, bool isSignificant, double[] timePointMeans)> PerformRepeatedMeasuresANOVAAsync(int[] classIds, int timePoints)
         {
             var responses = new double[classIds.Length][];
             for (int i = 0; i < classIds.Length; i++)
@@ -68,7 +77,10 @@ namespace WebApp.Services
                 responses[i] = await GetMultipleChoiceAnswersAsync(classIds[i]);
             }
 
-            return PerformRepeatedMeasuresANOVA(responses, timePoints);
+            var result = PerformRepeatedMeasuresANOVA(responses, timePoints);
+            var timePointMeans = responses.Select(r => r.Average()).ToArray();
+
+            return (result.FStatistic, result.PValue, result.IsSignificant, timePointMeans);
         }
 
         private async Task<double[]> GetMultipleChoiceAnswersAsync(int classId)
@@ -133,7 +145,7 @@ namespace WebApp.Services
             int degreesOfFreedom = sampleSize - 1;
 
             var tDistribution = new StudentT(0, 1, degreesOfFreedom);
-            double pValue = 2 * tDistribution.CumulativeDistribution(-Math.Abs(tStatistic)); // آزمون دو طرفه
+            double pValue = 2 * tDistribution.CumulativeDistribution(-Math.Abs(tStatistic)); // Two-tailed test
 
             return (tStatistic, pValue);
         }
@@ -173,7 +185,7 @@ namespace WebApp.Services
             int numUsers = data[0].Length / timePoints;
             int totalResponses = numUsers * timePoints * numGroups;
 
-            // فلت کردن داده‌ها برای ANOVA
+            // Flattening data for ANOVA
             double[] flatData = new double[totalResponses];
             int index = 0;
 
@@ -186,7 +198,7 @@ namespace WebApp.Services
                 }
             }
 
-            // برچسب‌های زمانی
+            // Time labels
             int[] timeLabels = new int[totalResponses];
             index = 0;
 
@@ -199,7 +211,7 @@ namespace WebApp.Services
                 }
             }
 
-            // انجام ANOVA
+            // Performing ANOVA
             OneWayAnova anova = new OneWayAnova(flatData, timeLabels);
 
             bool isSignificant = anova.FTest.PValue < 0.05;

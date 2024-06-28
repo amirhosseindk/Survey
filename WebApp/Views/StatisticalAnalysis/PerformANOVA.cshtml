@@ -2,12 +2,67 @@
     ViewData["Title"] = "ANOVA Analysis";
 }
 
-<h2>ANOVA Analysis</h2>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-@if (ViewBag.FStatistic != null && ViewBag.PValue != null)
-{
-    <h3>Results</h3>
-    <p>F-Statistic: @ViewBag.FStatistic</p>
-    <p>P-value: @ViewBag.PValue</p>
-    <p>@(ViewBag.IsSignificant ? "There is a significant difference between the groups." : "There is no significant difference between the groups.")</p>
-}
+<div class="container mt-5">
+    <h2 class="text-center">ANOVA Analysis</h2>
+    @if (ViewBag.FStatistic != null && ViewBag.PValue != null)
+    {
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Results</h3>
+                <canvas id="anovaChart"></canvas>
+                <p>F-Statistic: <strong>@ViewBag.FStatistic</strong></p>
+                <p>P-value: <strong>@ViewBag.PValue</strong></p>
+                <div class="alert alert-info">
+                    @if (ViewBag.IsSignificant)
+                    {
+                        <p>There is a significant difference between the groups 😃</p>
+                    }
+                    else
+                    {
+                        <p>There is no significant difference between the groups 😐</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <script>
+            var ctx = document.getElementById('anovaChart').getContext('2d');
+            var anovaChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Group 1', 'Group 2', 'Group 3'], // Add more groups if necessary
+                    datasets: [{
+                        label: 'Mean',
+                        data: [@ViewBag.Group1Mean, @ViewBag.Group2Mean, @ViewBag.Group3Mean], // Example data, replace with actual data if available
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-4">
+            <p>No data available. Please select at least three questionnaires and try again.</p>
+        </div>
+    }
+</div>

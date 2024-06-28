@@ -2,12 +2,59 @@
     ViewData["Title"] = "Paired T-Test Analysis";
 }
 
-<h2>Paired T-Test Analysis</h2>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-@if (ViewBag.TStat != null && ViewBag.PValue != null)
-{
-    <h3>Results</h3>
-    <p>T-statistic: @ViewBag.TStat</p>
-    <p>P-value: @ViewBag.PValue</p>
-    <p>@(ViewBag.PValue < 0.05 ? "There is a significant difference between the groups." : "There is no significant difference between the groups.")</p>
-}
+<div class="container mt-5">
+    <h2 class="text-center">Paired T-Test Analysis</h2>
+    @if (ViewBag.TStat != null && ViewBag.PValue != null)
+    {
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Results</h3>
+                <canvas id="pairedTTestChart"></canvas>
+                <p>T-statistic: <strong>@ViewBag.TStat</strong></p>
+                <p>P-value: <strong>@ViewBag.PValue</strong></p>
+                <div class="alert alert-info">
+                    @if (ViewBag.PValue < 0.05)
+                    {
+                        <p>There is a significant difference between the groups 😃</p>
+                    }
+                    else
+                    {
+                        <p>There is no significant difference between the groups 😐</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <script>
+            var ctx = document.getElementById('pairedTTestChart').getContext('2d');
+            var pairedTTestChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Group 1', 'Group 2'],
+                    datasets: [{
+                        label: 'Difference',
+                        data: [@ViewBag.TStat, 0], // Example data, replace with actual data if available
+                        borderColor: ['rgba(75, 192, 192, 1)'],
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-4">
+            <p>No data available. Please select exactly two questionnaires and try again.</p>
+        </div>
+    }
+</div>
