@@ -7,25 +7,32 @@ using WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options => {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+// Add services to the container.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddScoped<IStatisticalAnalysisService, StatisticalAnalysisService>();
 
 var app = builder.Build();
 
-//Seed roles and admin user
+// Seed roles and admin user
 //using (var scope = app.Services.CreateScope())
 //{
 //    var services = scope.ServiceProvider;
-//    await DataSeeder.SeedRolesAndAdminAsync(services);
+//    try
+//    {
+//        await DataSeeder.SeedRolesAndAdminAsync(services);
+//    }
+//    catch (Exception ex)
+//    {
+//        var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "An error occurred while seeding the database.");
+//    }
 //}
 
 if (!app.Environment.IsDevelopment())

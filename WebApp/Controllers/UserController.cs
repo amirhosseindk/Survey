@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApp.Models;
 using WebApp.ViewModels;
 
@@ -21,10 +22,10 @@ namespace WebApp.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            var courses = _appDbContext.Courses.ToList();
+            var classes = _appDbContext.Classes.ToList();
             var model = new RegisterViewModel
             {
-                Courses = courses
+                Classes = classes
             };
             return View(model);
         }
@@ -38,8 +39,7 @@ namespace WebApp.Controllers
                 Email = model.Email,
                 EmailConfirmed = true,
                 IsProfessor = model.IsProfessor,
-                StudentNumber = model.StudentNumber,
-                Field = model.Field
+                StudentNumber = model.StudentNumber
             };
 
             string userPassword = model.ConfirmPassword;
@@ -58,7 +58,7 @@ namespace WebApp.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
                     var classes = _appDbContext.Classes
-                        .Where(c => model.SelectedCourseIds.Contains(c.CourseId))
+                        .Where(c => model.SelectedClassIds.Contains(c.Id))
                         .ToList();
 
                     foreach (var classEntity in classes)
@@ -72,7 +72,7 @@ namespace WebApp.Controllers
                 }
             }
 
-            model.Courses = _appDbContext.Courses.ToList();
+            model.Classes = _appDbContext.Classes.ToList();
             return View(model);
         }
 

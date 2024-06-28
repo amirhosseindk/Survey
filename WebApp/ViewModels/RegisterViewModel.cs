@@ -19,16 +19,13 @@ namespace WebApp.ViewModels
         public string ConfirmPassword { get; set; }
 
         [Required]
-        public string Field { get; set; }
-
-        [Required]
         [EmailAddress]
         public string Email { get; set; }
 
         [Required]
-        public List<int> SelectedCourseIds { get; set; } = new List<int>();
+        public List<int> SelectedClassIds { get; set; } = new List<int>();
 
-        public List<Course> Courses { get; set; }
+        public List<Class> Classes { get; set; }
 
         public bool IsProfessor { get; set; }
     }

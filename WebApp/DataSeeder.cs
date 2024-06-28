@@ -30,7 +30,6 @@ namespace WebApp
                 EmailConfirmed = true,
                 IsProfessor = true,
                 StudentNumber = "4003333004",
-                Field = "CS"
             };
 
             string adminPassword = "Admin@123";
@@ -42,31 +41,51 @@ namespace WebApp
                 if (createAdmin.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Professor");
-
-                    var course = new Course
-                    {
-                        Name = "Ehtemal",
-                        ProfessorId = adminUser.Id
-                    };
-
-                    context.Courses.Add(course);
-                    await context.SaveChangesAsync();
+                    await SeedCoursesAndClassesAsync(context, adminUser.Id);
                 }
             }
             else
             {
-                if (!context.Courses.Any(c => c.Name == "Ehtemal"))
-                {
-                    var course = new Course
-                    {
-                        Name = "Ehtemal",
-                        ProfessorId = admin.Id
-                    };
+                await SeedCoursesAndClassesAsync(context, admin.Id);
+            }
+        }
 
+        private static async Task SeedCoursesAndClassesAsync(AppDbContext context, string professorId)
+        {
+            var courses = new[]
+            {
+                new { Name = "Ehtemal", Classes = new[] { "CS", "CE", "Math" } },
+                new { Name = "AP", Classes = new[] { "CS", "Math" } },
+                new { Name = "BP", Classes = new[] { "CE", "Math" } },
+                new { Name = "Math", Classes = new[] { "CS", "CE", "Math" } },
+            };
+
+            foreach (var courseData in courses)
+            {
+                var course = context.Courses.FirstOrDefault(c => c.Name == courseData.Name && c.ProfessorId == professorId);
+                if (course == null)
+                {
+                    course = new Course
+                    {
+                        Name = courseData.Name,
+                        ProfessorId = professorId
+                    };
                     context.Courses.Add(course);
                     await context.SaveChangesAsync();
+
+                    foreach (var className in courseData.Classes)
+                    {
+                        var classEntity = new Class
+                        {
+                            Name = className,
+                            CourseId = course.Id
+                        };
+                        context.Classes.Add(classEntity);
+                    }
                 }
             }
+
+            await context.SaveChangesAsync();
         }
     }
 }

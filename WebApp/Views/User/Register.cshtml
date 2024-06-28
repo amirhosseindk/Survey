@@ -2,7 +2,7 @@
 
 <h2>Register</h2>
 
-<form asp-action="Register">
+<form asp-action="Register" method="post">
     <div class="form-group">
         <label asp-for="StudentNumber"></label>
         <input asp-for="StudentNumber" class="form-control" />
@@ -19,20 +19,15 @@
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Field"></label>
-        <input asp-for="Field" class="form-control" />
-        <span asp-validation-for="Field" class="text-danger"></span>
-    </div>
-    <div class="form-group">
         <label asp-for="Email"></label>
         <input asp-for="Email" class="form-control" type="email" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="SelectedCourseIds">Courses</label>
-        <select asp-for="SelectedCourseIds" asp-items="@(new SelectList(Model.Courses, "Id", "Name"))" class="form-control" multiple="multiple">
+        <label asp-for="SelectedClassIds">Classes</label>
+        <select asp-for="SelectedClassIds" asp-items="@(new SelectList(Model.Classes, "Id", "Name"))" class="form-control" multiple="multiple">
         </select>
-        <span asp-validation-for="SelectedCourseIds" class="text-danger"></span>
+        <span asp-validation-for="SelectedClassIds" class="text-danger"></span>
     </div>
     <div class="form-group">
         <input type="checkbox" asp-for="IsProfessor" />
