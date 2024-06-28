@@ -2,84 +2,167 @@
 
 @{
     ViewData["Title"] = "Fill Questionnaire";
+    Layout = null;
 }
 
-<h1>پاسخ به پرسشنامه</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionnaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
 
-<form id="questionnaire-form">
-    @foreach (var question in Model.Questions)
-    {
-        <div class="question">
-            <label>@question.Title</label>
-            @switch (question.Type)
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .question {
+            margin-bottom: 20px;
+        }
+
+            .question label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .question input[type="text"],
+            .question textarea,
+            .question input[type="number"],
+            .question input[type="range"] {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                box-sizing: border-box;
+                margin-bottom: 10px;
+            }
+
+            .question input[type="radio"] {
+                margin-right: 10px;
+            }
+
+            .question label.option-label {
+                display: block;
+                margin-bottom: 5px;
+            }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            font-size: 16px;
+        }
+
+            button[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Questions</h1>
+        <form id="questionnaire-form">
+            @foreach (var question in Model.Questions)
             {
-                case QuestionType.Text:
-                    <input type="text" name="answer-@question.Id" />
-                    break;
-                case QuestionType.MultipleChoice:
-                    var mcQuestion = (MultipleChoiceQuestion)question;
-                    foreach (var option in mcQuestion.Options)
+                <div class="question">
+                    <label>@question.Title</label>
+                    @switch (question.Type)
                     {
-                        <label>
-                            <input type="radio" name="answer-@question.Id" value="@option.Id" /> @option.OptionText
-                        </label>
+                        case QuestionType.Text:
+                            <textarea name="answer-@question.Id"></textarea>
+                            break;
+                        case QuestionType.MultipleChoice:
+                            var mcQuestion = (MultipleChoiceQuestion)question;
+                            foreach (var option in mcQuestion.Options)
+                            {
+                                <label class="option-label">
+                                    <input type="radio" name="answer-@question.Id" value="@option.Id" /> @option.OptionText
+                                </label>
+                            }
+                            break;
+                        case QuestionType.Range:
+                            <input type="range" name="answer-@question.Id" min="0" max="100" />
+                            break;
+                        case QuestionType.Degree:
+                            <input type="number" name="answer-@question.Id" min="0" max="5" />
+                            break;
                     }
-                    break;
-                case QuestionType.Range:
-                    <input type="range" name="answer-@question.Id" min="0" max="100" />
-                    break;
-                case QuestionType.Degree:
-                    <input type="number" name="answer-@question.Id" min="0" max="5" />
-                    break;
+                </div>
             }
-        </div>
-    }
-    <button type="submit">ارسال</button>
-</form>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 
-<script>
-    document.getElementById('questionnaire-form').addEventListener('submit', function (event) {
-        event.preventDefault();
+    <script>
+        document.getElementById('questionnaire-form').addEventListener('submit', function (event) {
+            event.preventDefault();
 
-        const formData = new FormData(event.target);
-        const data = {
-            questionnaireId: @Model.Id,
-            questions: []
-        };
+            const formData = new FormData(event.target);
+            const data = {
+                questionnaireId: @Model.Id,
+                questions: []
+            };
 
-        formData.forEach((value, key) => {
-            const [prefix, id] = key.split('-');
-            if (prefix === 'answer') {
-                const question = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Questions));
-                const q = question.find(q => q.Id.toString() === id);
-                if (q.Type === @Html.Raw((int)QuestionType.Text)) {
-                    data.questions.push({
-                        questionId: parseInt(id),
-                        answerText: value,
-                        questionnaireId: data.questionnaireId
-                    });
-                } else {
-                    data.questions.push({
-                        questionId: parseInt(id),
-                        answerOptionId: parseInt(value),
-                        questionnaireId: data.questionnaireId
-                    });
+            formData.forEach((value, key) => {
+                const [prefix, id] = key.split('-');
+                if (prefix === 'answer') {
+                    const question = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Questions));
+                    const q = question.find(q => q.Id.toString() === id);
+                    if (q.Type === @Html.Raw((int)QuestionType.Text)) {
+                        data.questions.push({
+                            questionId: parseInt(id),
+                            answerText: value,
+                            questionnaireId: data.questionnaireId
+                        });
+                    } else {
+                        data.questions.push({
+                            questionId: parseInt(id),
+                            answerOptionId: parseInt(value),
+                            questionnaireId: data.questionnaireId
+                        });
+                    }
                 }
-            }
-        });
+            });
 
-        fetch('/Questionnaire/SubmitAnswers', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data.questions)
-        }).then(response => {
-            if (response.ok) {
-                alert('پاسخ‌ها با موفقیت ثبت شدند.');
-            } else {
-                alert('مشکلی در ثبت پاسخ‌ها رخ داد.');
-            }
+            fetch('/Questionnaire/SubmitAnswers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data.questions)
+            }).then(response => {
+                if (response.ok) {
+                    alert('Responses were successfully recorded.');
+                } else {
+                    alert('There was an issue recording the responses.');
+                }
+            });
         });
-    });
-</script>
+    </script>
+
+</body>
+</html>

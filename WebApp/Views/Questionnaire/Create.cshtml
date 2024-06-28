@@ -245,7 +245,7 @@
                 body: JSON.stringify({ title, class: classId, questions })
             }).then(response => response.json()).then(data => {
                 if (data.questionnaireId) {
-                    window.location.href = `/Questionnaire/Fill/${data.questionnaireId}`;
+                    window.location.href = `/Professor/Index`;
                 } else {
                     alert('Error submitting the questionnaire.');
                 }
