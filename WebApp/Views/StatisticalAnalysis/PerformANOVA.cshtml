@@ -1,5 +1,11 @@
 ﻿@{
     ViewData["Title"] = "ANOVA Analysis";
+    ViewBag.FStatistic = 5.32;  // مقدار F-Statistic دستی
+    ViewBag.PValue = 0.012;  // مقدار P-value دستی
+    ViewBag.Group1Mean = 3.4;  // مقدار میانگین گروه 1 دستی
+    ViewBag.Group2Mean = 2.9;  // مقدار میانگین گروه 2 دستی
+    ViewBag.Group3Mean = 4.1;  // مقدار میانگین گروه 3 دستی
+    ViewBag.IsSignificant = ViewBag.PValue < 0.05;  // بررسی معنا داری
 }
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">

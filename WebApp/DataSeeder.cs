@@ -32,7 +32,7 @@ namespace WebApp
                 StudentNumber = "4003333004",
             };
 
-            string adminPassword = "Admin@123";
+            string adminPassword = "P@ssw0rd12345";
 
             var admin = await userManager.FindByEmailAsync(adminUser.Email);
             if (admin == null)
@@ -55,8 +55,8 @@ namespace WebApp
             var courses = new[]
             {
                 new { Name = "Ehtemal", Classes = new[] { "CS", "CE", "Math" } },
-                new { Name = "AP", Classes = new[] { "CS", "Math" } },
-                new { Name = "BP", Classes = new[] { "CE", "Math" } },
+                new { Name = "AP", Classes = new[] { "CS", "CE" } },
+                new { Name = "BP", Classes = new[] { "CE", "CS" } },
                 new { Name = "Math", Classes = new[] { "CS", "CE", "Math" } },
             };
 

@@ -94,7 +94,7 @@ namespace WebApp.Controllers
             var (overallMean, deviation) = await _statisticalAnalysisService.CompareWithCollegeAverageAsync(classId, collegeAverage);
             ViewBag.OverallMean = overallMean;
             ViewBag.Deviation = deviation;
-            ViewBag.CollegeAverage = collegeAverage; // Add this line to pass the college average to the view
+            ViewBag.CollegeAverage = collegeAverage;
             return View();
         }
 
@@ -110,8 +110,8 @@ namespace WebApp.Controllers
             var (tStatistic, pValue, classMean) = await _statisticalAnalysisService.PerformOneSampleTTestAsync(classId, collegeAverage);
             ViewBag.TStatistic = tStatistic;
             ViewBag.PValue = pValue;
-            ViewBag.ClassMean = classMean; // Add this line to pass the class mean to the view
-            ViewBag.CollegeAverage = collegeAverage; // Add this line to pass the college average to the view
+            ViewBag.ClassMean = classMean;
+            ViewBag.CollegeAverage = collegeAverage;
             return View();
         }
 
@@ -140,7 +140,7 @@ namespace WebApp.Controllers
             ViewBag.FStatistic = fStatistic;
             ViewBag.PValue = pValue;
             ViewBag.IsSignificant = isSignificant;
-            ViewBag.GroupMeans = groupMeans; // Add this line to pass the group means to the view
+            ViewBag.GroupMeans = groupMeans;
             return View();
         }
 
@@ -169,7 +169,7 @@ namespace WebApp.Controllers
             ViewBag.FStatistic = fStatistic;
             ViewBag.PValue = pValue;
             ViewBag.IsSignificant = isSignificant;
-            ViewBag.TimePointMeans = timePointMeans; // Add this line to pass the time point means to the view
+            ViewBag.TimePointMeans = timePointMeans;
             return View();
         }
     }
