@@ -6,10 +6,8 @@ namespace WebApp.Models
     {
         public string StudentNumber { get; set; }
         public bool IsProfessor { get; set; }
-        public ICollection<Course> EnrolledCourses { get; set; } = new List<Course>();
         public ICollection<Course> TaughtCourses { get; set; } = new List<Course>();
-        public ICollection<Questionnaire> Questionnaires { get; set; }
-        public ICollection<Answer> Answers { get; set; }
         public ICollection<Class> Classes { get; set; } = new List<Class>();
+        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
     }
 }

@@ -11,6 +11,7 @@ namespace WebApp.Models
         public Class Class { get; set; }
         public string ProfessorId { get; set; }
         public User Professor { get; set; }
-        public List<Question> Questions { get; set; } = new List<Question>();
+        public ICollection<Question> Questions { get; set; } = new List<Question>();
+        public ICollection<Answer> Answers { get; set; } = new List<Answer>();
     }
 }

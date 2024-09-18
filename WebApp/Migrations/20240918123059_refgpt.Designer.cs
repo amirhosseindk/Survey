@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApp;
 
@@ -11,9 +12,11 @@ using WebApp;
 namespace WebApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240918123059_refgpt")]
+    partial class refgpt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -182,13 +185,8 @@ namespace WebApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("AnswerText")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<short?>("AnswerValue")
-                        .HasColumnType("smallint");
-
-                    b.Property<DateTime>("FillDateTime")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
@@ -416,8 +414,8 @@ namespace WebApp.Migrations
                 {
                     b.HasBaseType("WebApp.Models.Question");
 
-                    b.Property<short>("MaxDegree")
-                        .HasColumnType("smallint");
+                    b.Property<int>("MaxDegree")
+                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -433,11 +431,11 @@ namespace WebApp.Migrations
                 {
                     b.HasBaseType("WebApp.Models.Question");
 
-                    b.Property<short>("MaxValue")
-                        .HasColumnType("smallint");
+                    b.Property<int>("MaxValue")
+                        .HasColumnType("int");
 
-                    b.Property<short>("MinValue")
-                        .HasColumnType("smallint");
+                    b.Property<int>("MinValue")
+                        .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue(2);
                 });

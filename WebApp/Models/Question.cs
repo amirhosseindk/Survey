@@ -1,10 +1,12 @@
 ﻿namespace WebApp.Models
 {
-    public class Question
+    public abstract class Question
     {
         public int Id { get; set; }
-        public Int16 Rank { get; set; }
+        public short Rank { get; set; }
         public QuestionType Type { get; set; }
         public string Title { get; set; }
+        public int QuestionnaireId { get; set; }
+        public Questionnaire Questionnaire { get; set; }
     }
 }

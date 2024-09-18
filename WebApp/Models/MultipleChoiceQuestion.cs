@@ -2,13 +2,15 @@
 {
     public class MultipleChoiceQuestion : Question
     {
-        public MultipleChoiceQuestion(Int16 rank, string title)
+        public MultipleChoiceQuestion() { }
+
+        public MultipleChoiceQuestion(short rank, string title)
         {
             Rank = rank;
             Title = title;
             Type = QuestionType.MultipleChoice;
         }
-        public List<MultipleChoiceOption> Options { get; set; }
-        public Int16 Answer { get; set; }
+
+        public ICollection<MultipleChoiceOption> Options { get; set; } = new List<MultipleChoiceOption>();
     }
 }
