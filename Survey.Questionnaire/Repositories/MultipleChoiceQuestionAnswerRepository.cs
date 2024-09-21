@@ -30,21 +30,21 @@ namespace Survey.Questionnaires.Repositories
 
         public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetAllAsync()
         {
-            var sql = GetGetAllSQL();
+            var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<MultipleChoiceQuestionAnswer>(sql);
         }
 
         public async Task<MultipleChoiceQuestionAnswer> GetByIdAsync(int id)
         {
-            var sql = GetGetByIdSQL();
+            var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<MultipleChoiceQuestionAnswer>(sql, new { Id = id });
         }
 
         public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetByQuestionIdAsync(int questionId)
         {
-            var sql = GetGetByQuestionIdSQL();
+            var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<MultipleChoiceQuestionAnswer>(sql, new { QuestionId = questionId });
         }
@@ -54,6 +54,13 @@ namespace Survey.Questionnaires.Repositories
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             await connection.ExecuteAsync(sql, answer);
+        }
+
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId)
+        {
+            var sql = GetByQuestionnaireIdSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.QueryAsync<MultipleChoiceQuestionAnswer>(sql, new { QuestionnaireId = questionnaireId });
         }
 
         private string GetCreateSQL()
@@ -70,17 +77,17 @@ namespace Survey.Questionnaires.Repositories
             return "DELETE FROM MultipleChoiceQuestionAnswers WHERE Id = @Id";
         }
 
-        private string GetGetAllSQL()
+        private string GetAllSQL()
         {
             return "SELECT * FROM MultipleChoiceQuestionAnswers";
         }
 
-        private string GetGetByIdSQL()
+        private string GetByIdSQL()
         {
             return "SELECT * FROM MultipleChoiceQuestionAnswers WHERE Id = @Id";
         }
 
-        private string GetGetByQuestionIdSQL()
+        private string GetByQuestionIdSQL()
         {
             return "SELECT * FROM MultipleChoiceQuestionAnswers WHERE QuestionId = @QuestionId";
         }
@@ -96,6 +103,11 @@ namespace Survey.Questionnaires.Repositories
                     FillDateTime = @FillDateTime
                 WHERE Id = @Id
             ";
+        }
+
+        private string GetByQuestionnaireIdSQL()
+        {
+            return "SELECT * FROM MultipleChoiceQuestionAnswers WHERE QuestionnaireId = @QuestionnaireId";
         }
     }
 }

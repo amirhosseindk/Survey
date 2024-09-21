@@ -30,14 +30,14 @@ namespace Survey.Questionnaires.Repositories
 
         public async Task<IEnumerable<Questionnaire>> GetAllAsync()
         {
-            var sql = GetGetAllSQL();
+            var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<Questionnaire>(sql);
         }
 
         public async Task<Questionnaire> GetByIdAsync(int id)
         {
-            var sql = GetGetByIdSQL();
+            var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<Questionnaire>(sql, new { Id = id });
         }
@@ -64,12 +64,12 @@ namespace Survey.Questionnaires.Repositories
             return "DELETE FROM Questionnaires WHERE Id = @Id";
         }
 
-        private string GetGetAllSQL()
+        private string GetAllSQL()
         {
             return "SELECT * FROM Questionnaires";
         }
 
-        private string GetGetByIdSQL()
+        private string GetByIdSQL()
         {
             return "SELECT * FROM Questionnaires WHERE Id = @Id";
         }

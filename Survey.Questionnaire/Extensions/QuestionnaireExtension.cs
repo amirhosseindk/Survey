@@ -19,6 +19,9 @@ namespace Survey.Questionnaires.Extensions
             services.AddScoped<IRangeQuestionAnswerRepository, RangeQuestionAnswerRepository>();
             services.AddScoped<IMultipleChoiceQuestionAnswerRepository, MultipleChoiceQuestionAnswerRepository>();
             services.AddScoped<IMultipleChoiceOptionRepository, MultipleChoiceOptionRepository>();
+
+            services.AddScoped<IQuestionnaireService, QuestionnaireService>();
+            services.AddScoped<IAnswerService, AnswerService>();
         }
     }
 }

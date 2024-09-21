@@ -9,5 +9,6 @@ namespace Survey.Questionnaires.Contracts
         Task<IEnumerable<MultipleChoiceOption>> GetByQuestionIdAsync(int questionId);
         Task UpdateAsync(MultipleChoiceOption option);
         Task DeleteAsync(int id);
+        Task<IEnumerable<MultipleChoiceOption>> GetAllAsync();
     }
 }

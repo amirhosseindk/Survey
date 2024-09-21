@@ -9,5 +9,6 @@ namespace Survey.Questionnaires.Contracts
         Task<IEnumerable<TextQuestionAnswer>> GetByQuestionIdAsync(int questionId);
         Task UpdateAsync(TextQuestionAnswer answer);
         Task DeleteAsync(int id);
+        Task<IEnumerable<TextQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId);
     }
 }

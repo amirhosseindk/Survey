@@ -30,21 +30,21 @@ namespace Survey.Questionnaires.Repositories
 
         public async Task<IEnumerable<MultipleChoiceOption>> GetByQuestionIdAsync(int questionId)
         {
-            var sql = GetGetByQuestionIdSQL();
+            var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<MultipleChoiceOption>(sql, new { QuestionId = questionId });
         }
 
         public async Task<MultipleChoiceOption> GetByIdAsync(int id)
         {
-            var sql = GetGetByIdSQL();
+            var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<MultipleChoiceOption>(sql, new { Id = id });
         }
 
         public async Task<IEnumerable<MultipleChoiceOption>> GetAllAsync()
         {
-            var sql = GetGetAllSQL();
+            var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<MultipleChoiceOption>(sql);
         }
@@ -70,17 +70,17 @@ namespace Survey.Questionnaires.Repositories
             return "DELETE FROM MultipleChoiceOptions WHERE Id = @Id";
         }
 
-        private string GetGetAllSQL()
+        private string GetAllSQL()
         {
             return "SELECT * FROM MultipleChoiceOptions";
         }
 
-        private string GetGetByIdSQL()
+        private string GetByIdSQL()
         {
             return "SELECT * FROM MultipleChoiceOptions WHERE Id = @Id";
         }
 
-        private string GetGetByQuestionIdSQL()
+        private string GetByQuestionIdSQL()
         {
             return "SELECT * FROM MultipleChoiceOptions WHERE MultipleChoiceQuestionId = @QuestionId";
         }

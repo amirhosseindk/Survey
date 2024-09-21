@@ -30,21 +30,21 @@ namespace Survey.Questionnaires.Repositories
 
         public async Task<IEnumerable<DegreeQuestionAnswer>> GetAllAsync()
         {
-            var sql = GetGetAllSQL();
+            var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<DegreeQuestionAnswer>(sql);
         }
 
         public async Task<DegreeQuestionAnswer> GetByIdAsync(int id)
         {
-            var sql = GetGetByIdSQL();
+            var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<DegreeQuestionAnswer>(sql, new { Id = id });
         }
 
         public async Task<IEnumerable<DegreeQuestionAnswer>> GetByQuestionIdAsync(int questionId)
         {
-            var sql = GetGetByQuestionIdSQL();
+            var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<DegreeQuestionAnswer>(sql, new { QuestionId = questionId });
         }
@@ -52,9 +52,15 @@ namespace Survey.Questionnaires.Repositories
         public async Task UpdateAsync(DegreeQuestionAnswer answer)
         {
             var sql = GetUpdateSQL();
-
             using var connection = _dbConnectionFactory.CreateConnection();
             await connection.ExecuteAsync(sql, answer);
+        }
+
+        public async Task<IEnumerable<DegreeQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId)
+        {
+            var sql = GetByQuestionnaireIdSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.QueryAsync<DegreeQuestionAnswer>(sql, new { QuestionnaireId = questionnaireId });
         }
 
         private string GetCreateSQL()
@@ -71,17 +77,17 @@ namespace Survey.Questionnaires.Repositories
             return "DELETE FROM DegreeQuestionAnswers WHERE Id = @Id";
         }
 
-        private string GetGetAllSQL()
+        private string GetAllSQL()
         {
             return "SELECT * FROM DegreeQuestionAnswers";
         }
 
-        private string GetGetByIdSQL()
+        private string GetByIdSQL()
         {
             return "SELECT * FROM DegreeQuestionAnswers WHERE Id = @Id";
         }
 
-        private string GetGetByQuestionIdSQL()
+        private string GetByQuestionIdSQL()
         {
             return "SELECT * FROM DegreeQuestionAnswers WHERE QuestionId = @QuestionId";
         }
@@ -97,6 +103,11 @@ namespace Survey.Questionnaires.Repositories
                     FillDateTime = @FillDateTime
                 WHERE Id = @Id
             ";
+        }
+
+        private string GetByQuestionnaireIdSQL()
+        {
+            return "SELECT * FROM DegreeQuestionAnswers WHERE QuestionnaireId = @QuestionnaireId";
         }
     }
 }

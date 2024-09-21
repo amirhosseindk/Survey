@@ -30,14 +30,14 @@ namespace Survey.University.Repositories
 
         public async Task<IEnumerable<ClassStudents>> GetAllAsync()
         {
-            var sql = GetGetAllSQL();
+            var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryAsync<ClassStudents>(sql);
         }
 
         public async Task<ClassStudents> GetByIdAsync(int classId, int studentId)
         {
-            var sql = GetGetByIdSQL();
+            var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<ClassStudents>(sql, new { ClassesId = classId, StudentsId = studentId });
         }
@@ -62,12 +62,12 @@ namespace Survey.University.Repositories
             return "DELETE FROM ClassStudents WHERE ClassesId = @ClassesId AND StudentsId = @StudentsId";
         }
 
-        private string GetGetAllSQL()
+        private string GetAllSQL()
         {
             return "SELECT * FROM ClassStudents";
         }
 
-        private string GetGetByIdSQL()
+        private string GetByIdSQL()
         {
             return "SELECT * FROM ClassStudents WHERE ClassesId = @ClassesId AND StudentsId = @StudentsId";
         }
