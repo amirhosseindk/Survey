@@ -21,7 +21,7 @@ namespace Survey.University.Repositories
             return id;
         }
 
-        public async Task DeleteAsync(int classId, int studentId)
+        public async Task DeleteAsync(int classId, string studentId)
         {
             var sql = GetDeleteSQL();
             using var connection = _dbConnectionFactory.CreateConnection();

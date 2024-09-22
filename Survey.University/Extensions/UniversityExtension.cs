@@ -15,6 +15,8 @@ namespace Survey.University.Extensions
             services.AddScoped<IClassRepository, ClassRepository>();
             services.AddScoped<IClassStudentsRepository, ClassStudentsRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
+
+            services.AddScoped<IUniversityService, UniversityService>();
         }
     }
 }

@@ -8,6 +8,6 @@ namespace Survey.University.Contracts
         Task<ClassStudents> GetByIdAsync(int classId, int studentId);
         Task<IEnumerable<ClassStudents>> GetAllAsync();
         Task UpdateAsync(ClassStudents classStudents);
-        Task DeleteAsync(int classId, int studentId);
+        Task DeleteAsync(int classId, string studentId);
     }
 }
