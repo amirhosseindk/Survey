@@ -1,0 +1,6 @@
+@Suvery.WebAPI_HostAddress = http://localhost:5224
+
+GET {{Suvery.WebAPI_HostAddress}}/User/
+Accept: application/json
+
+###

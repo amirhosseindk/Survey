@@ -8,7 +8,7 @@ namespace Survey.University.Extensions
 {
     public static class UniversityExtension
     {
-        public static void ConfigureQuestionnaireService(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureUniversityService(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IUniversityConnectionFactory>(con => new UniversityConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
 
