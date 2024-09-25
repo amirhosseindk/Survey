@@ -7,7 +7,6 @@ using Survey.Application.Features.Queries.Users.Login;
 
 namespace Suvery.WebAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class UserController : BaseController
     {
@@ -16,6 +15,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpPost]
+        [Route("api/[controller]/Login")]
         public async Task<bool> Login([FromBody] LoginDto dto)
         {
             var result = await _mediator.Send(new LoginQuery
@@ -28,6 +28,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpPost]
+        [Route("api/[controller]/SignUp")]
         public async Task<bool> SignUp([FromBody] CreateUserDto dto)
         {
             var result = await _mediator.Send(new SignUpCommand
