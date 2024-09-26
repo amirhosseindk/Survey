@@ -15,10 +15,10 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("api/[controller]/Login")]
-        public async Task<bool> Login([FromBody] LoginDto dto)
+        [Route("api/[controller]/SignIn")]
+        public async Task<bool> SignIn([FromBody] SignInDto dto)
         {
-            var result = await _mediator.Send(new LoginQuery
+            var result = await _mediator.Send(new SignInQuery
             {
                 Username = dto.Username,
                 Password = dto.Password

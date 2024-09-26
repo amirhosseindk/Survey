@@ -9,8 +9,10 @@
   <ItemGroup>
     <Folder Include="Features\Commands\Universities\" />
     <Folder Include="Features\Commands\Questionnaires\" />
+    <Folder Include="Features\Commands\Users\" />
     <Folder Include="Features\Queries\Questionnaires\" />
     <Folder Include="Features\Queries\Universities\" />
+    <Folder Include="Features\Queries\Users\" />
   </ItemGroup>
 
   <ItemGroup>

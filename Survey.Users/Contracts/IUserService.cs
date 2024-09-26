@@ -29,8 +29,8 @@ namespace Survey.Users.Contracts
         Task<IdentityResult> RemoveFromRolesAsync(User user, IEnumerable<string> roles);
         Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword);
         Task<IdentityResult> UpdateUserAsync(User user);
-        Task<bool> LoginAsync(User user);
-        Task<bool> LoginAsync(string userName, string password);
+        Task<bool> SignInAsync(User user);
+        Task<bool> SignInAsync(string userName, string password);
         Task<bool> LogOutAsync();
     }
 }
