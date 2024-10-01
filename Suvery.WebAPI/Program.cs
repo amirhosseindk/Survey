@@ -2,6 +2,7 @@ using Survey.Application.Extensions;
 using Survey.Questionnaires.Extensions;
 using Survey.University.Extensions;
 using Survey.Users.Extensions;
+using Survey.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 

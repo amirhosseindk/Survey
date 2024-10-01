@@ -31,6 +31,6 @@ namespace Survey.Users.Contracts
         Task<IdentityResult> UpdateUserAsync(User user);
         Task<bool> SignInAsync(User user);
         Task<bool> SignInAsync(string userName, string password);
-        Task<bool> LogOutAsync();
+        Task<bool> SignOutAsync();
     }
 }

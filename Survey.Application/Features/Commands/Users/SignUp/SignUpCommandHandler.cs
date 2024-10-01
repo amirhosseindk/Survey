@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Survey.Application.Dtos.Result;
+using Survey.Application.Extensions;
 using Survey.Users.Contracts;
 using Survey.Users.Models;
 
 namespace Survey.Application.Features.Commands.Users.SignUp
 {
-    public class SignUpCommandHandler : IRequestHandler<SignUpCommand, bool>
+    public class SignUpCommandHandler : IRequestHandler<SignUpCommand, ResultDto<bool>>
     {
         private readonly IUserService _userService;
 
@@ -13,7 +15,7 @@ namespace Survey.Application.Features.Commands.Users.SignUp
             _userService = userService;
         }
 
-        public async Task<bool> Handle(SignUpCommand request, CancellationToken cancellationToken)
+        public async Task<ResultDto<bool>> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
             var user = new User
             {
@@ -25,7 +27,7 @@ namespace Survey.Application.Features.Commands.Users.SignUp
 
             var result = await _userService.CreateAsync(user,request.Password);
 
-            return result.Succeeded;
+            return result.Succeeded.ToResultDto();
         }
     }
 }

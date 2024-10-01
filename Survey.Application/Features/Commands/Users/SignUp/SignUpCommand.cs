@@ -1,6 +1,8 @@
-﻿namespace Survey.Application.Features.Commands.Users.SignUp
+﻿using Survey.Application.Dtos.Result;
+
+namespace Survey.Application.Features.Commands.Users.SignUp
 {
-    public class SignUpCommand : BaseRequest<bool>
+    public class SignUpCommand : BaseRequest<ResultDto<bool>>
     {
         public string Username { get; set; }
         public string Email { get; set; }

@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Survey.Common.Exception;
+using Survey.Common.Maps;
+using Survey.Common.Types;
 using Survey.Users.Contracts;
 using Survey.Users.Models;
 using System.Security.Claims;
@@ -24,12 +27,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Adding claim {ClaimType} to user {UserId}", claim.Type, user.Id);
-                return await _userManager.AddClaimAsync(user, claim);
+                var result = await _userManager.AddClaimAsync(user, claim);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to add claim {ClaimType} to user {UserId}. Errors: {Errors}", claim.Type, user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while adding claim {ClaimType} to user {UserId}: {ErrorMessage}", claim.Type, user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -38,12 +51,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Adding {ClaimCount} claims to user {UserId}", claims.Count(), user.Id);
-                return await _userManager.AddClaimsAsync(user, claims);
+                var result = await _userManager.AddClaimsAsync(user, claims);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to add claims to user {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while adding claims to user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -52,12 +75,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Adding user {UserId} to role {Role}", user.Id, role);
-                return await _userManager.AddToRoleAsync(user, role);
+                var result = await _userManager.AddToRoleAsync(user, role);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to add user {UserId} to role {Role}. Errors: {Errors}", user.Id, role, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while adding user {UserId} to role {Role}: {ErrorMessage}", user.Id, role, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -66,12 +99,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Adding user {UserId} to roles {Roles}", user.Id, string.Join(",", roles));
-                return await _userManager.AddToRolesAsync(user, roles);
+                var result = await _userManager.AddToRolesAsync(user, roles);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to add user {UserId} to roles {Roles}. Errors: {Errors}", user.Id, string.Join(",", roles), errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while adding user {UserId} to roles: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -80,12 +123,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Changing email for user {UserId} to {NewEmail}", user.Id, newEmail);
-                return await _userManager.ChangeEmailAsync(user, newEmail, token);
+                var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to change email for user {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while changing email for user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -94,12 +147,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Changing password for user {UserId}", user.Id);
-                return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+                var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to change password for user {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while changing password for user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -115,13 +178,27 @@ namespace Survey.Users.Services
                     _logger.LogInformation("User {UserId} created successfully. Adding default claims...", user.Id);
                     await AddDefaultClaimsAsync(user);
                 }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("User creation failed for {Username}. Errors: {Errors}", user.UserName, errors);
+
+                    if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
+                    {
+                        throw new BusinessException(ErrorMap.GetMessage(ErrorType.ExistingEmailAddress), (int)ErrorType.ExistingEmailAddress);
+                    }
+                    else
+                    {
+                        throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserCreationFailed), (int)ErrorType.UserCreationFailed);
+                    }
+                }
 
                 return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while creating user {Username}: {ErrorMessage}", user.UserName, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -130,12 +207,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Deleting user {UserId}", user.Id);
-                return await _userManager.DeleteAsync(user);
+                var result = await _userManager.DeleteAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("User deletion failed for {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserDeleteFailed), (int)ErrorType.UserDeleteFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while deleting user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -144,12 +231,20 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Finding user by email {Email}", email);
-                return await _userManager.FindByEmailAsync(email);
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User with email {Email} not found", email);
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserNotFound), (int)ErrorType.UserNotFound);
+                }
+
+                return user;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while finding user by email {Email}: {ErrorMessage}", email, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -158,12 +253,20 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Finding user by username {Username}", userName);
-                return await _userManager.FindByNameAsync(userName);
+                var user = await _userManager.FindByNameAsync(userName);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User {Username} not found", userName);
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserNotFound), (int)ErrorType.UserNotFound);
+                }
+
+                return user;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while finding user by username {Username}: {ErrorMessage}", userName, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -172,12 +275,20 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Finding user by ID {UserId}", userId);
-                return await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User with ID {UserId} not found", userId);
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserNotFound), (int)ErrorType.UserNotFound);
+                }
+
+                return user;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while finding user by ID {UserId}: {ErrorMessage}", userId, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -185,13 +296,19 @@ namespace Survey.Users.Services
         {
             try
             {
+                if (user == null)
+                {
+                    _logger.LogWarning("User cannot be null in GetClaimsAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
                 _logger.LogInformation("Getting claims for user {UserId}", user.Id);
                 return await _userManager.GetClaimsAsync(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while getting claims for user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                _logger.LogError(ex, "Error while getting claims for user {UserId}: {ErrorMessage}", user?.Id, ex.Message);
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -199,13 +316,19 @@ namespace Survey.Users.Services
         {
             try
             {
+                if (user == null)
+                {
+                    _logger.LogWarning("User cannot be null in GetEmailAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
                 _logger.LogInformation("Getting email for user {UserId}", user.Id);
                 return await _userManager.GetEmailAsync(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while getting email for user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                _logger.LogError(ex, "Error while getting email for user {UserId}: {ErrorMessage}", user?.Id, ex.Message);
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -213,13 +336,19 @@ namespace Survey.Users.Services
         {
             try
             {
+                if (user == null)
+                {
+                    _logger.LogWarning("User cannot be null in GetRolesAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
                 _logger.LogInformation("Getting roles for user {UserId}", user.Id);
                 return await _userManager.GetRolesAsync(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while getting roles for user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                _logger.LogError(ex, "Error while getting roles for user {UserId}: {ErrorMessage}", user?.Id, ex.Message);
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -227,13 +356,27 @@ namespace Survey.Users.Services
         {
             try
             {
+                if (principal == null)
+                {
+                    _logger.LogWarning("Principal cannot be null in GetUserAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
                 _logger.LogInformation("Getting user by principal");
-                return await _userManager.GetUserAsync(principal);
+                var user = await _userManager.GetUserAsync(principal);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found for the given principal");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserNotFound), (int)ErrorType.UserNotFound);
+                }
+
+                return user;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while getting user by principal: {ErrorMessage}", ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -241,13 +384,19 @@ namespace Survey.Users.Services
         {
             try
             {
-                _logger.LogInformation("Getting user id");
+                if (user == null)
+                {
+                    _logger.LogWarning("User cannot be null in GetUserIdAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
+                _logger.LogInformation("Getting user id for user {UserId}", user.Id);
                 return await _userManager.GetUserIdAsync(user);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while getting user ID: {ErrorMessage}", ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -255,13 +404,19 @@ namespace Survey.Users.Services
         {
             try
             {
+                if (user == null)
+                {
+                    _logger.LogWarning("User cannot be null in GetUserNameAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
                 _logger.LogInformation("Getting user name for {UserId}", user.Id);
                 return await _userManager.GetUserNameAsync(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while getting user name for {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                _logger.LogError(ex, "Error while getting user name for {UserId}: {ErrorMessage}", user?.Id, ex.Message);
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -270,12 +425,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Removing claim {ClaimType} from user {UserId}", claim.Type, user.Id);
-                return await _userManager.RemoveClaimAsync(user, claim);
+                var result = await _userManager.RemoveClaimAsync(user, claim);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to remove claim {ClaimType} from user {UserId}. Errors: {Errors}", claim.Type, user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while removing claim {ClaimType} from user {UserId}: {ErrorMessage}", claim.Type, user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -284,12 +449,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Removing {ClaimCount} claims from user {UserId}", claims.Count(), user.Id);
-                return await _userManager.RemoveClaimsAsync(user, claims);
+                var result = await _userManager.RemoveClaimsAsync(user, claims);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to remove claims from user {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while removing claims from user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -298,12 +473,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Removing user {UserId} from role {Role}", user.Id, role);
-                return await _userManager.RemoveFromRoleAsync(user, role);
+                var result = await _userManager.RemoveFromRoleAsync(user, role);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to remove user {UserId} from role {Role}. Errors: {Errors}", user.Id, role, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while removing user {UserId} from role {Role}: {ErrorMessage}", user.Id, role, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -312,12 +497,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Removing user {UserId} from roles {Roles}", user.Id, string.Join(",", roles));
-                return await _userManager.RemoveFromRolesAsync(user, roles);
+                var result = await _userManager.RemoveFromRolesAsync(user, roles);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to remove user {UserId} from roles. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while removing user {UserId} from roles: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -326,12 +521,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Resetting password for user {UserId}", user.Id);
-                return await _userManager.ResetPasswordAsync(user, token, newPassword);
+                var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to reset password for user {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while resetting password for user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -340,12 +545,22 @@ namespace Survey.Users.Services
             try
             {
                 _logger.LogInformation("Updating user {UserId}", user.Id);
-                return await _userManager.UpdateAsync(user);
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("User update failed for {UserId}. Errors: {Errors}", user.Id, errors);
+
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.UserUpdateFailed), (int)ErrorType.UserUpdateFailed);
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while updating user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
@@ -353,41 +568,55 @@ namespace Survey.Users.Services
         {
             try
             {
+                if (user == null)
+                {
+                    _logger.LogWarning("User cannot be null in SignInAsync");
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.NullArgument), (int)ErrorType.NullArgument);
+                }
+
                 _logger.LogInformation("Logging in user {UserId}", user.Id);
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while logging in user {UserId}: {ErrorMessage}", user.Id, ex.Message);
-                throw;
+                _logger.LogError(ex, "Error while logging in user {UserId}: {ErrorMessage}", user?.Id, ex.Message);
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 
         public async Task<bool> SignInAsync(string userName, string password)
         {
-            var user = await FindByNameAsync(userName);
-            if (user == null)
+            try
             {
-                _logger.LogWarning("Login failed. User {Username} not found", userName);
-                return false;
+                var user = await FindByNameAsync(userName);
+                if (user == null)
+                {
+                    _logger.LogWarning("Login failed. User {Username} not found", userName);
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.InvalidUsernameOrPassword), (int)ErrorType.InvalidUsernameOrPassword);
+                }
+
+                _logger.LogInformation("Attempting login for user {Username}", userName);
+                var result = await _signInManager.PasswordSignInAsync(userName, password, isPersistent: true, lockoutOnFailure: false);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("Invalid login attempt for user {Username}", userName);
+                    throw new BusinessException(ErrorMap.GetMessage(ErrorType.InvalidUsernameOrPassword), (int)ErrorType.InvalidUsernameOrPassword);
+                }
+
+                _logger.LogInformation("Login successful for user {Username}. Adding missing claims...", userName);
+                await EnsureClaimsForUserAsync(user);
+                return true;
             }
-
-            _logger.LogInformation("Attempting login for user {Username}", userName);
-            var result = await _signInManager.PasswordSignInAsync(userName, password, isPersistent: true, lockoutOnFailure: false);
-
-            if (!result.Succeeded)
+            catch (Exception ex)
             {
-                _logger.LogWarning("Invalid login attempt for user {Username}", userName);
-                return false;
+                _logger.LogError(ex, "Error while signing in user {Username}: {ErrorMessage}", userName, ex.Message);
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
-
-            _logger.LogInformation("Login successful for user {Username}. Adding missing claims...", userName);
-            await EnsureClaimsForUserAsync(user);
-            return true;
         }
 
-        public async Task<bool> LogOutAsync()
+        public async Task<bool> SignOutAsync()
         {
             try
             {
@@ -398,7 +627,7 @@ namespace Survey.Users.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while logging out: {ErrorMessage}", ex.Message);
-                throw;
+                throw new BusinessException(ErrorMap.GetMessage(ErrorType.InternalServerError), (int)ErrorType.InternalServerError);
             }
         }
 

@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=.;Database=SurveyDB2;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=False"
+  }
+}
