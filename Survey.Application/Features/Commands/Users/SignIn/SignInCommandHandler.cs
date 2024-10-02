@@ -3,18 +3,18 @@ using Survey.Application.Dtos.Result;
 using Survey.Application.Extensions;
 using Survey.Users.Contracts;
 
-namespace Survey.Application.Features.Queries.Users.SignIn
+namespace Survey.Application.Features.Commands.Users.SignIn
 {
-    public class SignInQueryHandler : IRequestHandler<SignInQuery, ResultDto<bool>>
+    public class SignInCommandHandler : IRequestHandler<SignInCommand, ResultDto<bool>>
     {
         private readonly IUserService _userService;
 
-        public SignInQueryHandler(IUserService userService)
+        public SignInCommandHandler(IUserService userService)
         {
             _userService = userService;
         }
 
-        public async Task<ResultDto<bool>> Handle(SignInQuery request, CancellationToken cancellationToken)
+        public async Task<ResultDto<bool>> Handle(SignInCommand request, CancellationToken cancellationToken)
         {
             var result = await _userService.SignInAsync(request.Username, request.Password);
             return result.ToResultDto();

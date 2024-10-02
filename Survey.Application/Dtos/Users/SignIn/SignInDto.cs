@@ -1,4 +1,4 @@
-﻿namespace Survey.Application.Dtos.Users.Login
+﻿namespace Survey.Application.Dtos.Users.SignIn
 {
     public class SignInDto
     {

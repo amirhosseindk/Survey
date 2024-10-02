@@ -1,6 +1,6 @@
 ﻿namespace Survey.Application.Dtos.Users.Claim
 {
-    public class AddClaimDto
+    public class RemoveClaimDto
     {
         public string UserId { get; set; }
         public string ClaimType { get; set; }

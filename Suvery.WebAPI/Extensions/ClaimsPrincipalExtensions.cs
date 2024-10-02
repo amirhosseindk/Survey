@@ -1,4 +1,4 @@
-﻿using Survey.Users.Models;
+﻿using Survey.Application.Dtos.Users.Base;
 using System.Security.Claims;
 
 namespace Suvery.WebAPI.Extensions
@@ -59,16 +59,16 @@ namespace Suvery.WebAPI.Extensions
             return claim?.Value;
         }
 
-        public static User ToUserModel(this ClaimsPrincipal user)
+        public static UserDto ToUserModel(this ClaimsPrincipal user)
         {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return new User
+            return new UserDto
             {
-                Id = user.GetUserId(),
+                UserId = user.GetUserId(),
                 Email = user.GetUserEmail(),
                 UserName = user.GetUserName(),
                 IsProfessor = user.IsProfessor(),
