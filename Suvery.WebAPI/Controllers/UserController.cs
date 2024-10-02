@@ -21,10 +21,12 @@ using Survey.Application.Features.Queries.Users.Id;
 using Survey.Application.Features.Queries.Users.Roles;
 using Survey.Application.Features.Queries.Users.Username;
 using Suvery.WebAPI.Extensions;
+using Suvery.WebAPI.Filters;
 
 namespace Suvery.WebAPI.Controllers
 {
     [ApiController]
+    [ApiKey]
     public class UserController : BaseController
     {
         public UserController(IMediator mediator) : base(mediator)

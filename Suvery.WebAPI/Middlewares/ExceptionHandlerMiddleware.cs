@@ -2,88 +2,76 @@
 using Survey.Common.Exception;
 using Newtonsoft.Json;
 using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Survey.WebAPI.Middlewares
 {
-    public class ExceptionHandlerMiddleware
+    public class ExceptionHandlerMiddleware : IExceptionHandler
     {
-        private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
-        public ExceptionHandlerMiddleware(RequestDelegate next)
+        public ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logger)
         {
-            _next = next;
+            _logger = logger;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            try
+            var response = httpContext.Response;
+            response.ContentType = "application/json";
+
+            ProblemDetails problemDetails;
+
+            if (exception is IBusinessException businessException)
             {
-                await _next(context).ConfigureAwait(false);
+                problemDetails = HandleBusinessException(httpContext, businessException);
             }
-            catch (Exception error)
+            else
             {
-                var response = context.Response;
-                response.ContentType = "application/json";
-
-                ErrorDto errorDto;
-
-                if (error is IBusinessException businessException)
-                {
-                    errorDto = HandleBusinessException(context, businessException);
-                }
-                else
-                {
-                    errorDto = HandleNonBusinessException(context, error);
-                }
-
-                var result = JsonConvert.SerializeObject(new ResultDto
-                {
-                    Succeeded = false,
-                    Error = errorDto
-                });
-
-                await response.WriteAsync(result);
+                problemDetails = HandleNonBusinessException(httpContext, exception);
             }
+
+            var result = JsonConvert.SerializeObject(new ResultDto
+            {
+                Succeeded = false,
+                Error = problemDetails
+            });
+
+            await response.WriteAsync(result, cancellationToken);
+            return true;
         }
 
-        private ErrorDto HandleBusinessException(HttpContext context, IBusinessException businessException)
+        private ProblemDetails HandleBusinessException(HttpContext context, IBusinessException businessException)
         {
             var trackId = Guid.NewGuid().ToString();
-            GlobalLogger.LogBusinessError(businessException, trackId);
+            _logger.LogError(trackId, businessException, "Business error with track ID: {TrackId}");
 
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-            SetHeader(context, businessException.GetCode().ToString(), trackId);
-
-            return new ErrorDto
+            return new ProblemDetails
             {
-                Code = businessException.GetCode(),
-                Message = businessException.Message,
-                Details = businessException.ReturnDetail()
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Business error",
+                Detail = businessException.ReturnDetail().ToString(),
+                Instance = trackId
             };
         }
 
-        private ErrorDto HandleNonBusinessException(HttpContext context, Exception error)
+        private ProblemDetails HandleNonBusinessException(HttpContext context, Exception error)
         {
             var trackId = Guid.NewGuid().ToString();
-            GlobalLogger.LogGlobalError(error, trackId);
+            _logger.LogError(error, "Global error with track ID: {TrackId}", trackId);
 
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            SetHeader(context, "0", trackId);
-
-            return new ErrorDto
+            return new ProblemDetails
             {
-                Code = context.Response.StatusCode,
-                Message = "An unexpected error occurred.",
-                Details = error.Message
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "An unexpected error occurred.",
+                Detail = error.Message,
+                Instance = trackId
             };
-        }
-
-        private void SetHeader(HttpContext context, string errorCode, string trackId)
-        {
-            context.Response.Headers.Add("X-Exception-Code", errorCode);
-            context.Response.Headers.Add("X-Track-Id", trackId);
         }
     }
 }
