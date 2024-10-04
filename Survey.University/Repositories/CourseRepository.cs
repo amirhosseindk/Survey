@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Logging;
 using Survey.University.Contracts;
 using Survey.University.Models;
 
@@ -6,67 +7,143 @@ namespace Survey.University.Repositories
 {
     public class CourseRepository : ICourseRepository
     {
-        private readonly IUniversityConnectionFactory _dbConnectionFactory;
+        private readonly IUniversityReadConnectionFactory _readConnectionFactory;
+        private readonly IUniversityWriteConnectionFactory _writeConnectionFactory;
+        private readonly ILogger<CourseRepository> _logger;
 
-        public CourseRepository(IUniversityConnectionFactory dbConnectionFactory)
+        public CourseRepository(
+            IUniversityReadConnectionFactory readConnectionFactory,
+            IUniversityWriteConnectionFactory writeConnectionFactory,
+            ILogger<CourseRepository> logger)
         {
-            _dbConnectionFactory = dbConnectionFactory;
+            _readConnectionFactory = readConnectionFactory;
+            _writeConnectionFactory = writeConnectionFactory;
+            _logger = logger;
         }
 
         public async Task<int> CreateAsync(CourseRepoModel course)
         {
             var sql = GetCreateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var id = await connection.QuerySingleAsync<int>(sql, course);
-            return id;
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var sql = GetDeleteSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
-            return rowsAffected > 0;
-        }
-
-        public async Task<IEnumerable<CourseRepoModel>> GetAllAsync()
-        {
-            var sql = GetAllSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<CourseRepoModel>(sql);
-        }
-
-        public async Task<CourseRepoModel> GetByIdAsync(int id)
-        {
-            var sql = GetByIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<CourseRepoModel>(sql, new { Id = id });
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var id = await connection.QuerySingleAsync<int>(sql, course);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while creating course - {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<bool> UpdateAsync(CourseRepoModel course)
         {
             var sql = GetUpdateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var rowsAffected = await connection.ExecuteAsync(sql, course);
-            return rowsAffected > 0;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var rowsAffected = await connection.ExecuteAsync(sql, course);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while updating course - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var sql = GetDeleteSQL();
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while deleting course by ID {id} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<CourseRepoModel> GetByIdAsync(int id)
+        {
+            var sql = GetByIdSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryFirstOrDefaultAsync<CourseRepoModel>(sql, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting course by ID {id} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<CourseRepoModel> GetByNameAsync(string name)
+        {
+            var sql = GetByNameSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryFirstOrDefaultAsync<CourseRepoModel>(sql, new { Name = name });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting course by Name {name} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<CourseRepoModel>> GetAllAsync()
+        {
+            var sql = GetAllSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<CourseRepoModel>(sql);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting all courses - {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<Dictionary<int, string>> GetClassesByCourseIdAsync(int courseId)
         {
             var sql = GetClassesByCourseIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var result = await connection.QueryAsync<(int ClassId, string ClassName)>(sql, new { CourseId = courseId });
-
-            return result.ToDictionary(x => x.ClassId, x => x.ClassName);
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                var result = await connection.QueryAsync<(int ClassId, string ClassName)>(sql, new { CourseId = courseId });
+                return result.ToDictionary(x => x.ClassId, x => x.ClassName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting classes by course by ID {courseId} - {ex.Message}");
+                throw;
+            };
         }
 
         public async Task<Dictionary<int, string>> GetClassesByCourseNameAsync(string courseName)
         {
-            string sql = GetClassesByCourseNameSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var result = await connection.QueryAsync<(int ClassId, string ClassName)>(sql, new { CourseName = courseName });
-
-            return result.ToDictionary(x => x.ClassId, x => x.ClassName);
+            var sql = GetClassesByCourseNameSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                var result = await connection.QueryAsync<(int ClassId, string ClassName)>(sql, new { CourseName = courseName });
+                return result.ToDictionary(x => x.ClassId, x => x.ClassName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting classes by course by Name {courseName} - {ex.Message}");
+                throw;
+            }
         }
 
         private string GetClassesByCourseNameSQL()
@@ -110,6 +187,11 @@ namespace Survey.University.Repositories
         private string GetByIdSQL()
         {
             return "SELECT * FROM Courses WHERE Id = @Id";
+        }
+
+        private string GetByNameSQL()
+        {
+            return "SELECT * FROM Courses WHERE Name = @Name";
         }
 
         private string GetUpdateSQL()

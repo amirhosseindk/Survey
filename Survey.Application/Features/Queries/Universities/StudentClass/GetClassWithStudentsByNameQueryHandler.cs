@@ -24,6 +24,7 @@ namespace Survey.Application.Features.Queries.Universities.StudentClass
                 Id = @class.Id,
                 Name = @class.Name,
                 CourseId = @class.Course.Id,
+                CourseName = @class.Course.Name,
                 Students = @class.Students
             };
 

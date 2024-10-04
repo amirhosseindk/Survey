@@ -10,7 +10,6 @@ namespace Survey.University.Services
         private readonly ICourseRepository _courseRepository;
         private readonly ILogger<UniversityService> _logger;
 
-
         public UniversityService(
             IClassRepository classRepository,
             ICourseRepository courseRepository,
@@ -25,15 +24,21 @@ namespace Survey.University.Services
         {
             try
             {
+                if (course == null || string.IsNullOrWhiteSpace(course.Name))
+                {
+                    _logger.LogError("Invalid course data provided");
+                    throw new ArgumentException("Invalid course data");
+                }
+
                 return await _courseRepository.CreateAsync(new CourseRepoModel
                 {
-                    Name = course.Name,
+                    Name = course.Name.ToLower(),
                     ProfessorId = course.ProfessorId
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while creating course - {ex.Message}");
+                _logger.LogError(ex, $"Error while creating course: {ex.Message}");
                 throw;
             }
         }
@@ -42,16 +47,22 @@ namespace Survey.University.Services
         {
             try
             {
+                if (course == null || string.IsNullOrWhiteSpace(course.Name))
+                {
+                    _logger.LogError("Invalid course data provided for update");
+                    throw new ArgumentException("Invalid course data");
+                }
+
                 return await _courseRepository.UpdateAsync(new CourseRepoModel
                 {
                     Id = course.Id,
-                    Name = course.Name,
+                    Name = course.Name.ToLower(),
                     ProfessorId = course.ProfessorId
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while updating course - {ex.Message}");
+                _logger.LogError(ex, $"Error while updating course: {ex.Message}");
                 throw;
             }
         }
@@ -60,11 +71,16 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _courseRepository.DeleteAsync(id);
+                var result = await _courseRepository.DeleteAsync(id);
+                if (!result)
+                {
+                    throw new KeyNotFoundException("Course not found");
+                }
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while deleting course - {ex.Message}");
+                _logger.LogError(ex, $"Error while deleting course: {ex.Message}");
                 throw;
             }
         }
@@ -74,11 +90,13 @@ namespace Survey.University.Services
             try
             {
                 var course = await _courseRepository.GetByIdAsync(id);
+                if (course == null) throw new KeyNotFoundException("Course not found");
+
                 return new Course { Id = course.Id, Name = course.Name, ProfessorId = course.ProfessorId };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting course - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving course by ID: {ex.Message}");
                 throw;
             }
         }
@@ -87,13 +105,14 @@ namespace Survey.University.Services
         {
             try
             {
-                var courses = await _courseRepository.GetAllAsync();
-                var course = courses.FirstOrDefault(c => c.Name == name);
-                return new Course { Id = course.Id, Name = course.Name, ProfessorId= course.ProfessorId };
+                var course = await _courseRepository.GetByNameAsync(name.ToLower());
+                if (course == null) throw new KeyNotFoundException("Course not found");
+
+                return new Course { Id = course.Id, Name = course.Name, ProfessorId = course.ProfessorId };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting course - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving course by name: {ex.Message}");
                 throw;
             }
         }
@@ -103,24 +122,13 @@ namespace Survey.University.Services
             try
             {
                 var courses = await _courseRepository.GetAllAsync();
+                if (courses == null) throw new KeyNotFoundException("No courses found");
 
-                var result = new List<Course>();
-
-                foreach (var course in courses)
-                {
-                    result.Add(new Course
-                    {
-                        Id = course.Id,
-                        Name = course.Name,
-                        ProfessorId = course.ProfessorId
-                    });
-                }
-
-                return result;
+                return courses.Select(c => new Course { Id = c.Id, Name = c.Name, ProfessorId = c.ProfessorId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting courses - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving all courses: {ex.Message}");
                 throw;
             }
         }
@@ -129,16 +137,22 @@ namespace Survey.University.Services
         {
             try
             {
+                if (@class == null || string.IsNullOrWhiteSpace(@class.Name))
+                {
+                    _logger.LogError("Invalid class data provided");
+                    throw new ArgumentException("Invalid class data");
+                }
+
                 return await _classRepository.CreateAsync(new ClassRepoModel
                 {
                     CourseId = @class.Course.Id,
-                    Name = @class.Name,
+                    Name = @class.Name.ToLower(),
                     Id = @class.Id,
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while creating class - {ex.Message}");
+                _logger.LogError(ex, $"Error while creating class: {ex.Message}");
                 throw;
             }
         }
@@ -147,16 +161,22 @@ namespace Survey.University.Services
         {
             try
             {
+                if (@class == null || string.IsNullOrWhiteSpace(@class.Name))
+                {
+                    _logger.LogError("Invalid class data provided for update");
+                    throw new ArgumentException("Invalid class data");
+                }
+
                 return await _classRepository.UpdateAsync(new ClassRepoModel
                 {
                     Id = @class.Id,
                     CourseId = @class.Course.Id,
-                    Name= @class.Name
+                    Name = @class.Name.ToLower()
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while updating class - {ex.Message}");
+                _logger.LogError(ex, $"Error while updating class: {ex.Message}");
                 throw;
             }
         }
@@ -165,11 +185,16 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _classRepository.DeleteAsync(id);
+                var result = await _classRepository.DeleteAsync(id);
+                if (!result)
+                {
+                    throw new KeyNotFoundException("Class not found");
+                }
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while deleting class - {ex.Message}");
+                _logger.LogError(ex, $"Error while deleting class: {ex.Message}");
                 throw;
             }
         }
@@ -179,11 +204,13 @@ namespace Survey.University.Services
             try
             {
                 var @class = await _classRepository.GetByIdAsync(id);
+                if (@class == null) throw new KeyNotFoundException("Class not found");
+
                 return new Class { Id = @class.Id, Name = @class.Name, Course = await GetCourseByIdAsync(@class.CourseId) };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting class - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving class by ID: {ex.Message}");
                 throw;
             }
         }
@@ -192,13 +219,14 @@ namespace Survey.University.Services
         {
             try
             {
-                var classes = await _classRepository.GetAllAsync();
-                var @class = classes.FirstOrDefault(c => c.Name == name);
+                var @class = await _classRepository.GetByNameAsync(name.ToLower());
+                if (@class == null) throw new KeyNotFoundException("Class not found");
+
                 return new Class { Id = @class.Id, Name = @class.Name, Course = await GetCourseByIdAsync(@class.CourseId) };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting class - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving class by name: {ex.Message}");
                 throw;
             }
         }
@@ -208,23 +236,18 @@ namespace Survey.University.Services
             try
             {
                 var classes = await _classRepository.GetAllAsync();
-                var result = new List<Class>();
+                if (classes == null) throw new KeyNotFoundException("No classes found");
 
-                foreach (var @class in classes)
+                return classes.Select(c => new Class
                 {
-                    result.Add(new Class
-                    {
-                        Id = @class.Id,
-                        Name = @class.Name,
-                        Course = await GetCourseByIdAsync(@class.CourseId)
-                    });
-                }
-
-                return result;
+                    Id = c.Id,
+                    Name = c.Name,
+                    Course = GetCourseByIdAsync(c.CourseId).Result
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting classes - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving all classes: {ex.Message}");
                 throw;
             }
         }
@@ -242,7 +265,7 @@ namespace Survey.University.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while adding student to class - {ex.Message}");
+                _logger.LogError(ex, $"Error while adding student to class: {ex.Message}");
                 throw;
             }
         }
@@ -255,7 +278,7 @@ namespace Survey.University.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while removing student from class - {ex.Message}");
+                _logger.LogError(ex, $"Error while removing student from class: {ex.Message}");
                 throw;
             }
         }
@@ -264,11 +287,12 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _courseRepository.GetClassesByCourseIdAsync(courseId);
+                var result = await _courseRepository.GetClassesByCourseIdAsync(courseId);
+                return result ?? throw new KeyNotFoundException("No classes found for this course ID");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving classes for course ID {courseId} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving classes for course ID {courseId}: {ex.Message}");
                 throw;
             }
         }
@@ -277,11 +301,12 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _courseRepository.GetClassesByCourseNameAsync(courseName);
+                var result = await _courseRepository.GetClassesByCourseNameAsync(courseName.ToLower());
+                return result ?? throw new KeyNotFoundException("No classes found for this course name");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving classes for course name {courseName} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving classes for course name {courseName}: {ex.Message}");
                 throw;
             }
         }
@@ -290,11 +315,12 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _classRepository.GetStudentsByClassIdAsync(classId);
+                var result = await _classRepository.GetStudentsByClassIdAsync(classId);
+                return result ?? throw new KeyNotFoundException("No students found for this class ID");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving students for class ID {classId} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving students for class ID {classId}: {ex.Message}");
                 throw;
             }
         }
@@ -303,11 +329,12 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _classRepository.GetStudentsByClassNameAsync(className);
+                var result = await _classRepository.GetStudentsByClassNameAsync(className.ToLower());
+                return result ?? throw new KeyNotFoundException("No students found for this class name");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving students for class name {className} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving students for class name {className}: {ex.Message}");
                 throw;
             }
         }
@@ -317,8 +344,9 @@ namespace Survey.University.Services
             try
             {
                 var course = await _courseRepository.GetByIdAsync(courseId);
-                var classes = await _courseRepository.GetClassesByCourseIdAsync(courseId);
+                if (course == null) throw new KeyNotFoundException("Course not found");
 
+                var classes = await _courseRepository.GetClassesByCourseIdAsync(courseId);
                 return new Course
                 {
                     Id = course.Id,
@@ -329,7 +357,7 @@ namespace Survey.University.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving course with classes for course ID {courseId} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving course with classes for course ID {courseId}: {ex.Message}");
                 throw;
             }
         }
@@ -338,10 +366,10 @@ namespace Survey.University.Services
         {
             try
             {
-                var courses = await _courseRepository.GetAllAsync();
-                var course = courses.FirstOrDefault(c => c.Name == courseName);
-                var classes = await _courseRepository.GetClassesByCourseNameAsync(courseName);
+                var course = await _courseRepository.GetByNameAsync(courseName.ToLower());
+                if (course == null) throw new KeyNotFoundException("Course not found");
 
+                var classes = await _courseRepository.GetClassesByCourseNameAsync(courseName);
                 return new Course
                 {
                     Id = course.Id,
@@ -352,7 +380,7 @@ namespace Survey.University.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving course with classes for course name {courseName} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving course with classes for course name {courseName}: {ex.Message}");
                 throw;
             }
         }
@@ -362,8 +390,9 @@ namespace Survey.University.Services
             try
             {
                 var classRepoModel = await _classRepository.GetByIdAsync(classId);
-                var students = await _classRepository.GetStudentsByClassIdAsync(classId);
+                if (classRepoModel == null) throw new KeyNotFoundException("Class not found");
 
+                var students = await _classRepository.GetStudentsByClassIdAsync(classId);
                 return new Class
                 {
                     Id = classRepoModel.Id,
@@ -374,7 +403,7 @@ namespace Survey.University.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving class with students for class ID {classId} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving class with students for class ID {classId}: {ex.Message}");
                 throw;
             }
         }
@@ -383,21 +412,21 @@ namespace Survey.University.Services
         {
             try
             {
-                var classes = await _classRepository.GetAllAsync();
-                var classRepoModel = classes.FirstOrDefault(c => c.Name == className);
-                var students = await _classRepository.GetStudentsByClassNameAsync(className);
+                var @class = await _classRepository.GetByNameAsync(className.ToLower());
+                if (@class == null) throw new KeyNotFoundException("Class not found");
 
+                var students = await _classRepository.GetStudentsByClassNameAsync(className);
                 return new Class
                 {
-                    Id = classRepoModel.Id,
-                    Name = classRepoModel.Name,
-                    Course = new Course { Id = classRepoModel.CourseId },
+                    Id = @class.Id,
+                    Name = @class.Name,
+                    Course = await GetCourseByIdAsync(@class.CourseId),
                     Students = students
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while retrieving class with students for class name {className} - {ex.Message}");
+                _logger.LogError(ex, $"Error while retrieving class with students for class name {className}: {ex.Message}");
                 throw;
             }
         }

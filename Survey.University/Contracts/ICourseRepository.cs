@@ -6,6 +6,7 @@ namespace Survey.University.Contracts
     {
         Task<int> CreateAsync(CourseRepoModel course);
         Task<CourseRepoModel> GetByIdAsync(int id);
+        Task<CourseRepoModel> GetByNameAsync(string name);
         Task<IEnumerable<CourseRepoModel>> GetAllAsync();
         Task<bool> UpdateAsync(CourseRepoModel course);
         Task<bool> DeleteAsync(int id);

@@ -3,11 +3,17 @@ using Survey.University.Contracts;
 
 namespace Survey.University.Services
 {
-    public class UniversityConnectionFactory : BaseDapperConnectionFactory, IUniversityConnectionFactory
+    public class UniversityReadConnectionFactory : BaseDapperConnectionFactory, IUniversityReadConnectionFactory
     {
-        public UniversityConnectionFactory(string connectionString) : base(connectionString)
+        public UniversityReadConnectionFactory(string connectionString) : base(connectionString)
         {
-            
+        }
+    }
+
+    public class UniversityWriteConnectionFactory : BaseDapperConnectionFactory, IUniversityWriteConnectionFactory
+    {
+        public UniversityWriteConnectionFactory(string connectionString) : base(connectionString)
+        {
         }
     }
 }

@@ -2,7 +2,11 @@
 
 namespace Survey.University.Contracts
 {
-    public interface IUniversityConnectionFactory : IDapperConnectionFactory
+    public interface IUniversityReadConnectionFactory : IDapperConnectionFactory
+    {
+    }
+
+    public interface IUniversityWriteConnectionFactory : IDapperConnectionFactory
     {
     }
 }
