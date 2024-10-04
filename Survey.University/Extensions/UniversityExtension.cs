@@ -13,7 +13,6 @@ namespace Survey.University.Extensions
             services.AddSingleton<IUniversityConnectionFactory>(con => new UniversityConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IClassRepository, ClassRepository>();
-            services.AddScoped<IClassStudentsRepository, ClassStudentsRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
 
             services.AddScoped<IUniversityService, UniversityService>();

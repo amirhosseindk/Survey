@@ -1,10 +1,10 @@
-﻿namespace Survey.University.Models
+﻿namespace Survey.Application.Dtos.Courses
 {
-    public class Course
+    public class CourseWithClassesDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string ProfessorId { get; set; }
         public Dictionary<int, string> Classes { get; set; }
+        public string ProfessorId { get; set; }
     }
 }

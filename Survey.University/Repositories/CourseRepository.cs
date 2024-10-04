@@ -13,7 +13,7 @@ namespace Survey.University.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(Course course)
+        public async Task<int> CreateAsync(CourseRepoModel course)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -21,32 +21,71 @@ namespace Survey.University.Repositories
             return id;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new { Id = id });
+            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+            return rowsAffected > 0;
         }
 
-        public async Task<IEnumerable<Course>> GetAllAsync()
+        public async Task<IEnumerable<CourseRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<Course>(sql);
+            return await connection.QueryAsync<CourseRepoModel>(sql);
         }
 
-        public async Task<Course> GetByIdAsync(int id)
+        public async Task<CourseRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<Course>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<CourseRepoModel>(sql, new { Id = id });
         }
 
-        public async Task UpdateAsync(Course course)
+        public async Task<bool> UpdateAsync(CourseRepoModel course)
         {
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, course);
+            var rowsAffected = await connection.ExecuteAsync(sql, course);
+            return rowsAffected > 0;
+        }
+
+        public async Task<Dictionary<int, string>> GetClassesByCourseIdAsync(int courseId)
+        {
+            var sql = GetClassesByCourseIdSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            var result = await connection.QueryAsync<(int ClassId, string ClassName)>(sql, new { CourseId = courseId });
+
+            return result.ToDictionary(x => x.ClassId, x => x.ClassName);
+        }
+
+        public async Task<Dictionary<int, string>> GetClassesByCourseNameAsync(string courseName)
+        {
+            string sql = GetClassesByCourseNameSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            var result = await connection.QueryAsync<(int ClassId, string ClassName)>(sql, new { CourseName = courseName });
+
+            return result.ToDictionary(x => x.ClassId, x => x.ClassName);
+        }
+
+        private string GetClassesByCourseNameSQL()
+        {
+            return @"
+            SELECT cl.Id as ClassId, cl.Name as ClassName
+            FROM Classes cl
+            INNER JOIN Courses c ON cl.CourseId = c.Id
+            WHERE c.Name = @CourseName;
+            ";
+        }
+
+        private string GetClassesByCourseIdSQL()
+        {
+            return @"
+            SELECT cl.Id as ClassId, cl.Name as ClassName
+            FROM Classes cl
+            WHERE cl.CourseId = @CourseId;
+            ";
         }
 
         private string GetCreateSQL()
@@ -55,7 +94,7 @@ namespace Survey.University.Repositories
             INSERT INTO Courses (Name, ProfessorId)
             VALUES (@Name, @ProfessorId);
             SELECT CAST(SCOPE_IDENTITY() as int);
-        ";
+            ";
         }
 
         private string GetDeleteSQL()
@@ -80,7 +119,7 @@ namespace Survey.University.Repositories
             SET Name = @Name,
                 ProfessorId = @ProfessorId
             WHERE Id = @Id
-        ";
+            ";
         }
     }
 }

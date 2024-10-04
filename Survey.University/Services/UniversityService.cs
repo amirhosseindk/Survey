@@ -8,19 +8,16 @@ namespace Survey.University.Services
     {
         private readonly IClassRepository _classRepository;
         private readonly ICourseRepository _courseRepository;
-        private readonly IClassStudentsRepository _classStudentsRepository;
         private readonly ILogger<UniversityService> _logger;
 
 
         public UniversityService(
             IClassRepository classRepository,
             ICourseRepository courseRepository,
-            IClassStudentsRepository classStudentsRepository,
             ILogger<UniversityService> logger)
         {
             _classRepository = classRepository;
             _courseRepository = courseRepository;
-            _classStudentsRepository = classStudentsRepository;
             _logger = logger;
         }
 
@@ -28,7 +25,11 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _courseRepository.CreateAsync(course);
+                return await _courseRepository.CreateAsync(new CourseRepoModel
+                {
+                    Name = course.Name,
+                    ProfessorId = course.ProfessorId
+                });
             }
             catch (Exception ex)
             {
@@ -37,11 +38,16 @@ namespace Survey.University.Services
             }
         }
 
-        public async Task UpdateCourseAsync(Course course)
+        public async Task<bool> UpdateCourseAsync(Course course)
         {
             try
             {
-                await _courseRepository.UpdateAsync(course);
+                return await _courseRepository.UpdateAsync(new CourseRepoModel
+                {
+                    Id = course.Id,
+                    Name = course.Name,
+                    ProfessorId = course.ProfessorId
+                });
             }
             catch (Exception ex)
             {
@@ -50,11 +56,11 @@ namespace Survey.University.Services
             }
         }
 
-        public async Task DeleteCourseAsync(int id)
+        public async Task<bool> DeleteCourseAsync(int id)
         {
             try
             {
-                await _courseRepository.DeleteAsync(id);
+                return await _courseRepository.DeleteAsync(id);
             }
             catch (Exception ex)
             {
@@ -67,7 +73,8 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _courseRepository.GetByIdAsync(id);
+                var course = await _courseRepository.GetByIdAsync(id);
+                return new Course { Id = course.Id, Name = course.Name, ProfessorId = course.ProfessorId };
             }
             catch (Exception ex)
             {
@@ -81,7 +88,8 @@ namespace Survey.University.Services
             try
             {
                 var courses = await _courseRepository.GetAllAsync();
-                return courses.FirstOrDefault(c => c.Name == name);
+                var course = courses.FirstOrDefault(c => c.Name == name);
+                return new Course { Id = course.Id, Name = course.Name, ProfessorId= course.ProfessorId };
             }
             catch (Exception ex)
             {
@@ -94,7 +102,21 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _courseRepository.GetAllAsync();
+                var courses = await _courseRepository.GetAllAsync();
+
+                var result = new List<Course>();
+
+                foreach (var course in courses)
+                {
+                    result.Add(new Course
+                    {
+                        Id = course.Id,
+                        Name = course.Name,
+                        ProfessorId = course.ProfessorId
+                    });
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -107,7 +129,12 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _classRepository.CreateAsync(@class);
+                return await _classRepository.CreateAsync(new ClassRepoModel
+                {
+                    CourseId = @class.Course.Id,
+                    Name = @class.Name,
+                    Id = @class.Id,
+                });
             }
             catch (Exception ex)
             {
@@ -116,11 +143,16 @@ namespace Survey.University.Services
             }
         }
 
-        public async Task UpdateClassAsync(Class @class)
+        public async Task<bool> UpdateClassAsync(Class @class)
         {
             try
             {
-                await _classRepository.UpdateAsync(@class);
+                return await _classRepository.UpdateAsync(new ClassRepoModel
+                {
+                    Id = @class.Id,
+                    CourseId = @class.Course.Id,
+                    Name= @class.Name
+                });
             }
             catch (Exception ex)
             {
@@ -129,11 +161,11 @@ namespace Survey.University.Services
             }
         }
 
-        public async Task DeleteClassAsync(int id)
+        public async Task<bool> DeleteClassAsync(int id)
         {
             try
             {
-                await _classRepository.DeleteAsync(id);
+                return await _classRepository.DeleteAsync(id);
             }
             catch (Exception ex)
             {
@@ -146,7 +178,8 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _classRepository.GetByIdAsync(id);
+                var @class = await _classRepository.GetByIdAsync(id);
+                return new Class { Id = @class.Id, Name = @class.Name, Course = await GetCourseByIdAsync(@class.CourseId) };
             }
             catch (Exception ex)
             {
@@ -160,7 +193,8 @@ namespace Survey.University.Services
             try
             {
                 var classes = await _classRepository.GetAllAsync();
-                return classes.FirstOrDefault(c => c.Name == name);
+                var @class = classes.FirstOrDefault(c => c.Name == name);
+                return new Class { Id = @class.Id, Name = @class.Name, Course = await GetCourseByIdAsync(@class.CourseId) };
             }
             catch (Exception ex)
             {
@@ -173,7 +207,20 @@ namespace Survey.University.Services
         {
             try
             {
-                return await _classRepository.GetAllAsync();
+                var classes = await _classRepository.GetAllAsync();
+                var result = new List<Class>();
+
+                foreach (var @class in classes)
+                {
+                    result.Add(new Class
+                    {
+                        Id = @class.Id,
+                        Name = @class.Name,
+                        Course = await GetCourseByIdAsync(@class.CourseId)
+                    });
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -182,16 +229,16 @@ namespace Survey.University.Services
             }
         }
 
-        public async Task AddStudentToClass(int classId, string studentId)
+        public async Task<bool> AddStudentToClassAsync(int classId, string studentId)
         {
             try
             {
-                var classStudent = new ClassStudents
+                var classStudent = new ClassStudentRepoModel
                 {
-                    ClassesId = classId,
-                    StudentsId = studentId
+                    ClassId = classId,
+                    StudentId = studentId
                 };
-                await _classStudentsRepository.CreateAsync(classStudent);
+                return await _classRepository.AddStudentToClassAsync(classStudent) > 0;
             }
             catch (Exception ex)
             {
@@ -200,15 +247,157 @@ namespace Survey.University.Services
             }
         }
 
-        public async Task RemoveStudentToClass(int classId, string studentId)
+        public async Task<bool> RemoveStudentFromClassAsync(int classId, string studentId)
         {
             try
             {
-                await _classStudentsRepository.DeleteAsync(classId, studentId);
+                return await _classRepository.RemoveStudentFromClassAsync(classId, studentId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error while removing student from class - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<int, string>> GetClassesByCourseIdAsync(int courseId)
+        {
+            try
+            {
+                return await _courseRepository.GetClassesByCourseIdAsync(courseId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving classes for course ID {courseId} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<int, string>> GetClassesByCourseNameAsync(string courseName)
+        {
+            try
+            {
+                return await _courseRepository.GetClassesByCourseNameAsync(courseName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving classes for course name {courseName} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<string, string>> GetStudentsByClassIdAsync(int classId)
+        {
+            try
+            {
+                return await _classRepository.GetStudentsByClassIdAsync(classId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving students for class ID {classId} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Dictionary<string, string>> GetStudentsByClassNameAsync(string className)
+        {
+            try
+            {
+                return await _classRepository.GetStudentsByClassNameAsync(className);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving students for class name {className} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Course> GetCourseWithClassesByIdAsync(int courseId)
+        {
+            try
+            {
+                var course = await _courseRepository.GetByIdAsync(courseId);
+                var classes = await _courseRepository.GetClassesByCourseIdAsync(courseId);
+
+                return new Course
+                {
+                    Id = course.Id,
+                    Name = course.Name,
+                    ProfessorId = course.ProfessorId,
+                    Classes = classes
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving course with classes for course ID {courseId} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Course> GetCourseWithClassesByNameAsync(string courseName)
+        {
+            try
+            {
+                var courses = await _courseRepository.GetAllAsync();
+                var course = courses.FirstOrDefault(c => c.Name == courseName);
+                var classes = await _courseRepository.GetClassesByCourseNameAsync(courseName);
+
+                return new Course
+                {
+                    Id = course.Id,
+                    Name = course.Name,
+                    ProfessorId = course.ProfessorId,
+                    Classes = classes
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving course with classes for course name {courseName} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Class> GetClassWithStudentsByIdAsync(int classId)
+        {
+            try
+            {
+                var classRepoModel = await _classRepository.GetByIdAsync(classId);
+                var students = await _classRepository.GetStudentsByClassIdAsync(classId);
+
+                return new Class
+                {
+                    Id = classRepoModel.Id,
+                    Name = classRepoModel.Name,
+                    Course = await GetCourseByIdAsync(classRepoModel.CourseId),
+                    Students = students
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving class with students for class ID {classId} - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<Class> GetClassWithStudentsByNameAsync(string className)
+        {
+            try
+            {
+                var classes = await _classRepository.GetAllAsync();
+                var classRepoModel = classes.FirstOrDefault(c => c.Name == className);
+                var students = await _classRepository.GetStudentsByClassNameAsync(className);
+
+                return new Class
+                {
+                    Id = classRepoModel.Id,
+                    Name = classRepoModel.Name,
+                    Course = new Course { Id = classRepoModel.CourseId },
+                    Students = students
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving class with students for class name {className} - {ex.Message}");
                 throw;
             }
         }

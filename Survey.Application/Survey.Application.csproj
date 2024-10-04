@@ -7,10 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Commands\Universities\" />
     <Folder Include="Features\Commands\Questionnaires\" />
     <Folder Include="Features\Queries\Questionnaires\" />
-    <Folder Include="Features\Queries\Universities\" />
   </ItemGroup>
 
   <ItemGroup>

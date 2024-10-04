@@ -83,7 +83,7 @@ namespace Suvery.WebAPI.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("api/[controller]/ChangePassword")]
         public async Task<ResultDto<bool>> ChangePassword([FromBody] ChangePasswordDto dto)
         {
@@ -97,7 +97,7 @@ namespace Suvery.WebAPI.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("api/[controller]/AddClaim")]
         public async Task<ResultDto<bool>> AddClaim([FromBody] AddClaimDto dto)
         {
@@ -111,7 +111,7 @@ namespace Suvery.WebAPI.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("api/[controller]/AddToRole")]
         public async Task<ResultDto<bool>> AddToRole([FromBody] AddToRoleDto dto)
         {
@@ -124,7 +124,7 @@ namespace Suvery.WebAPI.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("api/[controller]/ChangeEmail")]
         public async Task<ResultDto<bool>> ChangeEmail([FromBody] ChangeEmailDto dto)
         {
@@ -138,7 +138,7 @@ namespace Suvery.WebAPI.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpDelete]
         [Route("api/[controller]/RemoveClaim")]
         public async Task<ResultDto<bool>> RemoveClaim([FromBody] RemoveClaimDto dto)
         {
@@ -175,7 +175,7 @@ namespace Suvery.WebAPI.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpDelete]
         [Route("api/[controller]/DeleteUser")]
         public async Task<ResultDto<bool>> DeleteUser(string userId)
         {
