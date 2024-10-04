@@ -1,6 +1,6 @@
 ﻿namespace Survey.Questionnaires.Models
 {
-    public class DegreeQuestionAnswer
+    public class RangeQuestionAnswerRepoModel
     {
         public int Id { get; set; }
         public int QuestionnaireId { get; set; }

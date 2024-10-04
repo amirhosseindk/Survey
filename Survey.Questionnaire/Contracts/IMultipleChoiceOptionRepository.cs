@@ -4,11 +4,11 @@ namespace Survey.Questionnaires.Contracts
 {
     public interface IMultipleChoiceOptionRepository
     {
-        Task<int> CreateAsync(MultipleChoiceOption option);
-        Task<MultipleChoiceOption> GetByIdAsync(int id);
-        Task<IEnumerable<MultipleChoiceOption>> GetByQuestionIdAsync(int questionId);
-        Task UpdateAsync(MultipleChoiceOption option);
+        Task<int> CreateAsync(MultipleChoiceOptionRepoModel option);
+        Task<MultipleChoiceOptionRepoModel> GetByIdAsync(int id);
+        Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetByQuestionIdAsync(int questionId);
+        Task UpdateAsync(MultipleChoiceOptionRepoModel option);
         Task DeleteAsync(int id);
-        Task<IEnumerable<MultipleChoiceOption>> GetAllAsync();
+        Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetAllAsync();
     }
 }

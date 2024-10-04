@@ -2,13 +2,12 @@
 
 namespace Survey.Questionnaires.Models
 {
-    public class Question
+    public class QuestionRepoModel
     {
         public int Id { get; set; }
-        public string Title { get; set; }
         public short Rank { get; set; }
         public QuestionType Type { get; set; }
+        public string Title { get; set; }
         public int QuestionnaireId { get; set; }
-        public List<MultipleChoiseOptions>? Options { get; set; }
     }
 }

@@ -28,10 +28,10 @@ namespace Survey.Questionnaires.Services
         }
 
         public async Task SaveAnswersAsync(
-            List<DegreeQuestionAnswer>? degreeAnswers = null,
-            List<MultipleChoiceQuestionAnswer>? multipleChoiceAnswers = null,
-            List<RangeQuestionAnswer>? rangeAnswers = null,
-            List<TextQuestionAnswer>? textAnswers = null)
+            List<DegreeQuestionAnswerRepoModel>? degreeAnswers = null,
+            List<MultipleChoiceQuestionAnswerRepoModel>? multipleChoiceAnswers = null,
+            List<RangeQuestionAnswerRepoModel>? rangeAnswers = null,
+            List<TextQuestionAnswerRepoModel>? textAnswers = null)
         {
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -71,22 +71,22 @@ namespace Survey.Questionnaires.Services
             }
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
             return await _degreeAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
         }
 
-        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
             return await _multipleChoiceAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
         }
 
-        public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
             return await _rangeAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
         }
 
-        public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
             return await _textAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
         }

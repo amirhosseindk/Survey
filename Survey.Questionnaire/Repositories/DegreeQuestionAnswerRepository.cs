@@ -13,7 +13,7 @@ namespace Survey.Questionnaires.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(DegreeQuestionAnswer answer)
+        public async Task<int> CreateAsync(DegreeQuestionAnswerRepoModel answer)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -28,39 +28,39 @@ namespace Survey.Questionnaires.Repositories
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswer>> GetAllAsync()
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<DegreeQuestionAnswer>(sql);
+            return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql);
         }
 
-        public async Task<DegreeQuestionAnswer> GetByIdAsync(int id)
+        public async Task<DegreeQuestionAnswerRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<DegreeQuestionAnswer>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<DegreeQuestionAnswerRepoModel>(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswer>> GetByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<DegreeQuestionAnswer>(sql, new { QuestionId = questionId });
+            return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
         }
 
-        public async Task UpdateAsync(DegreeQuestionAnswer answer)
+        public async Task UpdateAsync(DegreeQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             await connection.ExecuteAsync(sql, answer);
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<DegreeQuestionAnswer>(sql, new { QuestionnaireId = questionnaireId });
+            return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
         }
 
         private string GetCreateSQL()

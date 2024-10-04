@@ -13,7 +13,7 @@ namespace Survey.Questionnaires.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(MultipleChoiceOption option)
+        public async Task<int> CreateAsync(MultipleChoiceOptionRepoModel option)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -28,28 +28,28 @@ namespace Survey.Questionnaires.Repositories
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<MultipleChoiceOption>> GetByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<MultipleChoiceOption>(sql, new { QuestionId = questionId });
+            return await connection.QueryAsync<MultipleChoiceOptionRepoModel>(sql, new { QuestionId = questionId });
         }
 
-        public async Task<MultipleChoiceOption> GetByIdAsync(int id)
+        public async Task<MultipleChoiceOptionRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<MultipleChoiceOption>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<MultipleChoiceOptionRepoModel>(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<MultipleChoiceOption>> GetAllAsync()
+        public async Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<MultipleChoiceOption>(sql);
+            return await connection.QueryAsync<MultipleChoiceOptionRepoModel>(sql);
         }
 
-        public async Task UpdateAsync(MultipleChoiceOption option)
+        public async Task UpdateAsync(MultipleChoiceOptionRepoModel option)
         {
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -59,7 +59,7 @@ namespace Survey.Questionnaires.Repositories
         private string GetCreateSQL()
         {
             return @"
-                INSERT INTO MultipleChoiceOptions (OptionText, MultipleChoiceQuestionId)
+                INSERT INTO MultipleChoiceOption (OptionText, MultipleChoiceQuestionId)
                 VALUES (@OptionText, @MultipleChoiceQuestionId);
                 SELECT CAST(SCOPE_IDENTITY() as int);
             ";

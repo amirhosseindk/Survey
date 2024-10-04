@@ -4,9 +4,9 @@ namespace Survey.Questionnaires.Contracts
 {
     public interface IQuestionnaireService
     {
-        Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire, List<Question> questions, List<MultipleChoiceOption>? options = null);
-        Task<(Questionnaire questionnaire, List<Question> questions, List<MultipleChoiceOption>? options)> GetQuestionnaireByIdAsync(int id);
-        Task UpdateQuestionnaireAsync(Questionnaire questionnaire, List<Question> questions, List<MultipleChoiceOption>? options = null);
+        Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire);
+        Task<(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options)> GetQuestionnaireByIdAsync(int id);
+        Task UpdateQuestionnaireAsync(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options = null);
         Task DeleteQuestionnaireAsync(int id);
     }
 }

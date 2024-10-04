@@ -4,11 +4,11 @@ namespace Survey.Questionnaires.Contracts
 {
     public interface IRangeQuestionAnswerRepository
     {
-        Task<int> CreateAsync(RangeQuestionAnswer answer);
-        Task<RangeQuestionAnswer> GetByIdAsync(int id);
-        Task<IEnumerable<RangeQuestionAnswer>> GetByQuestionIdAsync(int questionId);
-        Task UpdateAsync(RangeQuestionAnswer answer);
+        Task<int> CreateAsync(RangeQuestionAnswerRepoModel answer);
+        Task<RangeQuestionAnswerRepoModel> GetByIdAsync(int id);
+        Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId);
+        Task UpdateAsync(RangeQuestionAnswerRepoModel answer);
         Task DeleteAsync(int id);
-        Task<IEnumerable<RangeQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId);
+        Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId);
     }
 }

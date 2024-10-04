@@ -13,7 +13,7 @@ namespace Survey.Questionnaires.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(TextQuestionAnswer answer)
+        public async Task<int> CreateAsync(TextQuestionAnswerRepoModel answer)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -28,39 +28,39 @@ namespace Survey.Questionnaires.Repositories
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<TextQuestionAnswer>> GetAllAsync()
+        public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<TextQuestionAnswer>(sql);
+            return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql);
         }
 
-        public async Task<TextQuestionAnswer> GetByIdAsync(int id)
+        public async Task<TextQuestionAnswerRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<TextQuestionAnswer>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<TextQuestionAnswerRepoModel>(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<TextQuestionAnswer>> GetByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<TextQuestionAnswer>(sql, new { QuestionId = questionId });
+            return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
         }
 
-        public async Task UpdateAsync(TextQuestionAnswer answer)
+        public async Task UpdateAsync(TextQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             await connection.ExecuteAsync(sql, answer);
         }
 
-        public async Task<IEnumerable<TextQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<TextQuestionAnswer>(sql, new { QuestionnaireId = questionnaireId });
+            return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
         }
 
         private string GetCreateSQL()

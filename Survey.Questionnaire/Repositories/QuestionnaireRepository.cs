@@ -13,7 +13,7 @@ namespace Survey.Questionnaires.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(Questionnaire questionnaire)
+        public async Task<int> CreateAsync(QuestionnaireRepoModel questionnaire)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -28,21 +28,21 @@ namespace Survey.Questionnaires.Repositories
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<Questionnaire>> GetAllAsync()
+        public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<Questionnaire>(sql);
+            return await connection.QueryAsync<QuestionnaireRepoModel>(sql);
         }
 
-        public async Task<Questionnaire> GetByIdAsync(int id)
+        public async Task<QuestionnaireRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<Questionnaire>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Id = id });
         }
 
-        public async Task UpdateAsync(Questionnaire questionnaire)
+        public async Task UpdateAsync(QuestionnaireRepoModel questionnaire)
         {
             var sql = GetUpdateSQL();
 

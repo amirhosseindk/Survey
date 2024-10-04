@@ -1,6 +1,6 @@
 ﻿namespace Survey.Questionnaires.Models
 {
-    public class MultipleChoiceOption
+    public class MultipleChoiceOptionRepoModel
     {
         public int Id { get; set; }
         public string OptionText { get; set; }

@@ -25,23 +25,44 @@ namespace Survey.Questionnaires.Services
             _logger = logger;
         }
 
-        public async Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire, List<Question> questions, List<MultipleChoiceOption>? options = null)
+        public async Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire)
         {
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    var questionnaireId = await _questionnaireRepository.CreateAsync(questionnaire);
-
-                    foreach (var question in questions)
+                    var questionnaireRepoModel = new QuestionnaireRepoModel
                     {
-                        question.QuestionnaireId = questionnaireId;
-                        await _questionRepository.CreateAsync(question);
-                        if (question.Type == QuestionType.MultipleChoice && options != null)
+                        Title = questionnaire.Title,
+                        ClassId = questionnaire.ClassId,
+                        ProfessorId = questionnaire.ProfessorId
+                    };
+
+                    var questionnaireId = await _questionnaireRepository.CreateAsync(questionnaireRepoModel);
+
+                    foreach (var question in questionnaire.Questions)
+                    {
+                        var questionRepoModel = new QuestionRepoModel
                         {
-                            foreach (var option in options)
+                            Title = question.Title,
+                            Type = question.Type,
+                            Rank = question.Rank,
+                            QuestionnaireId = questionnaireId
+                        };
+
+                        var questionId = await _questionRepository.CreateAsync(questionRepoModel);
+
+                        if (question.Type == QuestionType.MultipleChoice && question.Options != null)
+                        {
+                            foreach (var option in question.Options)
                             {
-                                await _multipleChoiceOptionRepository.CreateAsync(option);
+                                var optionRepoModel = new MultipleChoiceOptionRepoModel
+                                {
+                                    OptionText = option.OptionText,
+                                    MultipleChoiceQuestionId = questionId
+                                };
+
+                                await _multipleChoiceOptionRepository.CreateAsync(optionRepoModel);
                             }
                         }
                     }
@@ -51,19 +72,19 @@ namespace Survey.Questionnaires.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Error while creating questionnaire - {ex.Message}");
+                    _logger.LogError(ex, $"Error while creating questionnaire {questionnaire.Title} - {ex.Message}");
                     throw;
                 }
             }
         }
 
-        public async Task<(Questionnaire questionnaire, List<Question> questions, List<MultipleChoiceOption>? options)> GetQuestionnaireByIdAsync(int id)
+        public async Task<(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options)> GetQuestionnaireByIdAsync(int id)
         {
             try
             {
                 var questionnaire = await _questionnaireRepository.GetByIdAsync(id);
-                var questions = new List<Question>();
-                var options = new List<MultipleChoiceOption>();
+                var questions = new List<QuestionRepoModel>();
+                var options = new List<MultipleChoiceOptionRepoModel>();
 
                 if (questionnaire != null)
                 {
@@ -87,7 +108,7 @@ namespace Survey.Questionnaires.Services
             }
         }
 
-        public async Task UpdateQuestionnaireAsync(Questionnaire questionnaire, List<Question> questions, List<MultipleChoiceOption>? options = null)
+        public async Task UpdateQuestionnaireAsync(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options = null)
         {
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {

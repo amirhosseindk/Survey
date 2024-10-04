@@ -13,7 +13,7 @@ namespace Survey.Questionnaires.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(MultipleChoiceQuestionAnswer answer)
+        public async Task<int> CreateAsync(MultipleChoiceQuestionAnswerRepoModel answer)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -28,39 +28,39 @@ namespace Survey.Questionnaires.Repositories
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetAllAsync()
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<MultipleChoiceQuestionAnswer>(sql);
+            return await connection.QueryAsync<MultipleChoiceQuestionAnswerRepoModel>(sql);
         }
 
-        public async Task<MultipleChoiceQuestionAnswer> GetByIdAsync(int id)
+        public async Task<MultipleChoiceQuestionAnswerRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<MultipleChoiceQuestionAnswer>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<MultipleChoiceQuestionAnswerRepoModel>(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<MultipleChoiceQuestionAnswer>(sql, new { QuestionId = questionId });
+            return await connection.QueryAsync<MultipleChoiceQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
         }
 
-        public async Task UpdateAsync(MultipleChoiceQuestionAnswer answer)
+        public async Task UpdateAsync(MultipleChoiceQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             await connection.ExecuteAsync(sql, answer);
         }
 
-        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<MultipleChoiceQuestionAnswer>(sql, new { QuestionnaireId = questionnaireId });
+            return await connection.QueryAsync<MultipleChoiceQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
         }
 
         private string GetCreateSQL()

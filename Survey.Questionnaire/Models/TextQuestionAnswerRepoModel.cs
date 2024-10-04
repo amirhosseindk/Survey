@@ -1,6 +1,6 @@
 ﻿namespace Survey.Questionnaires.Models
 {
-    public class TextQuestionAnswer
+    public class TextQuestionAnswerRepoModel
     {
         public int Id { get; set; }
         public int QuestionnaireId { get; set; }

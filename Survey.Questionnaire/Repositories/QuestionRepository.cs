@@ -13,7 +13,7 @@ namespace Survey.Questionnaires.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<int> CreateAsync(Question question)
+        public async Task<int> CreateAsync(QuestionRepoModel question)
         {
             var sql = GetCreateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
@@ -28,28 +28,28 @@ namespace Survey.Questionnaires.Repositories
             await connection.ExecuteAsync(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<Question>> GetAllAsync()
+        public async Task<IEnumerable<QuestionRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<Question>(sql);
+            return await connection.QueryAsync<QuestionRepoModel>(sql);
         }
 
-        public async Task<Question> GetByIdAsync(int id)
+        public async Task<QuestionRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<Question>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<QuestionRepoModel>(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<Question>> GetByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<QuestionRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<Question>(sql, new { QuestionnaireId = questionnaireId });
+            return await connection.QueryAsync<QuestionRepoModel>(sql, new { QuestionnaireId = questionnaireId });
         }
 
-        public async Task UpdateAsync(Question question)
+        public async Task UpdateAsync(QuestionRepoModel question)
         {
             var sql = GetUpdateSQL();
 
