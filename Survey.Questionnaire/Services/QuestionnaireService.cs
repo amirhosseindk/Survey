@@ -108,46 +108,61 @@ namespace Survey.Questionnaires.Services
             }
         }
 
-        public async Task UpdateQuestionnaireAsync(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options = null)
+        public async Task<bool> UpdateQuestionnaireAsync(Questionnaire questionnaire)
         {
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    await _questionnaireRepository.UpdateAsync(questionnaire);
-
-                    foreach (var question in questions)
+                    var questionnaireRepoModel = new QuestionnaireRepoModel
                     {
-                        if (question.Id > 0)
+                        Id = questionnaire.Id,
+                        Title = questionnaire.Title,
+                        ClassId = questionnaire.ClassId,
+                        ProfessorId = questionnaire.ProfessorId
+                    };
+
+                    var questionnaireUpdateResult = await _questionnaireRepository.UpdateAsync(questionnaireRepoModel);
+                    if(!questionnaireUpdateResult)
+                        throw new Exception("Error while updating questionnaire");
+
+                    foreach (var question in questionnaire.Questions)
+                    {
+                        var questionRepoModel = new QuestionRepoModel
                         {
-                            await _questionRepository.UpdateAsync(question);
-                            if (question.Type == QuestionType.MultipleChoice && options != null)
-                            {
-                                foreach (var option in options)
-                                {
-                                    await _multipleChoiceOptionRepository.UpdateAsync(option);
-                                }
-                            }
-                        }
-                        else
+                            Title = question.Title,
+                            Type = question.Type,
+                            Rank = question.Rank,
+                            QuestionnaireId = question.QuestionnaireId
+                        };
+
+                        var questionsUpdateResult = await _questionRepository.UpdateAsync(questionRepoModel);
+                        if (!questionsUpdateResult)
+                            throw new Exception("Error while updating questions");
+
+                        if (question.Type == QuestionType.MultipleChoice && question.Options != null)
                         {
-                            question.QuestionnaireId = questionnaire.Id;
-                            await _questionRepository.CreateAsync(question);
-                            if (question.Type == QuestionType.MultipleChoice && options != null)
+                            foreach (var option in question.Options)
                             {
-                                foreach (var option in options)
+                                var optionRepoModel = new MultipleChoiceOptionRepoModel
                                 {
-                                    await _multipleChoiceOptionRepository.CreateAsync(option);
-                                }
+                                    OptionText = option.OptionText,
+                                    MultipleChoiceQuestionId = option.QuestionId
+                                };
+
+                                var optionsUpdateResult = await _multipleChoiceOptionRepository.UpdateAsync(optionRepoModel);
+                                if (!optionsUpdateResult)
+                                    throw new Exception("Error while updating options");
                             }
                         }
                     }
 
                     transaction.Complete();
+                    return questionnaireUpdateResult;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Error while updating questionnaire - {ex.Message}");
+                    _logger.LogError(ex, $"Error while updating questionnaire {questionnaire.Title} - {ex.Message}");
                     throw;
                 }
             }

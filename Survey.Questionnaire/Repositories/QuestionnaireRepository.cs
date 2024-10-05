@@ -42,12 +42,12 @@ namespace Survey.Questionnaires.Repositories
             return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Id = id });
         }
 
-        public async Task UpdateAsync(QuestionnaireRepoModel questionnaire)
+        public async Task<bool> UpdateAsync(QuestionnaireRepoModel questionnaire)
         {
             var sql = GetUpdateSQL();
-
             using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, questionnaire);
+            var rowsAffected = await connection.ExecuteAsync(sql, questionnaire);
+            return rowsAffected > 0;
         }
 
         private string GetCreateSQL()

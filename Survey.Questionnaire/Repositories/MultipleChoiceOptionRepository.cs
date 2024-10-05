@@ -49,11 +49,12 @@ namespace Survey.Questionnaires.Repositories
             return await connection.QueryAsync<MultipleChoiceOptionRepoModel>(sql);
         }
 
-        public async Task UpdateAsync(MultipleChoiceOptionRepoModel option)
+        public async Task<bool> UpdateAsync(MultipleChoiceOptionRepoModel option)
         {
             var sql = GetUpdateSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, option);
+            var rowsAffected = await connection.ExecuteAsync(sql, option);
+            return rowsAffected > 0;
         }
 
         private string GetCreateSQL()

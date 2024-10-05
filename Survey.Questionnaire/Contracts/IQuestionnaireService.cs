@@ -6,7 +6,7 @@ namespace Survey.Questionnaires.Contracts
     {
         Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire);
         Task<(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options)> GetQuestionnaireByIdAsync(int id);
-        Task UpdateQuestionnaireAsync(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options = null);
+        Task<bool> UpdateQuestionnaireAsync(Questionnaire questionnaire);
         Task DeleteQuestionnaireAsync(int id);
     }
 }

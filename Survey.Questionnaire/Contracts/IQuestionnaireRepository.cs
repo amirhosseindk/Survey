@@ -7,7 +7,7 @@ namespace Survey.Questionnaires.Contracts
         Task<int> CreateAsync(QuestionnaireRepoModel questionnaire);
         Task<QuestionnaireRepoModel> GetByIdAsync(int id);
         Task<IEnumerable<QuestionnaireRepoModel>> GetAllAsync();
-        Task UpdateAsync(QuestionnaireRepoModel questionnaire);
+        Task<bool> UpdateAsync(QuestionnaireRepoModel questionnaire);
         Task DeleteAsync(int id);
     }
 }

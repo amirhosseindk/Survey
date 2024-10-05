@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Survey.Application.Dtos.Questionnaires;
 using Survey.Application.Dtos.Result;
 using Survey.Application.Features.Commands.Questionnaires.CreateQuestionnaire;
+using Survey.Application.Features.Commands.Questionnaires.UpdateQuestionnaire;
 using Suvery.WebAPI.Filters;
 
 namespace Suvery.WebAPI.Controllers
@@ -27,6 +28,34 @@ namespace Suvery.WebAPI.Controllers
                 ProffesorId = dto.ProffesorId
             });
             
+            return result;
+        }
+
+        [HttpPut]
+        [Route("api/[controller]/UpdateQuestionnaire")]
+        public async Task<ResultDto<bool>> UpdateQuestionnaire([FromBody] UpdateQuestionnaireDto dto)
+        {
+            var result = await _mediator.Send(new UpdateQuestionnaireCommand
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Questions = dto.Questions,
+                ClassId = dto.ClassId,
+                ProffesorId = dto.ProffesorId
+            });
+
+            return result;
+        }
+
+        [HttpGet]
+        [Route("api/[controller]/GetQuestionnaireById")]
+        public async Task<ResultDto<QuestionnaireDto>> GetQuestionnaireById(int id)
+        {
+            var result = await _mediator.Send(new GetQuestionnaireByIdQuery
+            {
+                Id = id
+            });
+
             return result;
         }
     }
