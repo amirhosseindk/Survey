@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Logging;
 using Survey.Questionnaires.Contracts;
 using Survey.Questionnaires.Models;
 
@@ -6,61 +7,93 @@ namespace Survey.Questionnaires.Repositories
 {
     public class RangeQuestionAnswerRepository : IRangeQuestionAnswerRepository
     {
-        private readonly IQuestionnaireConnectionFactory _dbConnectionFactory;
+        private readonly IQuestionnaireReadConnectionFactory _readConnectionFactory;
+        private readonly IQuestionnaireWriteConnectionFactory _writeConnectionFactory;
+        private readonly ILogger<RangeQuestionAnswerRepository> _logger;
 
-        public RangeQuestionAnswerRepository(IQuestionnaireConnectionFactory dbConnectionFactory)
+        public RangeQuestionAnswerRepository(IQuestionnaireReadConnectionFactory readConnectionFactory,
+                                             IQuestionnaireWriteConnectionFactory writeConnectionFactory,
+                                             ILogger<RangeQuestionAnswerRepository> logger)
         {
-            _dbConnectionFactory = dbConnectionFactory;
+            _readConnectionFactory = readConnectionFactory;
+            _writeConnectionFactory = writeConnectionFactory;
+            _logger = logger;
         }
 
         public async Task<int> CreateAsync(RangeQuestionAnswerRepoModel answer)
         {
             var sql = GetCreateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var id = await connection.QuerySingleAsync<int>(sql, answer);
-            return id;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var id = await connection.QuerySingleAsync<int>(sql, answer);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating range question answer: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new { Id = id });
-        }
-
-        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetAllAsync()
-        {
-            var sql = GetAllSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql);
-        }
-
-        public async Task<RangeQuestionAnswerRepoModel> GetByIdAsync(int id)
-        {
-            var sql = GetByIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<RangeQuestionAnswerRepoModel>(sql, new { Id = id });
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deleting range question answer with ID {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving range question answers by question ID {QuestionId}: {Message}", questionId, ex.Message);
+                throw;
+            }
         }
 
         public async Task UpdateAsync(RangeQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, answer);
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, answer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating range question answer: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving range question answers by questionnaire ID {QuestionnaireId}: {Message}", questionnaireId, ex.Message);
+                throw;
+            }
         }
 
         private string GetCreateSQL()

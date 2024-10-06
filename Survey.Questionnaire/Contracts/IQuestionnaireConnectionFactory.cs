@@ -2,7 +2,11 @@
 
 namespace Survey.Questionnaires.Contracts
 {
-    public interface IQuestionnaireConnectionFactory : IDapperConnectionFactory
+    public interface IQuestionnaireReadConnectionFactory : IDapperConnectionFactory
+    {
+    }
+
+    public interface IQuestionnaireWriteConnectionFactory : IDapperConnectionFactory
     {
     }
 }

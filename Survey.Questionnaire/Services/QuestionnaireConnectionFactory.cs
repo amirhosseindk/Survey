@@ -3,11 +3,17 @@ using Survey.Questionnaires.Contracts;
 
 namespace Survey.Questionnaires.Services
 {
-    public class QuestionnaireConnectionFactory : BaseDapperConnectionFactory, IQuestionnaireConnectionFactory
+    public class QuestionnaireReadConnectionFactory : BaseDapperConnectionFactory, IQuestionnaireReadConnectionFactory
     {
-        public QuestionnaireConnectionFactory(string connectionString) : base(connectionString)
+        public QuestionnaireReadConnectionFactory(string connectionString) : base(connectionString)
         {
-            
+        }
+    }
+
+    public class QuestionnaireWriteConnectionFactory : BaseDapperConnectionFactory, IQuestionnaireWriteConnectionFactory
+    {
+        public QuestionnaireWriteConnectionFactory(string connectionString) : base(connectionString)
+        {
         }
     }
 }

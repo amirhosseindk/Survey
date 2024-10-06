@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Logging;
 using Survey.Questionnaires.Contracts;
 using Survey.Questionnaires.Models;
 
@@ -6,61 +7,93 @@ namespace Survey.Questionnaires.Repositories
 {
     public class TextQuestionAnswerRepository : ITextQuestionAnswerRepository
     {
-        private readonly IQuestionnaireConnectionFactory _dbConnectionFactory;
+        private readonly IQuestionnaireReadConnectionFactory _readConnectionFactory;
+        private readonly IQuestionnaireWriteConnectionFactory _writeConnectionFactory;
+        private readonly ILogger<TextQuestionAnswerRepository> _logger;
 
-        public TextQuestionAnswerRepository(IQuestionnaireConnectionFactory dbConnectionFactory)
+        public TextQuestionAnswerRepository(IQuestionnaireReadConnectionFactory readConnectionFactory,
+                                            IQuestionnaireWriteConnectionFactory writeConnectionFactory,
+                                            ILogger<TextQuestionAnswerRepository> logger)
         {
-            _dbConnectionFactory = dbConnectionFactory;
+            _readConnectionFactory = readConnectionFactory;
+            _writeConnectionFactory = writeConnectionFactory;
+            _logger = logger;
         }
 
         public async Task<int> CreateAsync(TextQuestionAnswerRepoModel answer)
         {
             var sql = GetCreateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var id = await connection.QuerySingleAsync<int>(sql, answer);
-            return id;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var id = await connection.QuerySingleAsync<int>(sql, answer);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating text question answer: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new { Id = id });
-        }
-
-        public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetAllAsync()
-        {
-            var sql = GetAllSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql);
-        }
-
-        public async Task<TextQuestionAnswerRepoModel> GetByIdAsync(int id)
-        {
-            var sql = GetByIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<TextQuestionAnswerRepoModel>(sql, new { Id = id });
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deleting text question answer with ID {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving text question answers by question ID {QuestionId}: {Message}", questionId, ex.Message);
+                throw;
+            }
         }
 
         public async Task UpdateAsync(TextQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, answer);
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, answer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating text question answer: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<TextQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving text question answers by questionnaire ID {QuestionnaireId}: {Message}", questionnaireId, ex.Message);
+                throw;
+            }
         }
 
         private string GetCreateSQL()
@@ -75,16 +108,6 @@ namespace Survey.Questionnaires.Repositories
         private string GetDeleteSQL()
         {
             return "DELETE FROM TextQuestionAnswers WHERE Id = @Id";
-        }
-
-        private string GetAllSQL()
-        {
-            return "SELECT * FROM TextQuestionAnswers";
-        }
-
-        private string GetByIdSQL()
-        {
-            return "SELECT * FROM TextQuestionAnswers WHERE Id = @Id";
         }
 
         private string GetByQuestionIdSQL()

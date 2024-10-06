@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Logging;
 using Survey.Questionnaires.Contracts;
 using Survey.Questionnaires.Models;
 
@@ -6,61 +7,93 @@ namespace Survey.Questionnaires.Repositories
 {
     public class DegreeQuestionAnswerRepository : IDegreeQuestionAnswerRepository
     {
-        private readonly IQuestionnaireConnectionFactory _dbConnectionFactory;
+        private readonly IQuestionnaireReadConnectionFactory _readConnectionFactory;
+        private readonly IQuestionnaireWriteConnectionFactory _writeConnectionFactory;
+        private readonly ILogger<DegreeQuestionAnswerRepository> _logger;
 
-        public DegreeQuestionAnswerRepository(IQuestionnaireConnectionFactory dbConnectionFactory)
+        public DegreeQuestionAnswerRepository(IQuestionnaireReadConnectionFactory readConnectionFactory,
+                                              IQuestionnaireWriteConnectionFactory writeConnectionFactory,
+                                              ILogger<DegreeQuestionAnswerRepository> logger)
         {
-            _dbConnectionFactory = dbConnectionFactory;
+            _readConnectionFactory = readConnectionFactory;
+            _writeConnectionFactory = writeConnectionFactory;
+            _logger = logger;
         }
 
         public async Task<int> CreateAsync(DegreeQuestionAnswerRepoModel answer)
         {
             var sql = GetCreateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var id = await connection.QuerySingleAsync<int>(sql, answer);
-            return id;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var id = await connection.QuerySingleAsync<int>(sql, answer);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating degree question answer: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new { Id = id });
-        }
-
-        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetAllAsync()
-        {
-            var sql = GetAllSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql);
-        }
-
-        public async Task<DegreeQuestionAnswerRepoModel> GetByIdAsync(int id)
-        {
-            var sql = GetByIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<DegreeQuestionAnswerRepoModel>(sql, new { Id = id });
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deleting degree question answer with ID {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
         {
             var sql = GetByQuestionIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving degree question answers by question ID {QuestionId}: {Message}", questionId, ex.Message);
+                throw;
+            }
         }
 
         public async Task UpdateAsync(DegreeQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, answer);
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                await connection.ExecuteAsync(sql, answer);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating degree question answer: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnaireId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving degree question answers by questionnaire ID {QuestionnaireId}: {Message}", questionnaireId, ex.Message);
+                throw;
+            }
         }
 
         private string GetCreateSQL()
@@ -75,16 +108,6 @@ namespace Survey.Questionnaires.Repositories
         private string GetDeleteSQL()
         {
             return "DELETE FROM DegreeQuestionAnswers WHERE Id = @Id";
-        }
-
-        private string GetAllSQL()
-        {
-            return "SELECT * FROM DegreeQuestionAnswers";
-        }
-
-        private string GetByIdSQL()
-        {
-            return "SELECT * FROM DegreeQuestionAnswers WHERE Id = @Id";
         }
 
         private string GetByQuestionIdSQL()

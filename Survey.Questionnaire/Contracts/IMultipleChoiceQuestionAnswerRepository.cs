@@ -5,7 +5,6 @@ namespace Survey.Questionnaires.Contracts
     public interface IMultipleChoiceQuestionAnswerRepository
     {
         Task<int> CreateAsync(MultipleChoiceQuestionAnswerRepoModel answer);
-        Task<MultipleChoiceQuestionAnswerRepoModel> GetByIdAsync(int id);
         Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId);
         Task UpdateAsync(MultipleChoiceQuestionAnswerRepoModel answer);
         Task DeleteAsync(int id);

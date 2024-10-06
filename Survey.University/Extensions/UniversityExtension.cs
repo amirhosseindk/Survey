@@ -14,21 +14,8 @@ namespace Survey.University.Extensions
             services.AddSingleton<IUniversityReadConnectionFactory>(con => new UniversityReadConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
             services.AddSingleton<IUniversityWriteConnectionFactory>(con => new UniversityWriteConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddSingleton<IClassRepository, ClassRepository>(service =>
-            {
-                var readConnectionFactory = service.GetRequiredService<IUniversityReadConnectionFactory>();
-                var writeConnectionFactory = service.GetRequiredService<IUniversityWriteConnectionFactory>();
-                var logger = service.GetRequiredService<ILogger<ClassRepository>>();
-                return new ClassRepository(readConnectionFactory, writeConnectionFactory, logger);
-            });
-
-            services.AddSingleton<ICourseRepository, CourseRepository>(service =>
-            {
-                var readConnectionFactory = service.GetRequiredService<IUniversityReadConnectionFactory>();
-                var writeConnectionFactory = service.GetRequiredService<IUniversityWriteConnectionFactory>();
-                var logger = service.GetRequiredService<ILogger<CourseRepository>>();
-                return new CourseRepository(readConnectionFactory, writeConnectionFactory, logger);
-            });
+            services.AddSingleton<IClassRepository, ClassRepository>();
+            services.AddSingleton<ICourseRepository, CourseRepository>();
 
             services.AddScoped<IUniversityService, UniversityService>();
         }

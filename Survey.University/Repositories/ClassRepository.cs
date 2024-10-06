@@ -157,7 +157,7 @@ namespace Survey.University.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting class wuth students by Id {classId}: {ex.Message}");
+                _logger.LogError(ex, $"Error while getting class with students by Id {classId}: {ex.Message}");
                 throw;
             }
         }
@@ -173,7 +173,7 @@ namespace Survey.University.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while getting class wuth students by Name {className}: {ex.Message}");
+                _logger.LogError(ex, $"Error while getting class with students by Name {className}: {ex.Message}");
                 throw;
             }
         }

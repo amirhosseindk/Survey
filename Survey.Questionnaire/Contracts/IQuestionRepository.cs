@@ -5,7 +5,6 @@ namespace Survey.Questionnaires.Contracts
     public interface IQuestionRepository
     {
         Task<int> CreateAsync(QuestionRepoModel question);
-        Task<QuestionRepoModel> GetByIdAsync(int id);
         Task<IEnumerable<QuestionRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId);
         Task<bool> UpdateAsync(QuestionRepoModel question);
         Task<bool> DeleteAsync(int id);

@@ -10,15 +10,19 @@ namespace Survey.Questionnaires.Extensions
     {
         public static void ConfigureQuestionnaireService(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IQuestionnaireConnectionFactory>(con => new QuestionnaireConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
+            services.AddSingleton<IQuestionnaireReadConnectionFactory>(con =>
+                new QuestionnaireReadConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
-            services.AddScoped<IQuestionRepository, QuestionRepository>();
-            services.AddScoped<ITextQuestionAnswerRepository, TextQuestionAnswerRepository>();
-            services.AddScoped<IDegreeQuestionAnswerRepository, DegreeQuestionAnswerRepository>();
-            services.AddScoped<IRangeQuestionAnswerRepository, RangeQuestionAnswerRepository>();
-            services.AddScoped<IMultipleChoiceQuestionAnswerRepository, MultipleChoiceQuestionAnswerRepository>();
-            services.AddScoped<IMultipleChoiceOptionRepository, MultipleChoiceOptionRepository>();
+            services.AddSingleton<IQuestionnaireWriteConnectionFactory>(con =>
+                new QuestionnaireWriteConnectionFactory(configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddSingleton<IQuestionnaireRepository, QuestionnaireRepository>();
+            services.AddSingleton<IQuestionRepository, QuestionRepository>();
+            services.AddSingleton<ITextQuestionAnswerRepository, TextQuestionAnswerRepository>();
+            services.AddSingleton<IDegreeQuestionAnswerRepository, DegreeQuestionAnswerRepository>();
+            services.AddSingleton<IRangeQuestionAnswerRepository, RangeQuestionAnswerRepository>();
+            services.AddSingleton<IMultipleChoiceQuestionAnswerRepository, MultipleChoiceQuestionAnswerRepository>();
+            services.AddSingleton<IMultipleChoiceOptionRepository, MultipleChoiceOptionRepository>();
 
             services.AddScoped<IQuestionnaireService, QuestionnaireService>();
             services.AddScoped<IAnswerService, AnswerService>();

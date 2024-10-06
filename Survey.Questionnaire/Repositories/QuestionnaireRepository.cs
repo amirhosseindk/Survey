@@ -1,82 +1,161 @@
 ﻿using Dapper;
 using Survey.Questionnaires.Models;
 using Survey.Questionnaires.Contracts;
+using Microsoft.Extensions.Logging;
 
 namespace Survey.Questionnaires.Repositories
 {
     public class QuestionnaireRepository : IQuestionnaireRepository
     {
-        private readonly IQuestionnaireConnectionFactory _dbConnectionFactory;
+        private readonly IQuestionnaireReadConnectionFactory _readConnectionFactory;
+        private readonly IQuestionnaireWriteConnectionFactory _writeConnectionFactory;
+        private readonly ILogger<QuestionnaireRepository> _logger;
 
-        public QuestionnaireRepository(IQuestionnaireConnectionFactory dbConnectionFactory)
+        public QuestionnaireRepository(IQuestionnaireReadConnectionFactory readConnectionFactory,
+                                       IQuestionnaireWriteConnectionFactory writeConnectionFactory,
+                                       ILogger<QuestionnaireRepository> logger)
         {
-            _dbConnectionFactory = dbConnectionFactory;
+            _readConnectionFactory = readConnectionFactory;
+            _writeConnectionFactory = writeConnectionFactory;
+            _logger = logger;
         }
 
         public async Task<int> CreateAsync(QuestionnaireRepoModel questionnaire)
         {
             var sql = GetCreateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var id = await connection.QuerySingleAsync<int>(sql, questionnaire);
-            return id;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var id = await connection.QuerySingleAsync<int>(sql, questionnaire);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating questionnaire: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
-            return rowsAffected > 0;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deleting questionnaire with ID {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllAsync()
         {
             var sql = GetAllSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<QuestionnaireRepoModel>(sql);
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<QuestionnaireRepoModel>(sql);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving all questionnaires: {Message}", ex.Message);
+                throw;
+            }
         }
 
-        public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByProfessorIdAsync(string ProfessorId)
+        public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByProfessorIdAsync(string professorId)
         {
             var sql = GetAllByProfessorIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { ProfessorId = ProfessorId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { ProfessorId = professorId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving questionnaires by professor ID {ProfessorId}: {Message}", professorId, ex.Message);
+                throw;
+            }
         }
 
         public async Task<QuestionnaireRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Id = id });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving questionnaire by ID {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<QuestionnaireRepoModel> GetByTitleAsync(string title)
         {
             var sql = GetByTitleSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Title = title });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Title = title });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieving questionnaire by title {Title}: {Message}", title, ex.Message);
+                throw;
+            }
         }
 
         public async Task<bool> UpdateAsync(QuestionnaireRepoModel questionnaire)
         {
             var sql = GetUpdateSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            var rowsAffected = await connection.ExecuteAsync(sql, questionnaire);
-            return rowsAffected > 0;
+            try
+            {
+                using var connection = _writeConnectionFactory.CreateConnection();
+                var rowsAffected = await connection.ExecuteAsync(sql, questionnaire);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating questionnaire: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByClassIdAsync(int classId)
         {
             var sql = GetAllByClassIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { ClassId = classId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { ClassId = classId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while getting all questionnaires by class id: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByStudentIdAsync(string studentId)
         {
             var sql = GetAllByStudentIdSQL();
-            using var connection = _dbConnectionFactory.CreateConnection();
-            return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { StudentId = studentId });
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { StudentId = studentId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while getting all questionnaires by student id: {Message}", ex.Message);
+                throw;
+            }
         }
 
         private string GetAllByClassIdSQL()
