@@ -6,8 +6,12 @@ namespace Survey.Questionnaires.Contracts
     {
         Task<int> CreateAsync(QuestionnaireRepoModel questionnaire);
         Task<QuestionnaireRepoModel> GetByIdAsync(int id);
+        Task<QuestionnaireRepoModel> GetByTitleAsync(string title);
         Task<IEnumerable<QuestionnaireRepoModel>> GetAllAsync();
+        Task<IEnumerable<QuestionnaireRepoModel>> GetAllByProfessorIdAsync(string id);
+        Task<IEnumerable<QuestionnaireRepoModel>> GetAllByClassIdAsync(int classId);
+        Task<IEnumerable<QuestionnaireRepoModel>> GetAllByStudentIdAsync(string studentId);
         Task<bool> UpdateAsync(QuestionnaireRepoModel questionnaire);
-        Task DeleteAsync(int id);
+        Task<bool> DeleteAsync(int id);
     }
 }

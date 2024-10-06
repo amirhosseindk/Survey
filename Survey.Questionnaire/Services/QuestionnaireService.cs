@@ -27,13 +27,19 @@ namespace Survey.Questionnaires.Services
 
         public async Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire)
         {
+            var questionnaireName = await _questionnaireRepository.GetByTitleAsync(questionnaire.Title.ToLower());
+            if (questionnaireName != null)
+            {
+                throw new Exception($"Questionnaire with this name {questionnaire.Title} is already available");
+            }
+
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
                     var questionnaireRepoModel = new QuestionnaireRepoModel
                     {
-                        Title = questionnaire.Title,
+                        Title = questionnaire.Title.ToLower(),
                         ClassId = questionnaire.ClassId,
                         ProfessorId = questionnaire.ProfessorId
                     };
@@ -78,34 +84,186 @@ namespace Survey.Questionnaires.Services
             }
         }
 
-        public async Task<(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options)> GetQuestionnaireByIdAsync(int id)
+        public async Task<Questionnaire> GetQuestionnaireByIdAsync(int id)
         {
             try
             {
-                var questionnaire = await _questionnaireRepository.GetByIdAsync(id);
-                var questions = new List<QuestionRepoModel>();
-                var options = new List<MultipleChoiceOptionRepoModel>();
-
-                if (questionnaire != null)
+                var questionnaireRepoModel = await _questionnaireRepository.GetByIdAsync(id);
+                if (questionnaireRepoModel == null)
                 {
-                    var questionsRep = await _questionRepository.GetByQuestionnaireIdAsync(questionnaire.Id);
-                    foreach (var question in questionsRep)
-                    {
-                        if (question.Type == QuestionType.MultipleChoice)
-                        {
-                            options.AddRange(await _multipleChoiceOptionRepository.GetByQuestionIdAsync(question.Id));
-                        }
-                    }
-                    questions = questionsRep.ToList();
+                    throw new Exception($"Questionnaire with ID {id} not found");
                 }
 
-                return (questionnaire, questions, options);
+                var questionRepoModels = await _questionRepository.GetByQuestionnaireIdAsync(questionnaireRepoModel.Id);
+
+                var questions = new List<Question>();
+
+                foreach (var questionRepoModel in questionRepoModels)
+                {
+                    var question = new Question
+                    {
+                        Id = questionRepoModel.Id,
+                        Title = questionRepoModel.Title,
+                        Type = questionRepoModel.Type,
+                        Rank = questionRepoModel.Rank,
+                        QuestionnaireId = questionRepoModel.QuestionnaireId
+                    };
+
+                    if (question.Type == QuestionType.MultipleChoice)
+                    {
+                        var optionsRepoModels = await _multipleChoiceOptionRepository.GetByQuestionIdAsync(questionRepoModel.Id);
+                        question.Options = optionsRepoModels.Select(optionRepoModel => new MultipleChoiseOptions
+                        {
+                            OptionText = optionRepoModel.OptionText,
+                            QuestionId = optionRepoModel.MultipleChoiceQuestionId
+                        }).ToList();
+                    }
+
+                    questions.Add(question);
+                }
+
+                var questionnaire = new Questionnaire
+                {
+                    Id = questionnaireRepoModel.Id,
+                    Title = questionnaireRepoModel.Title,
+                    ClassId = questionnaireRepoModel.ClassId,
+                    ProfessorId = questionnaireRepoModel.ProfessorId,
+                    Questions = questions
+                };
+
+                return questionnaire;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error while fetching questionnaire by ID - {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<Questionnaire> GetQuestionnaireByTitleAsync(string title)
+        {
+            try
+            {
+                var questionnaireRepoModel = await _questionnaireRepository.GetByTitleAsync(title.ToLower());
+                if (questionnaireRepoModel == null)
+                {
+                    throw new Exception($"Questionnaire with name {title} not found");
+                }
+
+                var questionRepoModels = await _questionRepository.GetByQuestionnaireIdAsync(questionnaireRepoModel.Id);
+
+                var questions = new List<Question>();
+
+                foreach (var questionRepoModel in questionRepoModels)
+                {
+                    var question = new Question
+                    {
+                        Id = questionRepoModel.Id,
+                        Title = questionRepoModel.Title,
+                        Type = questionRepoModel.Type,
+                        Rank = questionRepoModel.Rank,
+                        QuestionnaireId = questionRepoModel.QuestionnaireId
+                    };
+
+                    if (question.Type == QuestionType.MultipleChoice)
+                    {
+                        var optionsRepoModels = await _multipleChoiceOptionRepository.GetByQuestionIdAsync(questionRepoModel.Id);
+                        question.Options = optionsRepoModels.Select(optionRepoModel => new MultipleChoiseOptions
+                        {
+                            OptionText = optionRepoModel.OptionText,
+                            QuestionId = optionRepoModel.MultipleChoiceQuestionId
+                        }).ToList();
+                    }
+
+                    questions.Add(question);
+                }
+
+                var questionnaire = new Questionnaire
+                {
+                    Id = questionnaireRepoModel.Id,
+                    Title = questionnaireRepoModel.Title,
+                    ClassId = questionnaireRepoModel.ClassId,
+                    ProfessorId = questionnaireRepoModel.ProfessorId,
+                    Questions = questions
+                };
+
+                return questionnaire;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while fetching questionnaire by ID - {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Questionnaire>> GetAllQuestionnairesAsync()
+        {
+            var questionnaires = await _questionnaireRepository.GetAllAsync();
+
+            var result = new List<Questionnaire>();
+
+            foreach (var questionnaire in questionnaires)
+            {
+                result.Add(new Questionnaire
+                {
+                    Id = questionnaire.Id,
+                    Title = questionnaire.Title,
+                    ProfessorId = questionnaire.ProfessorId,
+                    ClassId = questionnaire.ClassId
+                });
+            }
+
+            return result.AsEnumerable();
+        }
+
+        public async Task<IEnumerable<Questionnaire>> GetAllQuestionnairesByProfessorIdAsync(string id)
+        {
+            var questionnaires = await _questionnaireRepository.GetAllByProfessorIdAsync(id);
+
+            var result = new List<Questionnaire>();
+
+            foreach (var questionnaire in questionnaires)
+            {
+                result.Add(new Questionnaire
+                {
+                    Id = questionnaire.Id,
+                    Title = questionnaire.Title,
+                    ProfessorId = questionnaire.ProfessorId,
+                    ClassId = questionnaire.ClassId
+                });
+            }
+
+            return result.AsEnumerable();
+        }
+
+        public async Task<IEnumerable<Questionnaire>> GetAllQuestionnairesByClassIdAsync(int classId)
+        {
+            var questionnaires = await _questionnaireRepository.GetAllByClassIdAsync(classId);
+
+            var result = questionnaires.Select(q => new Questionnaire
+            {
+                Id = q.Id,
+                Title = q.Title,
+                ProfessorId = q.ProfessorId,
+                ClassId = q.ClassId
+            }).ToList();
+
+            return result.AsEnumerable();
+        }
+
+        public async Task<IEnumerable<Questionnaire>> GetAllQuestionnairesByStudentIdAsync(string studentId)
+        {
+            var questionnaires = await _questionnaireRepository.GetAllByStudentIdAsync(studentId);
+
+            var result = questionnaires.Select(q => new Questionnaire
+            {
+                Id = q.Id,
+                Title = q.Title,
+                ProfessorId = q.ProfessorId,
+                ClassId = q.ClassId
+            }).ToList();
+
+            return result;
         }
 
         public async Task<bool> UpdateQuestionnaireAsync(Questionnaire questionnaire)
@@ -168,7 +326,7 @@ namespace Survey.Questionnaires.Services
             }
         }
 
-        public async Task DeleteQuestionnaireAsync(int id)
+        public async Task<bool> DeleteQuestionnaireAsync(int id)
         {
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -177,16 +335,23 @@ namespace Survey.Questionnaires.Services
                     var questions = await _questionRepository.GetByQuestionnaireIdAsync(id);
                     foreach (var question in questions)
                     {
-                        await _questionRepository.DeleteAsync(question.Id);
+                        var quesitonDeleteResult = await _questionRepository.DeleteAsync(question.Id);
+                        if (!quesitonDeleteResult)
+                            throw new Exception("Error while deleting question");
                         if (question.Type == QuestionType.MultipleChoice)
                         {
-                            await _multipleChoiceOptionRepository.DeleteAsync(question.Id);
+                            var multipleChoiseDeleteResult = await _multipleChoiceOptionRepository.DeleteAsync(question.Id);
+                            if (!multipleChoiseDeleteResult)
+                                throw new Exception("Error while deleting multipleChoiseOption");
                         }
                     }
 
-                    await _questionnaireRepository.DeleteAsync(id);
+                    var questionnaireDeleteResult = await _questionnaireRepository.DeleteAsync(id);
+                    if (!questionnaireDeleteResult)
+                        throw new Exception("Error while deleting questionnaire");
 
                     transaction.Complete();
+                    return questionnaireDeleteResult;
                 }
                 catch (Exception ex)
                 {

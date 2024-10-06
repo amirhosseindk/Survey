@@ -21,11 +21,12 @@ namespace Survey.Questionnaires.Repositories
             return id;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new { Id = id });
+            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+            return rowsAffected > 0;
         }
 
         public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllAsync()
@@ -35,11 +36,25 @@ namespace Survey.Questionnaires.Repositories
             return await connection.QueryAsync<QuestionnaireRepoModel>(sql);
         }
 
+        public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByProfessorIdAsync(string ProfessorId)
+        {
+            var sql = GetAllByProfessorIdSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { ProfessorId = ProfessorId });
+        }
+
         public async Task<QuestionnaireRepoModel> GetByIdAsync(int id)
         {
             var sql = GetByIdSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Id = id });
+        }
+
+        public async Task<QuestionnaireRepoModel> GetByTitleAsync(string title)
+        {
+            var sql = GetByTitleSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<QuestionnaireRepoModel>(sql, new { Title = title });
         }
 
         public async Task<bool> UpdateAsync(QuestionnaireRepoModel questionnaire)
@@ -48,6 +63,34 @@ namespace Survey.Questionnaires.Repositories
             using var connection = _dbConnectionFactory.CreateConnection();
             var rowsAffected = await connection.ExecuteAsync(sql, questionnaire);
             return rowsAffected > 0;
+        }
+
+        public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByClassIdAsync(int classId)
+        {
+            var sql = GetAllByClassIdSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { ClassId = classId });
+        }
+
+        public async Task<IEnumerable<QuestionnaireRepoModel>> GetAllByStudentIdAsync(string studentId)
+        {
+            var sql = GetAllByStudentIdSQL();
+            using var connection = _dbConnectionFactory.CreateConnection();
+            return await connection.QueryAsync<QuestionnaireRepoModel>(sql, new { StudentId = studentId });
+        }
+
+        private string GetAllByClassIdSQL()
+        {
+            return "SELECT * FROM Questionnaires WHERE ClassId = @ClassId";
+        }
+
+        private string GetAllByStudentIdSQL()
+        {
+            return @"SELECT q.* 
+                FROM Questionnaires q 
+                INNER JOIN Classes c ON q.ClassId = c.Id 
+                INNER JOIN ClassStudents cs ON c.Id = cs.ClassesId
+                WHERE cs.StudentsId = @StudentId";
         }
 
         private string GetCreateSQL()
@@ -69,9 +112,19 @@ namespace Survey.Questionnaires.Repositories
             return "SELECT * FROM Questionnaires";
         }
 
+        private string GetAllByProfessorIdSQL()
+        {
+            return "SELECT * FROM Questionnaires WHERE ProfessorId = @ProfessorId";
+        }
+
         private string GetByIdSQL()
         {
             return "SELECT * FROM Questionnaires WHERE Id = @Id";
+        }
+
+        private string GetByTitleSQL()
+        {
+            return "SELECT * FROM Questionnaires WHERE Title = @Title";
         }
 
         private string GetUpdateSQL()

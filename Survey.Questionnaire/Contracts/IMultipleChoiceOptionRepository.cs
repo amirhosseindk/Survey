@@ -8,7 +8,7 @@ namespace Survey.Questionnaires.Contracts
         Task<MultipleChoiceOptionRepoModel> GetByIdAsync(int id);
         Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetByQuestionIdAsync(int questionId);
         Task<bool> UpdateAsync(MultipleChoiceOptionRepoModel option);
-        Task DeleteAsync(int id);
+        Task<bool> DeleteAsync(int id);
         Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetAllAsync();
     }
 }

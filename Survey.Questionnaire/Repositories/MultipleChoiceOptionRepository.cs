@@ -21,11 +21,12 @@ namespace Survey.Questionnaires.Repositories
             return id;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var sql = GetDeleteSQL();
             using var connection = _dbConnectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new { Id = id });
+            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
+            return rowsAffected > 0;
         }
 
         public async Task<IEnumerable<MultipleChoiceOptionRepoModel>> GetByQuestionIdAsync(int questionId)
@@ -60,7 +61,7 @@ namespace Survey.Questionnaires.Repositories
         private string GetCreateSQL()
         {
             return @"
-                INSERT INTO MultipleChoiceOption (OptionText, MultipleChoiceQuestionId)
+                INSERT INTO MultipleChoiceOptions (OptionText, MultipleChoiceQuestionId)
                 VALUES (@OptionText, @MultipleChoiceQuestionId);
                 SELECT CAST(SCOPE_IDENTITY() as int);
             ";

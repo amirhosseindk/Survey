@@ -5,8 +5,13 @@ namespace Survey.Questionnaires.Contracts
     public interface IQuestionnaireService
     {
         Task<int> CreateQuestionnaireAsync(Questionnaire questionnaire);
-        Task<(QuestionnaireRepoModel questionnaire, List<QuestionRepoModel> questions, List<MultipleChoiceOptionRepoModel>? options)> GetQuestionnaireByIdAsync(int id);
+        Task<Questionnaire> GetQuestionnaireByIdAsync(int id);
+        Task<Questionnaire> GetQuestionnaireByTitleAsync(string title);
+        Task<IEnumerable<Questionnaire>> GetAllQuestionnairesAsync();
+        Task<IEnumerable<Questionnaire>> GetAllQuestionnairesByProfessorIdAsync(string id);
+        Task<IEnumerable<Questionnaire>> GetAllQuestionnairesByClassIdAsync(int classId);
+        Task<IEnumerable<Questionnaire>> GetAllQuestionnairesByStudentIdAsync(string studentId);
         Task<bool> UpdateQuestionnaireAsync(Questionnaire questionnaire);
-        Task DeleteQuestionnaireAsync(int id);
+        Task<bool> DeleteQuestionnaireAsync(int id);
     }
 }

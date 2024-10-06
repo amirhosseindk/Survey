@@ -15,6 +15,7 @@ namespace Survey.University.Contracts
         Task<bool> DeleteClassAsync(int id);
         Task<Class> GetClassByIdAsync(int id);
         Task<Class> GetClassByNameAsync(string name);
+        Task<Class> GetClassByCourseIdAsync(int courseId);
         Task<IEnumerable<Class>> GetAllClassesAsync();
         Task<bool> AddStudentToClassAsync(int classId, string studentId);
         Task<bool> RemoveStudentFromClassAsync(int classId, string studentId);

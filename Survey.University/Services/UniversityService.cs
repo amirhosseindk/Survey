@@ -231,6 +231,20 @@ namespace Survey.University.Services
             }
         }
 
+        public async Task<Class> GetClassByCourseIdAsync(int courseId)
+        {
+            try
+            {
+                var @class = await GetCourseByIdAsync(courseId);
+                return await GetClassByIdAsync(@class.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving class by courseId: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<Class>> GetAllClassesAsync()
         {
             try

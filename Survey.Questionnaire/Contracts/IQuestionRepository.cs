@@ -8,6 +8,6 @@ namespace Survey.Questionnaires.Contracts
         Task<QuestionRepoModel> GetByIdAsync(int id);
         Task<IEnumerable<QuestionRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId);
         Task<bool> UpdateAsync(QuestionRepoModel question);
-        Task DeleteAsync(int id);
+        Task<bool> DeleteAsync(int id);
     }
 }
