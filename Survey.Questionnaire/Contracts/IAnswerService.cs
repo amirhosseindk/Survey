@@ -4,15 +4,25 @@ namespace Survey.Questionnaires.Contracts
 {
     public interface IAnswerService
     {
-        Task SaveAnswersAsync(
-            List<DegreeQuestionAnswerRepoModel>? degreeAnswers = null,
-            List<MultipleChoiceQuestionAnswerRepoModel>? multipleChoiceAnswers = null,
-            List<RangeQuestionAnswerRepoModel>? rangeAnswers = null,
-            List<TextQuestionAnswerRepoModel>? textAnswers = null);
-
-        Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId);
-        Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId);
-        Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId);
-        Task<IEnumerable<TextQuestionAnswerRepoModel>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId);
+        Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId);
+        Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId);
+        Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId);
+        Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId);
+        Task<bool> CreateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer);
+        Task<bool> CreateTextAnswerAsync(TextQuestionAnswer answer);
+        Task<bool> CreateRangeAnswerAsync(RangeQuestionAnswer answer);
+        Task<bool> CreateDegreeAnswerAsync(DegreeQuestionAnswer answer);
+        Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionIdAsync(int questionId);
+        Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionIdAsync(int questionId);
+        Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionIdAsync(int questionId);
+        Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionIdAsync(int questionId);
+        Task UpdateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer);
+        Task UpdateTextAnswerAsync(TextQuestionAnswer answer);
+        Task UpdateRangeAnswerAsync(RangeQuestionAnswer answer);
+        Task UpdateDegreeAnswerAsync(DegreeQuestionAnswer answer);
+        Task DeleteMultipleChoiceAnswerAsync(int id);
+        Task DeleteTextAnswerAsync(int id);
+        Task DeleteRangeAnswerAsync(int id);
+        Task DeleteDegreeAnswerAsync(int id);
     }
 }

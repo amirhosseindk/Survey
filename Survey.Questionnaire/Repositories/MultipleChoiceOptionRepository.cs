@@ -86,20 +86,20 @@ namespace Survey.Questionnaires.Repositories
         private string GetCreateSQL()
         {
             return @"
-                INSERT INTO MultipleChoiceOptions (OptionText, MultipleChoiceQuestionId)
-                VALUES (@OptionText, @MultipleChoiceQuestionId);
+                INSERT INTO MultipleChoiceOption (OptionText, QuestionId)
+                VALUES (@OptionText, @QuestionId);
                 SELECT CAST(SCOPE_IDENTITY() as int);
             ";
         }
 
         private string GetDeleteSQL()
         {
-            return "DELETE FROM MultipleChoiceOptions WHERE Id = @Id";
+            return "DELETE FROM MultipleChoiceOption WHERE Id = @Id";
         }
 
         private string GetByQuestionIdSQL()
         {
-            return "SELECT * FROM MultipleChoiceOptions WHERE MultipleChoiceQuestionId = @QuestionId";
+            return "SELECT * FROM MultipleChoiceOption WHERE QuestionId = @QuestionId";
         }
 
         private string GetUpdateSQL()
@@ -107,7 +107,7 @@ namespace Survey.Questionnaires.Repositories
             return @"
                 UPDATE MultipleChoiceOptions
                 SET OptionText = @OptionText,
-                    MultipleChoiceQuestionId = @MultipleChoiceQuestionId
+                    QuestionId = @QuestionId
                 WHERE Id = @Id
             ";
         }

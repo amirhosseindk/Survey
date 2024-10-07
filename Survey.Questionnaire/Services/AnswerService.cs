@@ -1,94 +1,265 @@
 ﻿using Survey.Questionnaires.Contracts;
 using Survey.Questionnaires.Models;
-using Microsoft.Extensions.Logging;
-using System.Transactions;
 
 namespace Survey.Questionnaires.Services
 {
     public class AnswerService : IAnswerService
     {
-        private readonly IDegreeQuestionAnswerRepository _degreeAnswerRepository;
-        private readonly IMultipleChoiceQuestionAnswerRepository _multipleChoiceAnswerRepository;
-        private readonly IRangeQuestionAnswerRepository _rangeAnswerRepository;
-        private readonly ITextQuestionAnswerRepository _textAnswerRepository;
-        private readonly ILogger<AnswerService> _logger;
+        private readonly IMultipleChoiceQuestionAnswerRepository _multipleChoiceRepo;
+        private readonly ITextQuestionAnswerRepository _textRepo;
+        private readonly IRangeQuestionAnswerRepository _rangeRepo;
+        private readonly IDegreeQuestionAnswerRepository _degreeRepo;
 
         public AnswerService(
-            IDegreeQuestionAnswerRepository degreeAnswerRepository,
-            IMultipleChoiceQuestionAnswerRepository multipleChoiceAnswerRepository,
-            IRangeQuestionAnswerRepository rangeAnswerRepository,
-            ITextQuestionAnswerRepository textAnswerRepository,
-            ILogger<AnswerService> logger)
+            IMultipleChoiceQuestionAnswerRepository multipleChoiceRepo,
+            ITextQuestionAnswerRepository textRepo,
+            IRangeQuestionAnswerRepository rangeRepo,
+            IDegreeQuestionAnswerRepository degreeRepo)
         {
-            _degreeAnswerRepository = degreeAnswerRepository;
-            _multipleChoiceAnswerRepository = multipleChoiceAnswerRepository;
-            _rangeAnswerRepository = rangeAnswerRepository;
-            _textAnswerRepository = textAnswerRepository;
-            _logger = logger;
+            _multipleChoiceRepo = multipleChoiceRepo;
+            _textRepo = textRepo;
+            _rangeRepo = rangeRepo;
+            _degreeRepo = degreeRepo;
         }
 
-        public async Task SaveAnswersAsync(
-            List<DegreeQuestionAnswerRepoModel>? degreeAnswers = null,
-            List<MultipleChoiceQuestionAnswerRepoModel>? multipleChoiceAnswers = null,
-            List<RangeQuestionAnswerRepoModel>? rangeAnswers = null,
-            List<TextQuestionAnswerRepoModel>? textAnswers = null)
+        public async Task<bool> CreateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer)
         {
-            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var repoModel = new MultipleChoiceQuestionAnswerRepoModel
             {
-                try
-                {
-                    foreach (var answer in degreeAnswers)
-                    {
-                        if (answer != null)
-                            await _degreeAnswerRepository.CreateAsync(answer);
-                    }
-
-                    foreach (var answer in multipleChoiceAnswers)
-                    {
-                        if (answer != null)
-                            await _multipleChoiceAnswerRepository.CreateAsync(answer);
-                    }
-
-                    foreach (var answer in rangeAnswers)
-                    {
-                        if (answer != null)
-                            await _rangeAnswerRepository.CreateAsync(answer);
-                    }
-
-                    foreach (var answer in textAnswers)
-                    {
-                        if (answer != null)
-                            await _textAnswerRepository.CreateAsync(answer);
-                    }
-
-                    transaction.Complete();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error while saving answers - {ex.Message}");
-                    throw;
-                }
-            }
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerOptionId = answer.AnswerOptionId,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _multipleChoiceRepo.CreateAsync(repoModel) > 0;
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<bool> CreateTextAnswerAsync(TextQuestionAnswer answer)
         {
-            return await _degreeAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModel = new TextQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerText = answer.AnswerText,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _textRepo.CreateAsync(repoModel) > 0;
         }
 
-        public async Task<IEnumerable<MultipleChoiceQuestionAnswerRepoModel>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<bool> CreateRangeAnswerAsync(RangeQuestionAnswer answer)
         {
-            return await _multipleChoiceAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModel = new RangeQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerValue = answer.AnswerValue,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _rangeRepo.CreateAsync(repoModel) > 0;
         }
 
-        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<bool> CreateDegreeAnswerAsync(DegreeQuestionAnswer answer)
         {
-            return await _rangeAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModel = new DegreeQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerValue = answer.AnswerValue,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _degreeRepo.CreateAsync(repoModel) > 0;
         }
 
-        public async Task<IEnumerable<TextQuestionAnswerRepoModel>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionIdAsync(int questionId)
         {
-            return await _textAnswerRepository.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModels = await _multipleChoiceRepo.GetByQuestionIdAsync(questionId);
+            return repoModels.Select(repo => new MultipleChoiceQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerOptionId = repo.AnswerOptionId,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionIdAsync(int questionId)
+        {
+            var repoModels = await _textRepo.GetByQuestionIdAsync(questionId);
+            return repoModels.Select(repo => new TextQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerText = repo.AnswerText,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionIdAsync(int questionId)
+        {
+            var repoModels = await _rangeRepo.GetByQuestionIdAsync(questionId);
+            return repoModels.Select(repo => new RangeQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerValue = repo.AnswerValue,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionIdAsync(int questionId)
+        {
+            var repoModels = await _degreeRepo.GetByQuestionIdAsync(questionId);
+            return repoModels.Select(repo => new DegreeQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerValue = repo.AnswerValue,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task UpdateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer)
+        {
+            var repoModel = new MultipleChoiceQuestionAnswerRepoModel
+            {
+                Id = answer.Id,
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerOptionId = answer.AnswerOptionId,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            await _multipleChoiceRepo.UpdateAsync(repoModel);
+        }
+
+        public async Task UpdateTextAnswerAsync(TextQuestionAnswer answer)
+        {
+            var repoModel = new TextQuestionAnswerRepoModel
+            {
+                Id = answer.Id,
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerText = answer.AnswerText,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            await _textRepo.UpdateAsync(repoModel);
+        }
+
+        public async Task UpdateRangeAnswerAsync(RangeQuestionAnswer answer)
+        {
+            var repoModel = new RangeQuestionAnswerRepoModel
+            {
+                Id = answer.Id,
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerValue = answer.AnswerValue,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            await _rangeRepo.UpdateAsync(repoModel);
+        }
+
+        public async Task UpdateDegreeAnswerAsync(DegreeQuestionAnswer answer)
+        {
+            var repoModel = new DegreeQuestionAnswerRepoModel
+            {
+                Id = answer.Id,
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerValue = answer.AnswerValue,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            await _degreeRepo.UpdateAsync(repoModel);
+        }
+
+        public async Task DeleteMultipleChoiceAnswerAsync(int id)
+        {
+            await _multipleChoiceRepo.DeleteAsync(id);
+        }
+
+        public async Task DeleteTextAnswerAsync(int id)
+        {
+            await _textRepo.DeleteAsync(id);
+        }
+
+        public async Task DeleteRangeAnswerAsync(int id)
+        {
+            await _rangeRepo.DeleteAsync(id);
+        }
+
+        public async Task DeleteDegreeAnswerAsync(int id)
+        {
+            await _degreeRepo.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId)
+        {
+            var repoModels = await _degreeRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            return repoModels.Select(repo => new DegreeQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerValue = repo.AnswerValue,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId)
+        {
+            var repoModels = await _multipleChoiceRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            return repoModels.Select(repo => new MultipleChoiceQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerOptionId = repo.AnswerOptionId,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId)
+        {
+            var repoModels = await _rangeRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            return repoModels.Select(repo => new RangeQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerValue = repo.AnswerValue,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId)
+        {
+            var repoModels = await _textRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            return repoModels.Select(repo => new TextQuestionAnswer
+            {
+                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerText = repo.AnswerText,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
         }
     }
 }

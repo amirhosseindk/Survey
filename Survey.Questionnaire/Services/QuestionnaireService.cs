@@ -65,7 +65,7 @@ namespace Survey.Questionnaires.Services
                                 var optionRepoModel = new MultipleChoiceOptionRepoModel
                                 {
                                     OptionText = option.OptionText,
-                                    MultipleChoiceQuestionId = questionId
+                                    QuestionId = questionId
                                 };
 
                                 await _multipleChoiceOptionRepository.CreateAsync(optionRepoModel);
@@ -115,7 +115,7 @@ namespace Survey.Questionnaires.Services
                         question.Options = optionsRepoModels.Select(optionRepoModel => new MultipleChoiseOptions
                         {
                             OptionText = optionRepoModel.OptionText,
-                            QuestionId = optionRepoModel.MultipleChoiceQuestionId
+                            QuestionId = optionRepoModel.QuestionId
                         }).ToList();
                     }
 
@@ -171,7 +171,7 @@ namespace Survey.Questionnaires.Services
                         question.Options = optionsRepoModels.Select(optionRepoModel => new MultipleChoiseOptions
                         {
                             OptionText = optionRepoModel.OptionText,
-                            QuestionId = optionRepoModel.MultipleChoiceQuestionId
+                            QuestionId = optionRepoModel.QuestionId
                         }).ToList();
                     }
 
@@ -305,7 +305,7 @@ namespace Survey.Questionnaires.Services
                                 var optionRepoModel = new MultipleChoiceOptionRepoModel
                                 {
                                     OptionText = option.OptionText,
-                                    MultipleChoiceQuestionId = option.QuestionId
+                                    QuestionId = option.QuestionId
                                 };
 
                                 var optionsUpdateResult = await _multipleChoiceOptionRepository.UpdateAsync(optionRepoModel);

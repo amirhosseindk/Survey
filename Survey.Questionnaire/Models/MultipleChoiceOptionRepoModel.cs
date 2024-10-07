@@ -2,8 +2,7 @@
 {
     public class MultipleChoiceOptionRepoModel
     {
-        public int Id { get; set; }
         public string OptionText { get; set; }
-        public int MultipleChoiceQuestionId { get; set; }
+        public int QuestionId { get; set; }
     }
 }

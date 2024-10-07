@@ -181,10 +181,10 @@ namespace Survey.University.Repositories
         private string GetStudentsByClassNameSQL()
         {
             return @"
-                    SELECT cs.StudentsId as StudentId, u.UserName as StudentName
+                    SELECT cs.StudentId as StudentId, u.UserName as StudentName
                     FROM ClassStudents cs
-                    INNER JOIN Classes cl ON cs.ClassesId = cl.Id
-                    INNER JOIN AspNetUsers u ON cs.StudentsId = u.Id
+                    INNER JOIN Classes cl ON cs.ClassId = cl.Id
+                    INNER JOIN AspNetUsers u ON cs.StudentId = u.Id
                     WHERE cl.Name = @ClassName;
                     ";
         }
@@ -192,24 +192,24 @@ namespace Survey.University.Repositories
         private string GetStudentsByClassIdSQL()
         {
             return @"
-                SELECT cs.StudentsId as StudentId, u.UserName as StudentName
+                SELECT cs.StudentId as StudentId, u.UserName as StudentName
                 FROM ClassStudents cs
-                INNER JOIN AspNetUsers u ON cs.StudentsId = u.Id
-                WHERE cs.ClassesId = @ClassId;
+                INNER JOIN AspNetUsers u ON cs.StudentId = u.Id
+                WHERE cs.ClassId = @ClassId;
                 ";
         }
 
         private string GetAddStudentToClassSQL()
         {
             return @"
-                INSERT INTO ClassStudents (ClassesId, StudentsId)
+                INSERT INTO ClassStudents (ClassId, StudentId)
                 VALUES (@ClassId, @StudentId);
                 ";
         }
 
         private string GetRemoveStudentFromClassSQL()
         {
-            return "DELETE FROM ClassStudents WHERE ClassesId = @ClassId AND StudentsId = @StudentId";
+            return "DELETE FROM ClassStudents WHERE ClassId = @ClassId AND StudentId = @StudentId";
         }
 
         private string GetCreateSQL()

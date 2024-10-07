@@ -56,7 +56,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetQuestionnaireById")]
+        [Route("api/[controller]/GetQuestionnaireById/{id}")]
         public async Task<ResultDto<QuestionnaireDto>> GetQuestionnaireById(int id)
         {
             var result = await _mediator.Send(new GetQuestionnaireByIdQuery
@@ -68,7 +68,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetQuestionnaireByTitle")]
+        [Route("api/[controller]/GetQuestionnaireByTitle/{title}")]
         public async Task<ResultDto<QuestionnaireDto>> GetQuestionnaireByTitle(string title)
         {
             var result = await _mediator.Send(new GetQuestionnaireByTitleQuery
@@ -89,7 +89,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("api/[controller]/DeleteQuestionnaire")]
+        [Route("api/[controller]/DeleteQuestionnaire/{id}")]
         public async Task<ResultDto<bool>> DeleteQuestionnaire(int id)
         {
             var result = await _mediator.Send(new DeleteQuestionnaireCommand
@@ -101,7 +101,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetQuestionnaireByProfessorId")]
+        [Route("api/[controller]/GetQuestionnaireByProfessorId/{id}")]
         public async Task<ResultDto<IEnumerable<QuestionnaireDto>>> GetQuestionnaireByProfessorId(string id)
         {
             var result = await _mediator.Send(new GetQuestionnaireByProfessorIdQuery
@@ -113,7 +113,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetQuestionnairesByClassId")]
+        [Route("api/[controller]/GetQuestionnairesByClassId/{classId}")]
         public async Task<ResultDto<IEnumerable<QuestionnaireDto>>> GetQuestionnairesByClassId(int classId)
         {
             var result = await _mediator.Send(new GetQuestionnairesByClassIdQuery
@@ -125,7 +125,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetQuestionnairesByCourseId")]
+        [Route("api/[controller]/GetQuestionnairesByCourseId/{courseId}")]
         public async Task<ResultDto<IEnumerable<QuestionnaireDto>>> GetQuestionnairesByCourseId(int courseId)
         {
             var result = await _mediator.Send(new GetQuestionnairesByCourseIdQuery
@@ -137,7 +137,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/[controller]/GetQuestionnairesByStudentId")]
+        [Route("api/[controller]/GetQuestionnairesByStudentId/{studentId}")]
         public async Task<ResultDto<IEnumerable<QuestionnaireDto>>> GetQuestionnairesByStudentId(string studentId)
         {
             var result = await _mediator.Send(new GetQuestionnairesByStudentIdQuery

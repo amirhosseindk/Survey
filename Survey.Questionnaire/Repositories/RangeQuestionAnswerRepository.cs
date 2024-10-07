@@ -26,8 +26,8 @@ namespace Survey.Questionnaires.Repositories
             try
             {
                 using var connection = _writeConnectionFactory.CreateConnection();
-                var id = await connection.QuerySingleAsync<int>(sql, answer);
-                return id;
+                var rowsAffected = await connection.ExecuteAsync(sql, answer);
+                return rowsAffected;
             }
             catch (Exception ex)
             {
@@ -100,9 +100,7 @@ namespace Survey.Questionnaires.Repositories
         {
             return @"
                 INSERT INTO RangeQuestionAnswers (QuestionnaireId, QuestionId, StudentId, AnswerValue, FillDateTime)
-                VALUES (@QuestionnaireId, @QuestionId, @StudentId, @AnswerValue, @FillDateTime);
-                SELECT CAST(SCOPE_IDENTITY() as int);
-            ";
+                VALUES (@QuestionnaireId, @QuestionId, @StudentId, @AnswerValue, @FillDateTime);";
         }
 
         private string GetDeleteSQL()

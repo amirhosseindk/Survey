@@ -168,8 +168,8 @@ namespace Survey.Questionnaires.Repositories
             return @"SELECT q.* 
                 FROM Questionnaires q 
                 INNER JOIN Classes c ON q.ClassId = c.Id 
-                INNER JOIN ClassStudents cs ON c.Id = cs.ClassesId
-                WHERE cs.StudentsId = @StudentId";
+                INNER JOIN ClassStudents cs ON c.Id = cs.ClassId
+                WHERE cs.StudentId = @StudentId";
         }
 
         private string GetCreateSQL()

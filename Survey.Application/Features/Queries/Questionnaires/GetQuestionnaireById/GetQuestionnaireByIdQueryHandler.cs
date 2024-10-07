@@ -32,6 +32,7 @@ namespace Survey.Application.Features.Queries.Questionnaires.GetQuestionnaireByI
                     Title = q.Title,
                     Type = (int)q.Type,
                     Rank = q.Rank,
+                    QuestionnaireId = q.QuestionnaireId,
                     Options = q.Options?.Select(o => new MultipleChoiseOptionsDto()
                     {
                         QuestionId = o.QuestionId,

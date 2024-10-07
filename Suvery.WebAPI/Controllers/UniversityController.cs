@@ -51,7 +51,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("api/[controller]/DeleteCourse")]
+        [Route("api/[controller]/DeleteCourse/{courseId}")]
         public async Task<ResultDto<bool>> DeleteCourse(int courseId)
         {
             var result = await _mediator.Send(new DeleteCourseCommand
@@ -122,7 +122,7 @@ namespace Suvery.WebAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("api/[controller]/DeleteClass")]
+        [Route("api/[controller]/DeleteClass/{classId}")]
         public async Task<ResultDto<bool>> DeleteClass(int classId)
         {
             var result = await _mediator.Send(new DeleteClassCommand

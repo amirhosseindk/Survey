@@ -20,6 +20,8 @@ namespace Survey.Users
             optionsBuilder.UseSqlServer(connectionString);
 
             return new UserDbContext(optionsBuilder.Options);
+            // Add-Migration MigrationName -Project Survey.Users -StartupProject Survey.Users
+
         }
     }
 }
