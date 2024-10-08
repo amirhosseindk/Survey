@@ -74,12 +74,11 @@ namespace Survey.Questionnaires.Services
             return await _degreeRepo.CreateAsync(repoModel) > 0;
         }
 
-        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionIdAsync(int questionnnaireId, int questionId)
         {
-            var repoModels = await _multipleChoiceRepo.GetByQuestionIdAsync(questionId);
+            var repoModels = await _multipleChoiceRepo.GetAllAnswersOfQuestionIdAsync(questionnnaireId, questionId);
             return repoModels.Select(repo => new MultipleChoiceQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerOptionId = repo.AnswerOptionId,
@@ -88,12 +87,11 @@ namespace Survey.Questionnaires.Services
             });
         }
 
-        public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionIdAsync(int questionnnaireId, int questionId)
         {
-            var repoModels = await _textRepo.GetByQuestionIdAsync(questionId);
+            var repoModels = await _textRepo.GetAllAnswersOfQuestionIdAsync(questionnnaireId, questionId);
             return repoModels.Select(repo => new TextQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerText = repo.AnswerText,
@@ -102,12 +100,11 @@ namespace Survey.Questionnaires.Services
             });
         }
 
-        public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionIdAsync(int questionnnaireId, int questionId)
         {
-            var repoModels = await _rangeRepo.GetByQuestionIdAsync(questionId);
+            var repoModels = await _rangeRepo.GetAllAnswersOfQuestionIdAsync(questionnnaireId, questionId);
             return repoModels.Select(repo => new RangeQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerValue = repo.AnswerValue,
@@ -116,12 +113,11 @@ namespace Survey.Questionnaires.Services
             });
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionIdAsync(int questionnnaireId, int questionId)
         {
-            var repoModels = await _degreeRepo.GetByQuestionIdAsync(questionId);
+            var repoModels = await _degreeRepo.GetAllAnswersOfQuestionIdAsync(questionnnaireId, questionId);
             return repoModels.Select(repo => new DegreeQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerValue = repo.AnswerValue,
@@ -130,88 +126,115 @@ namespace Survey.Questionnaires.Services
             });
         }
 
-        public async Task UpdateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer)
+        public async Task<bool> UpdateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer)
         {
             var repoModel = new MultipleChoiceQuestionAnswerRepoModel
             {
-                Id = answer.Id,
                 QuestionnaireId = answer.QuestionnaireId,
                 QuestionId = answer.QuestionId,
                 AnswerOptionId = answer.AnswerOptionId,
                 StudentId = answer.StudentId,
                 FillDateTime = answer.FillDateTime
             };
-            await _multipleChoiceRepo.UpdateAsync(repoModel);
+            return await _multipleChoiceRepo.UpdateAsync(repoModel);
         }
 
-        public async Task UpdateTextAnswerAsync(TextQuestionAnswer answer)
+        public async Task<bool> UpdateTextAnswerAsync(TextQuestionAnswer answer)
         {
             var repoModel = new TextQuestionAnswerRepoModel
             {
-                Id = answer.Id,
                 QuestionnaireId = answer.QuestionnaireId,
                 QuestionId = answer.QuestionId,
                 AnswerText = answer.AnswerText,
                 StudentId = answer.StudentId,
                 FillDateTime = answer.FillDateTime
             };
-            await _textRepo.UpdateAsync(repoModel);
+            return await _textRepo.UpdateAsync(repoModel);
         }
 
-        public async Task UpdateRangeAnswerAsync(RangeQuestionAnswer answer)
+        public async Task<bool> UpdateRangeAnswerAsync(RangeQuestionAnswer answer)
         {
             var repoModel = new RangeQuestionAnswerRepoModel
             {
-                Id = answer.Id,
                 QuestionnaireId = answer.QuestionnaireId,
                 QuestionId = answer.QuestionId,
                 AnswerValue = answer.AnswerValue,
                 StudentId = answer.StudentId,
                 FillDateTime = answer.FillDateTime
             };
-            await _rangeRepo.UpdateAsync(repoModel);
+            return await _rangeRepo.UpdateAsync(repoModel);
         }
 
-        public async Task UpdateDegreeAnswerAsync(DegreeQuestionAnswer answer)
+        public async Task<bool> UpdateDegreeAnswerAsync(DegreeQuestionAnswer answer)
         {
             var repoModel = new DegreeQuestionAnswerRepoModel
             {
-                Id = answer.Id,
                 QuestionnaireId = answer.QuestionnaireId,
                 QuestionId = answer.QuestionId,
                 AnswerValue = answer.AnswerValue,
                 StudentId = answer.StudentId,
                 FillDateTime = answer.FillDateTime
             };
-            await _degreeRepo.UpdateAsync(repoModel);
+            return await _degreeRepo.UpdateAsync(repoModel);
         }
 
-        public async Task DeleteMultipleChoiceAnswerAsync(int id)
+        public async Task<bool> DeleteMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer)
         {
-            await _multipleChoiceRepo.DeleteAsync(id);
+            var repoModel = new MultipleChoiceQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerOptionId = answer.AnswerOptionId,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _multipleChoiceRepo.DeleteAsync(repoModel);
         }
 
-        public async Task DeleteTextAnswerAsync(int id)
+        public async Task<bool> DeleteTextAnswerAsync(TextQuestionAnswer answer)
         {
-            await _textRepo.DeleteAsync(id);
+            var repoModel = new TextQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerText = answer.AnswerText,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _textRepo.DeleteAsync(repoModel);
         }
 
-        public async Task DeleteRangeAnswerAsync(int id)
+        public async Task<bool> DeleteRangeAnswerAsync(RangeQuestionAnswer answer)
         {
-            await _rangeRepo.DeleteAsync(id);
+            var repoModel = new RangeQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerValue = answer.AnswerValue,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _rangeRepo.DeleteAsync(repoModel);
         }
 
-        public async Task DeleteDegreeAnswerAsync(int id)
+        public async Task<bool> DeleteDegreeAnswerAsync(DegreeQuestionAnswer answer)
         {
-            await _degreeRepo.DeleteAsync(id);
+            var repoModel = new DegreeQuestionAnswerRepoModel
+            {
+                QuestionnaireId = answer.QuestionnaireId,
+                QuestionId = answer.QuestionId,
+                AnswerValue = answer.AnswerValue,
+                StudentId = answer.StudentId,
+                FillDateTime = answer.FillDateTime
+            };
+            return await _degreeRepo.DeleteAsync(repoModel);
         }
 
         public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
-            var repoModels = await _degreeRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModels = await _degreeRepo.GetAllOfQuestionnaireIdAsync(questionnaireId);
             return repoModels.Select(repo => new DegreeQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerValue = repo.AnswerValue,
@@ -222,10 +245,9 @@ namespace Survey.Questionnaires.Services
 
         public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
-            var repoModels = await _multipleChoiceRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModels = await _multipleChoiceRepo.GetAllOfQuestionnaireIdAsync(questionnaireId);
             return repoModels.Select(repo => new MultipleChoiceQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerOptionId = repo.AnswerOptionId,
@@ -236,10 +258,9 @@ namespace Survey.Questionnaires.Services
 
         public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
-            var repoModels = await _rangeRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModels = await _rangeRepo.GetAllOfQuestionnaireIdAsync(questionnaireId);
             return repoModels.Select(repo => new RangeQuestionAnswer
             {
-                Id = repo.Id,
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerValue = repo.AnswerValue,
@@ -250,10 +271,61 @@ namespace Survey.Questionnaires.Services
 
         public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionnaireIdAsync(int questionnaireId)
         {
-            var repoModels = await _textRepo.GetByQuestionnaireIdAsync(questionnaireId);
+            var repoModels = await _textRepo.GetAllOfQuestionnaireIdAsync(questionnaireId);
             return repoModels.Select(repo => new TextQuestionAnswer
             {
-                Id = repo.Id,
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerText = repo.AnswerText,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersAsync(int questionnaireId, string studentId)
+        {
+            var repoModels = await _degreeRepo.GetAllAnswersAsync(questionnaireId, studentId);
+            return repoModels.Select(repo => new DegreeQuestionAnswer
+            {
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerValue = repo.AnswerValue,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersAsync(int questionnaireId, string studentId)
+        {
+            var repoModels = await _multipleChoiceRepo.GetAllAnswersAsync(questionnaireId, studentId);
+            return repoModels.Select(repo => new MultipleChoiceQuestionAnswer
+            {
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerOptionId = repo.AnswerOptionId,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersAsync(int questionnaireId, string studentId)
+        {
+            var repoModels = await _rangeRepo.GetAllAnswersAsync(questionnaireId, studentId);
+            return repoModels.Select(repo => new RangeQuestionAnswer
+            {
+                QuestionnaireId = repo.QuestionnaireId,
+                QuestionId = repo.QuestionId,
+                AnswerValue = repo.AnswerValue,
+                StudentId = repo.StudentId,
+                FillDateTime = repo.FillDateTime
+            });
+        }
+
+        public async Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersAsync(int questionnaireId, string studentId)
+        {
+            var repoModels = await _textRepo.GetAllAnswersAsync(questionnaireId, studentId);
+            return repoModels.Select(repo => new TextQuestionAnswer
+            {
                 QuestionnaireId = repo.QuestionnaireId,
                 QuestionId = repo.QuestionId,
                 AnswerText = repo.AnswerText,

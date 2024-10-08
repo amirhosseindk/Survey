@@ -12,17 +12,21 @@ namespace Survey.Questionnaires.Contracts
         Task<bool> CreateTextAnswerAsync(TextQuestionAnswer answer);
         Task<bool> CreateRangeAnswerAsync(RangeQuestionAnswer answer);
         Task<bool> CreateDegreeAnswerAsync(DegreeQuestionAnswer answer);
-        Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionIdAsync(int questionId);
-        Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionIdAsync(int questionId);
-        Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionIdAsync(int questionId);
-        Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionIdAsync(int questionId);
-        Task UpdateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer);
-        Task UpdateTextAnswerAsync(TextQuestionAnswer answer);
-        Task UpdateRangeAnswerAsync(RangeQuestionAnswer answer);
-        Task UpdateDegreeAnswerAsync(DegreeQuestionAnswer answer);
-        Task DeleteMultipleChoiceAnswerAsync(int id);
-        Task DeleteTextAnswerAsync(int id);
-        Task DeleteRangeAnswerAsync(int id);
-        Task DeleteDegreeAnswerAsync(int id);
+        Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersByQuestionIdAsync(int questionnnaireId, int questionId);
+        Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersByQuestionIdAsync(int questionnnaireId, int questionId);
+        Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersByQuestionIdAsync(int questionnnaireId, int questionId);
+        Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersByQuestionIdAsync(int questionnnaireId, int questionId);
+        Task<bool> UpdateMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer);
+        Task<bool> UpdateTextAnswerAsync(TextQuestionAnswer answer);
+        Task<bool> UpdateRangeAnswerAsync(RangeQuestionAnswer answer);
+        Task<bool> UpdateDegreeAnswerAsync(DegreeQuestionAnswer answer);
+        Task<bool> DeleteMultipleChoiceAnswerAsync(MultipleChoiceQuestionAnswer answer);
+        Task<bool> DeleteTextAnswerAsync(TextQuestionAnswer answer);
+        Task<bool> DeleteRangeAnswerAsync(RangeQuestionAnswer answer);
+        Task<bool> DeleteDegreeAnswerAsync(DegreeQuestionAnswer answer);
+        Task<IEnumerable<DegreeQuestionAnswer>> GetDegreeAnswersAsync(int questionnaireId, string studentId);
+        Task<IEnumerable<MultipleChoiceQuestionAnswer>> GetMultipleChoiceAnswersAsync(int questionnaireId, string studentId);
+        Task<IEnumerable<RangeQuestionAnswer>> GetRangeAnswersAsync(int questionnaireId, string studentId);
+        Task<IEnumerable<TextQuestionAnswer>> GetTextAnswersAsync(int questionnaireId, string studentId);
     }
 }

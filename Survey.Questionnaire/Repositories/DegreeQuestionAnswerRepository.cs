@@ -36,28 +36,29 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(DegreeQuestionAnswerRepoModel answer)
         {
             var sql = GetDeleteSQL();
             try
             {
                 using var connection = _writeConnectionFactory.CreateConnection();
-                await connection.ExecuteAsync(sql, new { Id = id });
+                var rowsAffected = await connection.ExecuteAsync(sql, answer);
+                return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while deleting degree question answer with ID {Id}: {Message}", id, ex.Message);
+                _logger.LogError(ex, "Error while deleting degree question answer: {Message}", ex.Message);
                 throw;
             }
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetAllAnswersOfQuestionIdAsync(int questionnnaireId, int questionId)
         {
             var sql = GetByQuestionIdSQL();
             try
             {
                 using var connection = _readConnectionFactory.CreateConnection();
-                return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+                return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnnaireId, QuestionId = questionId });
             }
             catch (Exception ex)
             {
@@ -66,13 +67,14 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
-        public async Task UpdateAsync(DegreeQuestionAnswerRepoModel answer)
+        public async Task<bool> UpdateAsync(DegreeQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
             try
             {
                 using var connection = _writeConnectionFactory.CreateConnection();
-                await connection.ExecuteAsync(sql, answer);
+                var rowsAffected = await connection.ExecuteAsync(sql, answer);
+                return rowsAffected > 0;
             }
             catch (Exception ex)
             {
@@ -81,7 +83,7 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
-        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetAllOfQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
             try
@@ -96,6 +98,26 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
+        public async Task<IEnumerable<DegreeQuestionAnswerRepoModel>> GetAllAnswersAsync(int QuestionnaireId, string StudentId)
+        {
+            var sql = GetAllAnswersSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<DegreeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = QuestionnaireId, StudentId = StudentId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while getting degree question answers: {Message}", ex.Message);
+                throw;
+            }
+        }
+
+        private string GetAllAnswersSQL()
+        {
+            return "SELECT * FROM DegreeQuestionAnswers WHERE QuestionnaireId = @QuestionnaireId AND StudentId = @StudentId";
+        }
+
         private string GetCreateSQL()
         {
             return @"
@@ -105,25 +127,27 @@ namespace Survey.Questionnaires.Repositories
 
         private string GetDeleteSQL()
         {
-            return "DELETE FROM DegreeQuestionAnswers WHERE Id = @Id";
+            return @"
+                DELETE FROM DegreeQuestionAnswers
+                WHERE QuestionnaireId = @QuestionnaireId
+                  AND QuestionId = @QuestionId
+                  AND StudentId = @StudentId";
         }
 
         private string GetByQuestionIdSQL()
         {
-            return "SELECT * FROM DegreeQuestionAnswers WHERE QuestionId = @QuestionId";
+            return "SELECT * FROM DegreeQuestionAnswers WHERE QuestionnaireId = @QuestionnaireId AND QuestionId = @QuestionId";
         }
 
         private string GetUpdateSQL()
         {
             return @"
                 UPDATE DegreeQuestionAnswers
-                SET QuestionnaireId = @QuestionnaireId,
-                    QuestionId = @QuestionId,
-                    StudentId = @StudentId,
-                    AnswerValue = @AnswerValue,
+                SET AnswerValue = @AnswerValue,
                     FillDateTime = @FillDateTime
-                WHERE Id = @Id
-            ";
+                WHERE QuestionnaireId = @QuestionnaireId
+                      AND QuestionId = @QuestionId
+                      AND StudentId = @StudentId";
         }
 
         private string GetByQuestionnaireIdSQL()

@@ -16,7 +16,6 @@ using Suvery.WebAPI.Filters;
 namespace Suvery.WebAPI.Controllers
 {
     [ApiController]
-    [ApiKey]
     public class UniversityController : BaseController
     {
         public UniversityController(IMediator mediator) : base(mediator)

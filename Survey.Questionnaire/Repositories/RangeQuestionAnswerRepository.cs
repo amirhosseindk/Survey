@@ -36,28 +36,29 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(RangeQuestionAnswerRepoModel answer)
         {
             var sql = GetDeleteSQL();
             try
             {
                 using var connection = _writeConnectionFactory.CreateConnection();
-                await connection.ExecuteAsync(sql, new { Id = id });
+                var rowsAffected = await connection.ExecuteAsync(sql, answer);
+                return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while deleting range question answer with ID {Id}: {Message}", id, ex.Message);
+                _logger.LogError(ex, "Error while deleting range question answer: {Message}", ex.Message);
                 throw;
             }
         }
 
-        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetByQuestionIdAsync(int questionId)
+        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetAllAnswersOfQuestionIdAsync(int questionnnaireId, int questionId)
         {
             var sql = GetByQuestionIdSQL();
             try
             {
                 using var connection = _readConnectionFactory.CreateConnection();
-                return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionId = questionId });
+                return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = questionnnaireId, QuestionId = questionId });
             }
             catch (Exception ex)
             {
@@ -66,13 +67,14 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
-        public async Task UpdateAsync(RangeQuestionAnswerRepoModel answer)
+        public async Task<bool> UpdateAsync(RangeQuestionAnswerRepoModel answer)
         {
             var sql = GetUpdateSQL();
             try
             {
                 using var connection = _writeConnectionFactory.CreateConnection();
-                await connection.ExecuteAsync(sql, answer);
+                var rowsAffected = await connection.ExecuteAsync(sql, answer);
+                return rowsAffected > 0;
             }
             catch (Exception ex)
             {
@@ -81,7 +83,7 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
-        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetByQuestionnaireIdAsync(int questionnaireId)
+        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetAllOfQuestionnaireIdAsync(int questionnaireId)
         {
             var sql = GetByQuestionnaireIdSQL();
             try
@@ -96,6 +98,26 @@ namespace Survey.Questionnaires.Repositories
             }
         }
 
+        public async Task<IEnumerable<RangeQuestionAnswerRepoModel>> GetAllAnswersAsync(int QuestionnaireId, string StudentId)
+        {
+            var sql = GetAllAnswersSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<RangeQuestionAnswerRepoModel>(sql, new { QuestionnaireId = QuestionnaireId, StudentId = StudentId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while getting range question answers: {Message}", ex.Message);
+                throw;
+            }
+        }
+
+        private string GetAllAnswersSQL()
+        {
+            return "SELECT * FROM RangeQuestionAnswers WHERE QuestionnaireId = @QuestionnaireId AND StudentId = @StudentId";
+        }
+
         private string GetCreateSQL()
         {
             return @"
@@ -105,35 +127,27 @@ namespace Survey.Questionnaires.Repositories
 
         private string GetDeleteSQL()
         {
-            return "DELETE FROM RangeQuestionAnswers WHERE Id = @Id";
-        }
-
-        private string GetAllSQL()
-        {
-            return "SELECT * FROM RangeQuestionAnswers";
-        }
-
-        private string GetByIdSQL()
-        {
-            return "SELECT * FROM RangeQuestionAnswers WHERE Id = @Id";
+            return @"
+                DELETE FROM RangeQuestionAnswers
+                WHERE QuestionnaireId = @QuestionnaireId
+                  AND QuestionId = @QuestionId
+                  AND StudentId = @StudentId";
         }
 
         private string GetByQuestionIdSQL()
         {
-            return "SELECT * FROM RangeQuestionAnswers WHERE QuestionId = @QuestionId";
+            return "SELECT * FROM RangeQuestionAnswers WHERE QuestionnaireId = @QuestionnaireId AND QuestionId = @QuestionId";
         }
 
         private string GetUpdateSQL()
         {
             return @"
                 UPDATE RangeQuestionAnswers
-                SET QuestionnaireId = @QuestionnaireId,
-                    QuestionId = @QuestionId,
-                    StudentId = @StudentId,
-                    AnswerValue = @AnswerValue,
+                SET AnswerValue = @AnswerValue,
                     FillDateTime = @FillDateTime
-                WHERE Id = @Id
-            ";
+                WHERE QuestionnaireId = @QuestionnaireId
+                      AND QuestionId = @QuestionId
+                      AND StudentId = @StudentId";
         }
 
         private string GetByQuestionnaireIdSQL()

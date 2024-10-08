@@ -2,7 +2,6 @@
 {
     public class MultipleChoiceQuestionAnswer
     {
-        public int Id { get; set; }
         public int QuestionnaireId { get; set; }
         public int QuestionId { get; set; }
         public int AnswerOptionId { get; set; }
