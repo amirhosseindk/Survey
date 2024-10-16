@@ -1,173 +1,167 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using WebApp.Models;
+using Survey.Application.Dtos.Questionnaires;
+using Survey.Application.Features.Commands.Answer;
+using Survey.Application.Features.Commands.Questionnaires.CreateQuestionnaire;
+using Survey.Application.Features.Queries.Answers.GetAnswersOfQuestionnaire;
+using Survey.Application.Features.Queries.Answers.GetAnswersOfStudent;
+using Survey.Application.Features.Queries.Questionnaires.GetQuestionnaireById;
+using Survey.Application.Features.Queries.Universities.ClassCourse;
+using Survey.Application.Features.Queries.Universities.Classes;
+using Survey.Application.Features.Queries.Universities.Courses;
+using Survey.Application.Features.Queries.Universities.StudentClass;
+using WebApp.Extensions;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
     public class QuestionnaireController : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly IMediator _mediator;
+        private bool _updateAnswers;
 
-        public QuestionnaireController(AppDbContext context, UserManager<User> userManager)
+        public QuestionnaireController(IMediator mediator)
         {
-            _context = context;
-            _userManager = userManager;
+            _mediator = mediator;
         }
 
-        [Authorize(Roles = "Professor")]
-        public IActionResult Create()
+        public async Task<IActionResult> CreateAsync()
         {
-            var userId = _userManager.GetUserId(User);
-            var courses = _context.Courses
-                .Where(c => c.ProfessorId == userId)
-                .Include(c => c.Classes)
-                .ToList();
-            ViewBag.Courses = courses;
+            var userId = User.GetUserId();
+            var coursesOfProfessor = await _mediator.Send(new GetAllCoursesByProfessorIdQuery { ProfessorId = userId });
+
+            var courseTasks = coursesOfProfessor.Result.Select(async course =>
+            {
+                var res = await _mediator.Send(new GetCourseWithClassesByIdQuery { CourseId = course.Id });
+                return res.Result;
+            });
+
+            var coursesWithClasses = await Task.WhenAll(courseTasks);
+
+            ViewBag.Courses = coursesWithClasses;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] QuestionnaireDto data)
+        public async Task<IActionResult> Create([FromBody] CreateQuestionnaireDto data)
         {
             if (data == null)
             {
                 Console.WriteLine("Received null data.");
                 return BadRequest("Data is null.");
             }
-
-            data.Questions.RemoveAll(d => d.Rank == null);
-
-            var title = data.Title;
-            var classId = int.Parse(data.Class);
-            var professorId = _userManager.GetUserId(User);
-            var questions = new List<Question>();
-
-            var questionnaire = new Questionnaire
+            
+            var result = await _mediator.Send(new CreateQuestionnaireCommand 
             {
-                Title = title,
-                ClassId = classId,
-                ProfessorId = professorId,
-                Questions = questions
-            };
+                Title = data.Title,
+                ClassId = data.ClassId,
+                ProffesorId = User.GetUserId(),
+                Questions = data.Questions
+            });
 
-            foreach (var question in data.Questions)
-            {
-                switch (question.Type)
-                {
-                    case "Text":
-                        questionnaire.Questions.Add(new TextQuestion(Convert.ToInt16(question.Rank), question.Title) { Type = QuestionType.Text });
-                        break;
-                    case "MultipleChoice":
-                        questionnaire.Questions.Add(new MultipleChoiceQuestion(Convert.ToInt16(question.Rank), question.Title)
-                        {
-                            Type = QuestionType.MultipleChoice,
-                            Options = question.Options.Select(o => new MultipleChoiceOption { OptionText = o }).ToList()
-                        });
-                        break;
-                    case "Range":
-                        questionnaire.Questions.Add(new RangeQuestion(Convert.ToInt16(question.Rank), question.Title) { Type = QuestionType.Range });
-                        break;
-                    case "Degree":
-                        questionnaire.Questions.Add(new DegreeQuestion(Convert.ToInt16(question.Rank), question.Title) { Type = QuestionType.Degree });
-                        break;
-                }
-            }
-
-            _context.Questionnaires.Add(questionnaire);
-            await _context.SaveChangesAsync();
-            return Ok(new { questionnaireId = questionnaire.Id });
-        }   
+            return Ok(new { questionnaireId = result.Result });
+        }
 
         public async Task<IActionResult> Fill(int id)
         {
-            var questionnaire = await _context.Questionnaires
-                .Include(q => q.Questions)
-                .ThenInclude(q => (q as MultipleChoiceQuestion).Options)
-                .FirstOrDefaultAsync(q => q.Id == id);
+            var questionnaire = await _mediator.Send(new GetQuestionnaireByIdQuery { Id = id });
             if (questionnaire == null)
             {
                 return NotFound();
             }
-            return View(questionnaire);
+            var answers = await _mediator.Send(new GetAnswersOfStudentQuery { QuestionnaireId = id, StudentId = User.GetUserId() });
+            if (answers.Result.Count() != 0)
+            {
+                _updateAnswers = true;
+                ViewBag.Answers = answers.Result;
+                TempData["UpdateAnswers"] = true;
+            }
+
+            ViewBag.IsAnswered = _updateAnswers;
+            ViewBag.QuestionnaireId = id;
+            return View(questionnaire.Result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitAnswers([FromBody] List<AnswerDto> answers)
+        [Route("[controller]/SubmitAnswers/{id}")]
+        public async Task<IActionResult> SubmitAnswers(int id, [FromBody] WebApp.Models.AnswerDto answersDto)
         {
-            if (answers == null)
+            if (answersDto == null || (answersDto.CreateAnswers == null && answersDto.UpdateAnswers == null))
             {
                 Console.WriteLine("Received null answers.");
                 return BadRequest("Answers are null.");
             }
 
-            foreach (var answer in answers)
-            {
-                _context.Answers.Add(new Answer
-                {
-                    QuestionnaireId = answer.QuestionnaireId,
-                    QuestionId = answer.QuestionId,
-                    AnswerText = answer.AnswerText,
-                    AnswerOptionId = answer.AnswerOptionId,
-                    StudentId = _userManager.GetUserId(User)
-                });
-            }
+            _updateAnswers = TempData.ContainsKey("UpdateAnswers") && (bool)TempData["UpdateAnswers"];
 
-            await _context.SaveChangesAsync();
-            return Ok();
+            if (!_updateAnswers)
+            {
+                var result = await _mediator.Send(new CreateAnswerCommand { QuestionnaireId = id, Answers = answersDto.CreateAnswers });
+                if (result.Result)
+                    return Ok();
+                else
+                    return NotFound();
+            }
+            else
+            {
+                var result = await _mediator.Send(new UpdateAnswerCommand { QuestionnaireId = id, Answers = answersDto.UpdateAnswers });
+                if (result.Result)
+                    return Ok();
+                else
+                    return NotFound();
+            }
         }
 
-        [Authorize(Roles = "Professor")]
+        //[Authorize(Roles = "Professor")]
         public async Task<IActionResult> Results(int id)
         {
-            var questionnaire = await _context.Questionnaires
-                .Include(q => q.Class)
-                .ThenInclude(c => c.Students)
-                .Include(q => q.Questions)
-                .ThenInclude(q => ((MultipleChoiceQuestion)q).Options)
-                .FirstOrDefaultAsync(q => q.Id == id);
+            var questionnaire = await _mediator.Send(new GetQuestionnaireByIdQuery { Id = id });
             if (questionnaire == null)
             {
                 return NotFound();
             }
 
-            var totalStudents = questionnaire.Class.Students.Count;
-            var answeredStudents = await _context.Answers
-                .Where(a => a.QuestionnaireId == id)
+            var @class = await _mediator.Send(new GetClassByIdQuery { ClassId = questionnaire.Result.ClassId });
+            var students = await _mediator.Send(new GetStudentsByClassIdQuery { ClassId = questionnaire.Result.ClassId });
+
+            var totalStudents = students.Result.Count;
+
+            var answersResult = await _mediator.Send(new GetAnswersOfQuestionnaireQuery { QuestionnaireId = id });
+
+            var answeredStudents = answersResult.Result
                 .Select(a => a.StudentId)
                 .Distinct()
-                .CountAsync();
+                .Count();
 
-            var multipleChoiceResults = await _context.Answers
-                .Where(a => a.QuestionnaireId == id && a.AnswerOptionId != null)
-                .GroupBy(a => new { a.QuestionId, a.AnswerOptionId })
-                .Select(g => new MultipleChoiceResult { QuestionId = g.Key.QuestionId, AnswerOptionId = g.Key.AnswerOptionId, Count = g.Count() })
-                .ToListAsync();
+            var multipleChoiceResults = answersResult.Result
+                .Where(a => a.Type == 1 && !string.IsNullOrEmpty(a.AnswerText))
+                .GroupBy(a => new { a.QuestionId, a.AnswerText })
+                .Select(g => new MultipleChoiceResult
+                {
+                    QuestionId = g.Key.QuestionId,
+                    AnswerText = g.Key.AnswerText,
+                    Count = g.Count()
+                })
+                .ToList();
 
-            var textQuestionResults = await _context.Answers
-                .Where(a => a.QuestionnaireId == id && a.AnswerText != null)
+            var textQuestionResults = answersResult.Result
+                .Where(a => a.Type == 0 && !string.IsNullOrEmpty(a.AnswerText))
                 .GroupBy(a => a.QuestionId)
-                .Select(g => new TextQuestionResult { QuestionId = g.Key, Count = g.Count() })
-                .ToListAsync();
+                .Select(g => new TextQuestionResult
+                {
+                    QuestionId = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
 
             return View(new SurveyResultsViewModel
             {
-                Questionnaire = questionnaire,
+                Questionnaire = questionnaire.Result,
                 MultipleChoiceResults = multipleChoiceResults,
                 TextQuestionResults = textQuestionResults,
                 TotalStudents = totalStudents,
                 AnsweredStudents = answeredStudents
             });
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

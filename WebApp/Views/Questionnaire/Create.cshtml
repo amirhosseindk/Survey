@@ -1,313 +1,865 @@
-﻿@using WebApp.Models
-@using Microsoft.AspNetCore.Mvc.RazorPages
-@model WebApp.Models.QuestionnaireDto
+﻿@using Survey.Application.Dtos.Questionnaires
+@using Survey.Application.Dtos.Questions
+@model CreateQuestionnaireDto
 
 @{
     ViewData["Title"] = "Create Questionnaire";
+    Layout = null;
 }
 
-<link rel="stylesheet" href="~/css/QCreate.css" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
 
-<div class="container">
-    <form id="questionnaire-form">
-        <div class="form-group">
-            <label for="title">Questionnaire Title</label>
-            <input type="text" id="title" name="title" class="form-control" required />
+    <!-- External Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
+
+<style>
+/* CSS Variables */
+:root {
+  /* Light Mode Variables */
+  --primary-color: #7fcde7;
+  --secondary-color: #ffcbc2;
+  --background-color: #f5f8fa;
+  --text-color: #333;
+  --button-color: #7fcde7;
+  --input-border-color: #e0e6ed;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --icon-color: #ffeb3b; /* Icon color for dark mode toggle */
+}
+
+body.dark-mode {
+  /* Dark Mode Variables */
+  --primary-color: #1e3e62; /* Dark blue */
+  --secondary-color: #282a36; /* Teal */
+  --background-color: #0b192c; /* Deep navy */
+  --text-color: #ffffff; /* White */
+  --button-color: #ff6500; /* Bright orange */
+  --input-border-color: #444; /* Darker border */
+  --shadow-color: rgba(30, 62, 98, 0.5); /* Dark blue shadow */
+  --icon-color: #ffeb3b; /* Icon color for dark mode toggle */
+}
+
+/* Global Styles */
+body {
+  background-color: var(--background-color);
+  background: linear-gradient(
+    to right,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  font-family: "Roboto", sans-serif;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #fff; /* Light mode container background */
+  border-radius: 20px;
+  box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+body.dark-mode .container {
+  background-color: #070f2b; /* Dark mode container background */
+}
+
+h2 {
+  color: var(--primary-color);
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  color: var(--text-color);
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.form-group input,
+.form-group select,
+.modal textarea,
+.modal input {
+  border-radius: 10px;
+  border: 1px solid var(--input-border-color);
+  padding: 12px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  width: 100%;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+select {
+  appearance: none;
+}
+
+/* Table Styles */
+.table {
+  background-color: #fff; /* Light mode table background */
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px var(--shadow-color);
+}
+
+body.dark-mode .table {
+  background-color: #0b192c; /* Dark mode table background */
+}
+
+body.dark-mode .table tbody {
+  background-color: #0b192c; /* Dark mode table body */
+}
+
+.table th {
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 15px;
+}
+
+.table td,
+.table th {
+  text-align: left;
+  padding: 15px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+/* Navbar Styles */
+.navbar {
+  background-color: var(--primary-color) !important;
+  background: linear-gradient(
+    to right,
+    #4578b3,
+    #ba958e
+  );
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+body.dark-mode .navbar {
+  background-color: var(--primary-color) !important;
+  background: linear-gradient(
+    to right,
+    #2d4f76,
+    #6f544f
+  );
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: #fff !important;
+}
+
+.navbar-nav .nav-link {
+  color: #000; /* Default color for navbar links in light mode */
+  transition: color 0.3s;
+}
+
+/* Light Mode - Navbar Links Text and Icons */
+body:not(.dark-mode) .navbar-nav .nav-link {
+  color: #000; /* Black text */
+}
+
+body:not(.dark-mode) .navbar-nav .nav-link i {
+  color: inherit; /* Inherit color (black) */
+}
+
+/* Dark Mode - Navbar Links Text and Icons */
+body.dark-mode .navbar-nav .nav-link {
+  color: #fff; /* White text */
+}
+
+body.dark-mode .navbar-nav .nav-link i {
+  color: inherit; /* Inherit color (white) */
+}
+
+/* Dark Mode Toggle Icon Styles */
+#toggle-dark-mode i {
+  color: var(--icon-color);
+  transition: color 0.3s;
+}
+
+/* Change Dark Mode Toggle Icon Color Based on Theme */
+body:not(.dark-mode) #toggle-dark-mode i {
+  color: #333333; /* Dark gray in light mode */
+}
+
+body.dark-mode #toggle-dark-mode i {
+  color: #ffeb3b; /* Yellow in dark mode */
+}
+
+/* Navbar Toggler Icon */
+.navbar-toggler {
+  border-color: #fff;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%288, 8, 8, 0.8%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Question Type Styles */
+.question-type {
+  padding: 15px;
+  border-radius: 15px;
+  background-color: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  margin-bottom: 15px;
+  cursor: grab;
+  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
+  position: relative; /* For delete button positioning */
+}
+
+.question-type:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px var(--shadow-color);
+  background-color: #66b6d5;
+}
+
+body.dark-mode .question-type {
+  background-color: #6272a4; /* Teal */
+  color: #ffffff; /* White */
+}
+
+/* Delete Button Styles */
+.delete-btn {
+  position: absolute;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-btn:hover {
+  color: #ff1a1a;
+}
+
+.delete-btn i {
+  pointer-events: none;
+}
+
+.question-content {
+  padding-right: 30px; /* Prevent overlap with delete button */
+}
+
+/* Option Wrapper Styles */
+.option-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Option Input Styles */
+.option-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Delete Option Button Styles */
+.delete-option-btn {
+  background-color: transparent;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0 10px;
+}
+
+.delete-option-btn:hover {
+  color: #ff1a1a;
+}
+
+.delete-option-btn i {
+  pointer-events: none;
+}
+
+/* Drop Area Styles */
+#drop-area {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border: 2px dashed var(--primary-color);
+  padding: 30px;
+  border-radius: 15px;
+  background-color: var(--background-color);
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-color);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  min-height: 150px;
+}
+
+#drop-area.dragging {
+  background-color: var(--secondary-color);
+  border-color: #ff9999;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+}
+
+body.dark-mode .modal-content {
+  background-color: #1e3e62; /* Dark blue */
+  border: 1px solid #1e3e62; /* Darker border */
+}
+
+body.dark-mode .modal-content h2 {
+  color: #ffcb6b; /* Light orange for better visibility in dark mode */
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal textarea,
+.modal input {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.modal button {
+  background-color: var(--button-color);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal button:hover {
+  background-color: #ff6500; /* Bright orange */
+}
+
+/* Welcome and End Pages */
+.welcome-page,
+.end-page {
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Button Styles */
+.btn-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background-color: var(--button-color);
+  border-color: var(--button-color);
+  padding: 12px 25px;
+  font-size: 18px;
+  border-radius: 25px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #66b6d5;
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  #drop-area {
+    padding: 20px;
+  }
+
+  .table th {
+    font-size: 14px;
+  }
+}
+</style>
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Questionnaire Builder</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item px-3">
+                        <a class="nav-link active" href="#"><i class="fa fa-home fa-xl"></i></a>
+                    </li>
+                    <li class="nav-item px-3">
+                        <a class="nav-link" href="#" id="toggle-dark-mode">
+                            <i class="fa fa-moon fa-xl" aria-hidden="true" id="dark-mode-icon"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-language fa-xl"></i>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Persian</a></li>
+                            <li><a class="dropdown-item" href="#">English</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item px-3">
+                        <a class="nav-link active" href="#"><i class="fas fa-user-circle fa-xl"></i></a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
-        <div class="form-group">
-            <label for="course">Select Course</label>
-            <select id="course" name="course" class="form-control" required>
-                @foreach (var course in ViewBag.Courses)
-                {
-                    <option value="@course.Id">@course.Name</option>
-                }
-            </select>
+    <div class="container">
+        <!-- Body -->
+        <h2 class="mt-4">Create Questionnaire</h2>
+        <form id="questionnaire-form" method="post" action="/Questionnaire/Create">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="title">Questionnaire Title</label>
+                        <input type="text" id="title" name="Title" class="form-control" placeholder="Enter your Questionnaire Title" required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="course">Select Course <i class="fa fa-angle-down"></i></label>
+                        <select class="form-control" id="course" name="CourseId" required>
+                            @foreach (var course in ViewBag.Courses)
+                            {
+                                <option value="@course.Id">@course.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="class">Select Class <i class="fa fa-angle-down"></i></label>
+                        <select class="form-control" id="class" name="ClassId" required>
+                            @foreach (var course in ViewBag.Courses)
+                            {
+                                <option value="@course.Id">@course.Name</option>
+                                @foreach (var cls in course.Classes)
+                                {
+                                    <option value="@cls.Key">&nbsp;&nbsp;@cls.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row pt-5">
+                <div class="col-md-4 pt-5" id="left-col">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">
+                                    <div class="question-type" draggable="true" data-type="Text">
+                                        Text <i class="fa fa-file-text" aria-hidden="true"></i>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <div class="question-type" draggable="true" data-type="MultipleChoice">
+                                        Multiple Choice <i class="fa fa-list-ol" aria-hidden="true"></i>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <div class="question-type" draggable="true" data-type="Range">
+                                        Range <i class="fa fa-calendar" aria-hidden="true"></i>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <div class="question-type" draggable="true" data-type="Degree">
+                                        Degree <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                                    </div>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="row welcome-page d-flex justify-content-center align-items-center">
+                        <label class="h2 text-center" data-type="welcome">Welcome</label>
+                    </div>
+                    <div class="row body-page d-flex align-items-center">
+                        <div id="drop-area" class="drop-area d-flex justify-content-center align-items-center">
+                            <div class="h5">Drag question types here</div>
+                        </div>
+                    </div>
+                    <div class="row end-page d-flex justify-content-center align-items-center" data-type="end">
+                        <label class="h2 text-center">End Page</label>
+                    </div>
+                    <div class="row">
+                        <div class="btn-container">
+                            <button type="submit" class="btn btn-primary" id="submit-button">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modals for question settings -->
+    <div id="multiple-choice-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Multiple Choice Question Settings</h2>
+            <label for="mc-question-text">Question:</label>
+            <textarea id="mc-question-text" rows="4"></textarea>
+            <h3>Options</h3>
+            <div id="options-container">
+                <input type="text" class="option-input" placeholder="Option 1">
+                <input type="text" class="option-input" placeholder="Option 2">
+                <input type="text" class="option-input" placeholder="Option 3">
+                <input type="text" class="option-input" placeholder="Option 4">
+            </div>
+            <button id="add-option">Add Option</button>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label for="class">Select Class</label>
-            <select id="class" name="class" class="form-control" required>
-                @foreach (var course in ViewBag.Courses)
-                {
-                    @foreach (var cls in course.Classes)
-                    {
-                        <option value="@cls.Id">@course.Name - @cls.Name</option>
+    <div id="short-text-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Short Text Question Settings</h2>
+            <label for="short-question-text">Question:</label>
+            <textarea id="short-question-text" rows="4"></textarea>
+        </div>
+    </div>
+
+    <div id="scale-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Scale Question Settings</h2>
+            <label for="scale-question-text">Question:</label>
+            <textarea id="scale-question-text" rows="4"></textarea>
+        </div>
+    </div>
+
+    <div id="rating-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Rating Question Settings</h2>
+            <label for="rating-question-text">Question:</label>
+            <textarea id="rating-question-text" rows="4"></textarea>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const questionTypes = document.querySelectorAll('.question-type');
+            const dropArea = document.getElementById('drop-area');
+            const modals = {
+                'MultipleChoice': document.getElementById('multiple-choice-modal'),
+                'Text': document.getElementById('short-text-modal'),
+                'Range': document.getElementById('scale-modal'),
+                'Degree': document.getElementById('rating-modal')
+            };
+            const closeModalButtons = document.querySelectorAll('.close');
+            let questionCount = 1;
+            const questionData = {};
+
+            // Type map with integers for the back-end
+            const typeMap = {
+                'MultipleChoice': 1,
+                'Text': 0,
+                'Range': 2,
+                'Degree': 3
+            };
+
+            questionTypes.forEach(type => {
+                type.addEventListener('dragstart', dragStart);
+            });
+
+            dropArea.addEventListener('dragover', dragOver);
+            dropArea.addEventListener('drop', drop);
+
+            function dragStart(event) {
+                event.dataTransfer.setData('text', event.target.dataset.type);
+            }
+
+            function dragOver(event) {
+                event.preventDefault();
+            }
+
+            function drop(event) {
+                event.preventDefault();
+                const type = event.dataTransfer.getData('text');
+                const newElement = document.createElement('div');
+                newElement.classList.add('question-type');
+                newElement.textContent = `Question ${questionCount}: ${Object.keys(typeMap).find(key => typeMap[key] === typeMap[type])}`;
+                newElement.dataset.type = type;
+                newElement.dataset.rank = questionCount++;
+                newElement.dataset.id = Date.now();
+                newElement.addEventListener('click', openModal);
+                dropArea.appendChild(newElement);
+            }
+
+            function openModal(event) {
+                const type = event.currentTarget.dataset.type;
+                const id = event.currentTarget.dataset.id;
+                if (modals[type]) {
+                    modals[type].style.display = "block";
+                    modals[type].dataset.currentQuestion = id;
+                    if (questionData[id]) {
+                        loadQuestionData(type, id);
+                    } else {
+                        clearModalData(type);
                     }
                 }
-            </select>
-        </div>
+            }
 
-        <div class="flex-container">
-            <div class="left-panel">
-                <div class="section welcome-section" data-type="welcome">
-                    <h3>Welcome Page</h3>
-                </div>
-                <div id="drop-area" class="drop-area">
-                    <p>Drag question types here</p>
-                </div>
-                <div class="section end-section" data-type="end">
-                    <h3>End Page</h3>
-                </div>
-                <button id="submit-button" class="submit-button" type="button">Submit</button>
-            </div>
-
-            <div class="right-panel">
-                <div class="question-type" draggable="true" data-type="Text">Text</div>
-                <div class="question-type" draggable="true" data-type="MultipleChoice">Multiple Choice</div>
-                <div class="question-type" draggable="true" data-type="Range">Range</div>
-                <div class="question-type" draggable="true" data-type="Degree">Degree</div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Modals for question settings -->
-<div id="multiple-choice-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Multiple Choice Question Settings</h2>
-        <label for="mc-question-text">Question:</label>
-        <textarea id="mc-question-text" rows="4"></textarea>
-        <h3>Options</h3>
-        <div id="options-container">
-            <input type="text" class="option-input" placeholder="Option 1">
-            <input type="text" class="option-input" placeholder="Option 2">
-            <input type="text" class="option-input" placeholder="Option 3">
-            <input type="text" class="option-input" placeholder="Option 4">
-        </div>
-        <button id="add-option">Add Option</button>
-    </div>
-</div>
-
-<div id="short-text-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Short Text Question Settings</h2>
-        <label for="short-question-text">Question:</label>
-        <textarea id="short-question-text" rows="4"></textarea>
-    </div>
-</div>
-
-<div id="welcome-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Welcome Page Settings</h2>
-        <label for="welcome-text">Text:</label>
-        <textarea id="welcome-text" rows="4"></textarea>
-    </div>
-</div>
-
-<div id="end-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>End Page Settings</h2>
-        <label for="end-text">Text:</label>
-        <textarea id="end-text" rows="4"></textarea>
-    </div>
-</div>
-
-<div id="scale-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Scale Question Settings</h2>
-        <label for="scale-question-text">Question:</label>
-        <textarea id="scale-question-text" rows="4"></textarea>
-    </div>
-</div>
-
-<div id="rating-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Rating Question Settings</h2>
-        <label for="rating-question-text">Question:</label>
-        <textarea id="rating-question-text" rows="4"></textarea>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const questionTypes = document.querySelectorAll('.question-type');
-        const dropArea = document.getElementById('drop-area');
-        const modals = {
-            'MultipleChoice': document.getElementById('multiple-choice-modal'),
-            'Text': document.getElementById('short-text-modal'),
-            'Range': document.getElementById('scale-modal'),
-            'Degree': document.getElementById('rating-modal')
-        };
-        const closeModalButtons = document.querySelectorAll('.close');
-        let questionCount = 1;
-        const questionData = {};
-
-        const typeMap = {
-            'MultipleChoice': 'Multiple Choice',
-            'Text': 'Text',
-            'Range': 'Range',
-            'Degree': 'Degree'
-        };
-
-        questionTypes.forEach(type => {
-            type.addEventListener('dragstart', dragStart);
-        });
-
-        dropArea.addEventListener('dragover', dragOver);
-        dropArea.addEventListener('drop', drop);
-
-        document.querySelector('.welcome-section').addEventListener('click', openModal);
-        document.querySelector('.end-section').addEventListener('click', openModal);
-
-        function dragStart(event) {
-            event.dataTransfer.setData('text', event.target.dataset.type);
-        }
-
-        function dragOver(event) {
-            event.preventDefault();
-        }
-
-        function drop(event) {
-            event.preventDefault();
-            const type = event.dataTransfer.getData('text');
-            const newElement = document.createElement('div');
-            newElement.classList.add('question-type');
-            newElement.textContent = `Question ${questionCount}: ${typeMap[type]}`;
-            newElement.dataset.type = type;
-            newElement.dataset.rank = questionCount++;
-            newElement.dataset.id = Date.now();
-            newElement.addEventListener('click', openModal);
-            dropArea.appendChild(newElement);
-        }
-
-        function openModal(event) {
-            const type = event.currentTarget.dataset.type;
-            const id = event.currentTarget.dataset.id;
-            if (modals[type]) {
-                modals[type].style.display = "block";
-                modals[type].dataset.currentQuestion = id;
-                if (questionData[id]) {
-                    loadQuestionData(type, id);
-                } else {
-                    clearModalData(type);
+            function loadQuestionData(type, id) {
+                if (type === 'MultipleChoice') {
+                    document.getElementById('mc-question-text').value = questionData[id].title || '';
+                    const optionsContainer = document.getElementById('options-container');
+                    optionsContainer.innerHTML = '';
+                    (questionData[id].options || []).forEach((option, index) => {
+                        createOptionInput(option, index + 1);
+                    });
+                } else if (type === 'Text') {
+                    document.getElementById('short-question-text').value = questionData[id].title || '';
+                } else if (type === 'Range') {
+                    document.getElementById('scale-question-text').value = questionData[id].title || '';
+                } else if (type === 'Degree') {
+                    document.getElementById('rating-question-text').value = questionData[id].title || '';
                 }
             }
-        }
 
-        function loadQuestionData(type, id) {
-            if (type === 'MultipleChoice') {
-                document.getElementById('mc-question-text').value = questionData[id].title || '';
-                const optionsContainer = document.getElementById('options-container');
-                optionsContainer.innerHTML = '';
-                (questionData[id].options || []).forEach((option, index) => {
-                    const newOption = document.createElement('input');
-                    newOption.type = 'text';
-                    newOption.classList.add('option-input');
-                    newOption.placeholder = `Option ${index + 1}`;
-                    newOption.value = option;
-                    optionsContainer.appendChild(newOption);
-                });
-            } else if (type === 'Text') {
-                document.getElementById('short-question-text').value = questionData[id].title || '';
-            } else if (type === 'Range') {
-                document.getElementById('scale-question-text').value = questionData[id].title || '';
-            } else if (type === 'Degree') {
-                document.getElementById('rating-question-text').value = questionData[id].title || '';
-            }
-        }
-
-        function clearModalData(type) {
-            if (type === 'MultipleChoice') {
-                document.getElementById('mc-question-text').value = '';
-                const optionsContainer = document.getElementById('options-container');
-                optionsContainer.innerHTML = '';
-                for (let i = 1; i <= 4; i++) {
-                    const newOption = document.createElement('input');
-                    newOption.type = 'text';
-                    newOption.classList.add('option-input');
-                    newOption.placeholder = `Option ${i}`;
-                    optionsContainer.appendChild(newOption);
+            function clearModalData(type) {
+                if (type === 'MultipleChoice') {
+                    document.getElementById('mc-question-text').value = '';
+                    const optionsContainer = document.getElementById('options-container');
+                    optionsContainer.innerHTML = '';
+                    for (let i = 1; i <= 4; i++) {
+                        createOptionInput("", i);
+                    }
+                } else if (type === 'Text') {
+                    document.getElementById('short-question-text').value = '';
+                } else if (type === 'Range') {
+                    document.getElementById('scale-question-text').value = '';
+                } else if (type === 'Degree') {
+                    document.getElementById('rating-question-text').value = '';
                 }
-            } else if (type === 'Text') {
-                document.getElementById('short-question-text').value = '';
-            } else if (type === 'Range') {
-                document.getElementById('scale-question-text').value = '';
-            } else if (type === 'Degree') {
-                document.getElementById('rating-question-text').value = '';
             }
-        }
 
-        closeModalButtons.forEach(button => {
-            button.onclick = function () {
-                saveModalData(button.parentElement.parentElement.dataset.currentQuestion);
-                button.parentElement.parentElement.style.display = "none";
+            closeModalButtons.forEach(button => {
+                button.onclick = function () {
+                    const questionId = button.parentElement.parentElement.dataset.currentQuestion;
+                    saveModalData(questionId);
+                    button.parentElement.parentElement.style.display = "none";
+                };
+            });
+
+            window.onclick = function (event) {
+                if (event.target.classList.contains('modal')) {
+                    const questionId = event.target.dataset.currentQuestion;
+                    saveModalData(questionId);
+                    event.target.style.display = "none";
+                }
             };
-        });
 
-        window.onclick = function (event) {
-            if (event.target.classList.contains('modal')) {
-                saveModalData(event.target.dataset.currentQuestion);
-                event.target.style.display = "none";
-            }
-        };
+            document.getElementById('add-option').addEventListener('click', function () {
+                const optionsContainer = document.getElementById('options-container');
+                const optionCount = optionsContainer.querySelectorAll('.option-input').length + 1;
+                createOptionInput("", optionCount);
+            });
 
-        document.getElementById('add-option').addEventListener('click', function () {
-            const optionsContainer = document.getElementById('options-container');
-            const optionCount = optionsContainer.querySelectorAll('.option-input').length + 1;
-            const newOption = document.createElement('input');
-            newOption.type = 'text';
-            newOption.classList.add('option-input');
-            newOption.placeholder = `Option ${optionCount}`;
-            optionsContainer.appendChild(newOption);
-        });
+            function createOptionInput(value, index) {
+                const optionsContainer = document.getElementById('options-container');
 
-        function saveModalData(id) {
-            const type = document.querySelector(`[data-id='${id}']`).dataset.type;
-            if (!questionData[id]) {
-                questionData[id] = { type, title: '', options: [] };
-            }
+                const optionWrapper = document.createElement('div');
+                optionWrapper.classList.add('option-wrapper');
 
-            if (type === 'MultipleChoice') {
-                questionData[id].title = document.getElementById('mc-question-text').value;
-                const options = [];
-                document.querySelectorAll('.option-input').forEach(optionEl => {
-                    options.push(optionEl.value);
+                const newOption = document.createElement('input');
+                newOption.type = 'text';
+                newOption.classList.add('option-input');
+                newOption.placeholder = `Option ${index}`;
+                newOption.value = value;
+
+                const deleteOptionBtn = document.createElement('button');
+                deleteOptionBtn.innerHTML = '<i class="fa fa-trash"></i>';
+                deleteOptionBtn.classList.add('delete-option-btn');
+                deleteOptionBtn.setAttribute('aria-label', 'Delete this option');
+                deleteOptionBtn.addEventListener('click', function () {
+                    const optionCount = optionsContainer.querySelectorAll('.option-wrapper').length;
+                    if (optionCount > 1) {
+                        optionWrapper.remove();
+                        updateOptionPlaceholders();
+                    } else {
+                        alert("At least one option is required.");
+                    }
                 });
-                questionData[id].options = options;
-            } else if (type === 'Text') {
-                questionData[id].title = document.getElementById('short-question-text').value;
-            } else if (type === 'Range') {
-                questionData[id].title = document.getElementById('scale-question-text').value;
-            } else if (type === 'Degree') {
-                questionData[id].title = document.getElementById('rating-question-text').value;
+
+                optionWrapper.appendChild(newOption);
+                optionWrapper.appendChild(deleteOptionBtn);
+                optionsContainer.appendChild(optionWrapper);
             }
-        }
 
-        document.getElementById('submit-button').addEventListener('click', function () {
-            const title = document.getElementById('title').value;
-            const classId = document.getElementById('class').value;
-            const questions = [];
-
-            for (const [id, data] of Object.entries(questionData)) {
-                questions.push({
-                    rank: parseInt(document.querySelector(`[data-id='${id}']`).dataset.rank, 10),
-                    type: data.type,
-                    title: data.title,
-                    options: data.options
+            function updateOptionPlaceholders() {
+                const optionInputs = document.querySelectorAll("#options-container .option-input");
+                optionInputs.forEach((input, index) => {
+                    input.placeholder = `Option ${index + 1}`;
                 });
             }
 
-            fetch('/Questionnaire/Create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ title, class: classId, questions })
-            }).then(response => response.json()).then(data => {
-                if (data.questionnaireId) {
-                    alert('Questionnaire were successfully recorded.');
-                    window.location.href = `/Professor/Index`;
-                } else {
-                    alert('Error submitting the questionnaire.');
+            function saveModalData(id) {
+                const type = document.querySelector(`[data-id='${id}']`).dataset.type;
+                if (!questionData[id]) {
+                    questionData[id] = { type, title: "", options: [] };
                 }
+
+                if (type === 'MultipleChoice') {
+                    questionData[id].title = document.getElementById('mc-question-text').value;
+                    const options = [];
+                    document.querySelectorAll('.option-input').forEach(optionEl => {
+                        options.push(optionEl.value);
+                    });
+                    questionData[id].options = options;
+                } else if (type === 'Text') {
+                    questionData[id].title = document.getElementById('short-question-text').value;
+                } else if (type === 'Range') {
+                    questionData[id].title = document.getElementById('scale-question-text').value;
+                } else if (type === 'Degree') {
+                    questionData[id].title = document.getElementById('rating-question-text').value;
+                }
+            }
+
+            document.getElementById('submit-button').addEventListener('click', function (event) {
+                event.preventDefault();
+
+                const title = document.getElementById('title').value;
+                const classId = document.getElementById('class').value;
+                const questions = [];
+
+                const questionElements = document.querySelectorAll('.question-type');
+                questionElements.forEach((element) => {
+                    const id = element.dataset.id;
+                    const data = questionData[id];
+                    if (data) {
+                        questions.push({
+                            rank: parseInt(element.dataset.rank, 10),
+                            type: typeMap[data.type],  // Use the integer type mapping here
+                            title: data.title,
+                            options: data.options.map(option => ({
+                                OptionText: option
+                            }))
+                        });
+                    }
+                });
+
+                const data = {
+                    title: title,
+                    classId: parseInt(classId, 10),
+                    questions: questions
+                };
+
+                console.log("Payload being sent:", data); // Log the data for debugging
+
+                fetch('/Questionnaire/Create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.questionnaireId) {
+                            alert('Questionnaire was successfully recorded.');
+                            window.location.href = '/Professor/Index';
+                        } else {
+                            alert('Error submitting the questionnaire.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting the form:', error);
+                    });
             });
         });
-    });
-</script>
+    </script>
+
+</body>
+</html>

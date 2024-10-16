@@ -1,22 +1,35 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using WebApp;
-using WebApp.IServices;
-using WebApp.Models;
-using WebApp.Services;
+using Survey.Application.Extensions;
+using Survey.Questionnaires.Extensions;
+using Survey.University.Extensions;
+using Survey.Users.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<User, IdentityRole>()
+//    .AddEntityFrameworkStores<AppDbContext>()
+//    .AddDefaultTokenProviders();
+
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
+builder.Services.ConfigureApplicationServices();
+builder.Services.ConfigureQuestionnaireService(builder.Configuration);
+builder.Services.ConfigureUniversityService(builder.Configuration);
+builder.Services.ConfigureUserService(builder.Configuration);
+
+// Exception Handling Middleware
+//builder.Services.AddExceptionHandler<ExceptionHandlerMiddleware>();
+//builder.Services.AddProblemDetails();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IStatisticalAnalysisService, StatisticalAnalysisService>();
+//builder.Services.AddScoped<IStatisticalAnalysisService, StatisticalAnalysisService>();
 
 var app = builder.Build();
 

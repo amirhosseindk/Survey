@@ -133,6 +133,22 @@ namespace Survey.University.Services
             }
         }
 
+        public async Task<IEnumerable<Course>> GetAllCoursesByProfessorIdAsync(string professorId)
+        {
+            try
+            {
+                var courses = await _courseRepository.GetAllByProfessorIdAsync(professorId);
+                if (courses == null) throw new KeyNotFoundException("No courses found");
+
+                return courses.Select(c => new Course { Id = c.Id, Name = c.Name, ProfessorId = c.ProfessorId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving all courses: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<int> CreateClassAsync(Class @class)
         {
             try

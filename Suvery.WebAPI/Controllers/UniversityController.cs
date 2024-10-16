@@ -11,7 +11,6 @@ using Survey.Application.Features.Queries.Universities.ClassCourse;
 using Survey.Application.Features.Queries.Universities.Classes;
 using Survey.Application.Features.Queries.Universities.Courses;
 using Survey.Application.Features.Queries.Universities.StudentClass;
-using Suvery.WebAPI.Filters;
 
 namespace Suvery.WebAPI.Controllers
 {
@@ -90,6 +89,14 @@ namespace Suvery.WebAPI.Controllers
         public async Task<ResultDto<IEnumerable<CourseDto>>> GetAllCourses()
         {
             var result = await _mediator.Send(new GetAllCoursesQuery());
+            return result;
+        }
+
+        [HttpGet]
+        [Route("api/[controller]/GetAllCoursesByProfessorId/{professorId}")]
+        public async Task<ResultDto<IEnumerable<CourseDto>>> GetAllCoursesByProfessorId(string professorId)
+        {
+            var result = await _mediator.Send(new GetAllCoursesByProfessorIdQuery { ProfessorId = professorId});
             return result;
         }
 

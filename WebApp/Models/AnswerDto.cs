@@ -1,11 +1,10 @@
-﻿namespace WebApp.Models
+﻿using Survey.Application.Dtos.Answer;
+
+namespace WebApp.Models
 {
     public class AnswerDto
     {
-        public int QuestionnaireId { get; set; }
-        public int QuestionId { get; set; }
-        public string? AnswerText { get; set; }
-        public int? AnswerOptionId { get; set; }
-        public int StudentId { get; set; }
+        public List<CreateAnswerDto> CreateAnswers { get; set; }
+        public List<UpdateAnswerDto>? UpdateAnswers { get; set; }
     }
 }

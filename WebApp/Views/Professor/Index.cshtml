@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebApp.Models.Questionnaire>
+﻿@model IEnumerable<Survey.Application.Dtos.Questionnaires.QuestionnaireDto>
 
 @{
     ViewData["Title"] = "Professor Home";
@@ -59,7 +59,7 @@
                                 @foreach (var questionnaire in Model)
                                 {
                                     <li class="list-group-item">
-                                        <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" data-course-id="@questionnaire.Class.CourseId" data-class-id="@questionnaire.ClassId" class="mr-2" />
+                                        <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" data-course-id="@questionnaire.CourseId" data-class-id="@questionnaire.ClassId" class="mr-2" />
                                         <a asp-controller="Questionnaire" asp-action="Results" asp-route-id="@questionnaire.Id">@questionnaire.Title</a>
                                     </li>
                                 }

@@ -1,43 +1,166 @@
 ﻿@model WebApp.ViewModels.RegisterViewModel
 
 @{
-    Layout = "~/Views/Shared/_AuthLayout.cshtml";
-    ViewData["Title"] = "Register";
+    Layout = null;
 }
 
-<div class="auth-form">
-    <h2 class="auth-title">ثبت نام</h2>
-    <form asp-action="Register" method="post">
-        <div class="form-group">
-            <label asp-for="StudentNumber"></label>
-            <input asp-for="StudentNumber" class="form-control" placeholder="شماره دانشجویی" />
-            <span asp-validation-for="StudentNumber" class="text-danger"></span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+
+    <style>
+        :root {
+            --primary-color: #7fcde7;
+            --secondary-color: #ffcbc2;
+            --background-color: #f5f8fa;
+            --text-color: #333;
+            --button-color: #7fcde7;
+            --input-border-color: #e0e6ed;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Full viewport height */
+        }
+
+        .gradient-custom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary-color);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            min-height: 100vh; /* Full viewport height */
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            padding: 60px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border-color);
+            box-shadow: 0 4px 6px var(--shadow-color);
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: var(--button-color);
+            color: white;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 25px;
+            border: none;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+            .btn:hover {
+                background-color: #66b6d5;
+            }
+
+        p {
+            margin-top: 20px;
+        }
+
+        a {
+            color: var(--primary-color);
+        }
+
+            a:hover {
+                color: #66b6d5;
+            }
+
+        /* Responsive adjustments */
+        @@media only screen and (max-width: 768px) {
+            .auth-card {
+                padding: 40px 20px;
+                max-width: 90%;
+            }
+        }
+
+        @@media only screen and (max-width: 480px) {
+            .auth-card {
+                padding: 30px 10px;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="vh-100 gradient-custom">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-12">
+                    <div class="auth-card">
+                        <h2 class="fw-bold text-uppercase">Register</h2>
+                        <form asp-action="Register" method="post">
+                            <input asp-for="StudentNumber" class="form-control" placeholder="Student Number" />
+                            <span asp-validation-for="StudentNumber" class="text-danger"></span>
+
+                            <input asp-for="Email" class="form-control" type="email" placeholder="Email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+
+                            <input asp-for="Password" class="form-control" type="password" placeholder="Password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+
+                            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Confirm Password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+
+                            <select asp-for="SelectedClassName" asp-items="@(new SelectList(Model.Classes, "Name", "Name"))" class="form-control">
+                                <option value="">Select Class</option>
+                            </select>
+                            <span asp-validation-for="SelectedClassName" class="text-danger"></span>
+
+                            <div class="form-group mt-3">
+                                <input asp-for="IsProfessor" type="checkbox" />
+                                <label asp-for="IsProfessor">Are you a professor?</label>
+                            </div>
+
+                            <button type="submit" class="btn">Submit</button>
+                        </form>
+                        <p class="mt-3">Already have an account? <a href="/User/Login">Login</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label asp-for="Email"></label>
-            <input asp-for="Email" class="form-control" type="email" placeholder="ایمیل" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Password"></label>
-            <input asp-for="Password" class="form-control" type="password" placeholder="رمز عبور" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="ConfirmPassword"></label>
-            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="تایید رمز عبور" />
-            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="SelectedClassName">کلاس</label>
-            <select asp-for="SelectedClassName" asp-items="@(new SelectList(Model.Classes, "Name", "Name"))" class="form-control">
-            </select>
-            <span asp-validation-for="SelectedClassName" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <input asp-for="IsProfessor" type="checkbox" />
-            <label asp-for="IsProfessor">Are you a professor?</label>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">ثبت نام</button>
-    </form>
-</div>
+    </section>
+</body>
+</html>

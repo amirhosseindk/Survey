@@ -8,6 +8,7 @@ namespace Survey.University.Contracts
         Task<CourseRepoModel> GetByIdAsync(int id);
         Task<CourseRepoModel> GetByNameAsync(string name);
         Task<IEnumerable<CourseRepoModel>> GetAllAsync();
+        Task<IEnumerable<CourseRepoModel>> GetAllByProfessorIdAsync(string professorId);
         Task<bool> UpdateAsync(CourseRepoModel course);
         Task<bool> DeleteAsync(int id);
         Task<Dictionary<int, string>> GetClassesByCourseIdAsync(int courseId);

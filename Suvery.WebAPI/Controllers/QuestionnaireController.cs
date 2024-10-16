@@ -32,7 +32,7 @@ namespace Suvery.WebAPI.Controllers
                 Title = dto.Title,
                 Questions = dto.Questions,
                 ClassId = dto.ClassId,
-                ProffesorId = dto.ProffesorId
+                ProffesorId = dto.ProfessorId
             });
             
             return result;

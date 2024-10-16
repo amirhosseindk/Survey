@@ -177,6 +177,8 @@ namespace Survey.Users.Services
                 {
                     _logger.LogInformation("User {UserId} created successfully. Adding default claims...", user.Id);
                     await AddDefaultClaimsAsync(user);
+                    _logger.LogInformation("User {UserId} default claims Added successfully. Adding default roles...", user.Id);
+                    await AddDefaultRolesAsync(user);
                 }
                 else
                 {
@@ -576,6 +578,10 @@ namespace Survey.Users.Services
 
                 _logger.LogInformation("Logging in user {UserId}", user.Id);
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                _logger.LogInformation("Login successful for user {Username}. checking missing claims...", user.UserName);
+                await EnsureClaimsForUserAsync(user);
+                _logger.LogInformation("Login successful for user {Username}. checking missing roles...", user.UserName);
+                await EnsureRolesForUserAsync(user);
                 return true;
             }
             catch (Exception ex)
@@ -605,8 +611,10 @@ namespace Survey.Users.Services
                     throw new BusinessException(ErrorMap.GetMessage(ErrorType.InvalidUsernameOrPassword), (int)ErrorType.InvalidUsernameOrPassword);
                 }
 
-                _logger.LogInformation("Login successful for user {Username}. Adding missing claims...", userName);
+                _logger.LogInformation("Login successful for user {Username}. checking missing claims...", userName);
                 await EnsureClaimsForUserAsync(user);
+                _logger.LogInformation("Login successful for user {Username}. checking missing roles...", userName);
+                await EnsureRolesForUserAsync(user);
                 return true;
             }
             catch (Exception ex)
@@ -656,6 +664,43 @@ namespace Survey.Users.Services
                 _logger.LogInformation("Adding missing claims to user {UserId}", user.Id);
                 await AddClaimsAsync(user, claimsToAdd);
             }
+        }
+
+        private async Task EnsureRolesForUserAsync(User user)
+        {
+            var existingRoles = await GetRolesAsync(user);
+            var rolesToAdd = new List<string>();
+
+            if (user.IsProfessor)
+            {
+                if (!existingRoles.Any(c => c == "Professor"))
+                    rolesToAdd.Add("Professor");
+            }
+            else
+            {
+                if (!existingRoles.Any(c => c == "Student"))
+                    rolesToAdd.Add("Student");
+            }
+
+            if (rolesToAdd.Any())
+            {
+                _logger.LogInformation("Adding missing roles to user {UserId}", user.Id);
+                await AddToRolesAsync(user, rolesToAdd);
+            }
+        }
+
+        private async Task AddDefaultRolesAsync(User user)
+        {
+            string role;
+
+            if (user.IsProfessor)
+                role = "Professor";
+            else
+                role = "Student";
+
+            await AddToRoleAsync(user, role);
+
+            _logger.LogInformation("Default roles added for user {UserId}", user.Id);
         }
 
         private async Task AddDefaultClaimsAsync(User user)

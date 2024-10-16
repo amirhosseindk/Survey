@@ -1,34 +1,32 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApp.Models;
+using Survey.Application.Features.Commands.Universities.StudentClass;
+using Survey.Application.Features.Commands.Users.SignIn;
+using Survey.Application.Features.Commands.Users.SignOut;
+using Survey.Application.Features.Commands.Users.SignUp;
+using Survey.Application.Features.Queries.Universities.Classes;
+using WebApp.Extensions;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
     public class UserController : Controller
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly AppDbContext _appDbContext;
+        private readonly IMediator _mediator;
 
-        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, AppDbContext appDbContext)
+        public UserController(IMediator mediator)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _appDbContext = appDbContext;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
-            var classes = _appDbContext.Classes
-                                       .GroupBy(c => c.Name)
-                                       .Select(g => g.First())
-                                       .ToList();
+            var classes = await _mediator.Send(new GetAllClassesQuery());
+
             var model = new RegisterViewModel
             {
-                Classes = classes
+                Classes = classes.Result
             };
             return View(model);
         }
@@ -36,62 +34,60 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            string userPassword = model.ConfirmPassword;
+            var result = await _mediator.Send(new SignUpCommand
+            {
+                Email = model.Email,
+                Password = userPassword,
+                StudentNumber = model.StudentNumber,
+                IsProfessor = model.IsProfessor,
+                Username = model.StudentNumber
+            });
 
-                var user = new User
+            if (result.Succeeded)
+            {
+                if (model.IsProfessor)
                 {
-                    UserName = model.StudentNumber,
-                    Email = model.Email,
-                    EmailConfirmed = true,
-                    IsProfessor = model.IsProfessor,
-                    StudentNumber = model.StudentNumber,
-                };
-
-                string userPassword = model.ConfirmPassword;
-                var result = await _userManager.CreateAsync(user, userPassword);
-                if (result.Succeeded)
-                {
-                    if (model.IsProfessor)
+                    await _mediator.Send(new SignInCommand
                     {
-                        await _userManager.AddToRoleAsync(user, "Professor");
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToAction("Index", "Professor");
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "Student");
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-
-                        var selectedClassNames = _appDbContext.Classes
-                                                              .Where(c => c.Name == model.SelectedClassName)
-                                                              .ToList();
-
-                        foreach (var classEntity in selectedClassNames)
-                        {
-                            classEntity.Students.Add(user);
-                        }
-
-                        await _appDbContext.SaveChangesAsync();
-
-                        return RedirectToAction("Index", "Home");
-                    }
+                        Username = model.StudentNumber,
+                        Password = userPassword
+                    });
+                    return RedirectToAction("Index", "Professor");
                 }
+                else
+                {
+                    await _mediator.Send(new SignInCommand
+                    {
+                        Username = model.StudentNumber,
+                        Password = userPassword
+                    });
 
-                model.Classes = _appDbContext.Classes
-                                              .GroupBy(c => c.Name)
-                                              .Select(g => g.First())
-                                              .ToList();
-                return View(model);
+                    var @class = await _mediator.Send(new GetClassByNameQuery { ClassName = model.SelectedClassName });
+                    await _mediator.Send(new AddStudentToClassCommand { StudentId = User.GetUserId(), ClassId = @class.Result.Id });
 
-            model.Classes = _appDbContext.Classes
-                                          .GroupBy(c => c.Name)
-                                          .Select(g => g.First())
-                                          .ToList();
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
             return View(model);
         }
 
         [HttpGet]
         public IActionResult Login()
         {
+            if (User.IsLoggedIn())
+            {
+                if (User.IsProfessor())
+                {
+                    return RedirectToAction("Index", "Professor");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
             return View();
         }
 
@@ -100,21 +96,22 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.StudentNumber, model.Password, model.RememberMe, false);
+                var result = await _mediator.Send(new SignInCommand
+                {
+                    Username = model.StudentNumber,
+                    Password = model.Password
+                });
 
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByNameAsync(model.StudentNumber);
-                    if (user != null)
+                    var isProfessor = User.IsProfessor();
+                    if (isProfessor)
                     {
-                        if (await _userManager.IsInRoleAsync(user, "Professor"))
-                        {
-                            return RedirectToAction("Index", "Professor");
-                        }
-                        else if (await _userManager.IsInRoleAsync(user, "Student"))
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
+                        return RedirectToAction("Index", "Professor");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
                     }
                 }
 
@@ -127,7 +124,7 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _mediator.Send(new SignOutCommand());
             return RedirectToAction("Login", "User");
         }
     }

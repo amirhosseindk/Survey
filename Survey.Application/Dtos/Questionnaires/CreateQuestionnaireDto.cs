@@ -6,7 +6,7 @@ namespace Survey.Application.Dtos.Questionnaires
     {
         public string Title { get; set; }
         public int ClassId { get; set; }
-        public List<CreateQuestionDto> Questions { get; set; }
-        public string ProffesorId { get; set; }
+        public List<CreateQuestionDto>? Questions { get; set; }
+        public string ProfessorId { get; set; }
     }
 }

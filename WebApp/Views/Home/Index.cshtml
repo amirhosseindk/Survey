@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebApp.Models.Questionnaire>
+﻿@model IEnumerable<Survey.Application.Dtos.Questionnaires.QuestionnaireDto>
 
 @{
     ViewData["Title"] = "Home";
@@ -20,8 +20,8 @@
         {
             <tr>
                 <td>@questionnaire.Title</td>
-                <td>@questionnaire.Class.Course.Name</td>
-                <td>@questionnaire.Class.Name</td>
+                <td>@questionnaire.CourseId</td>
+                <td>@questionnaire.ClassId</td>
                 <td>
                     <a class="btn btn-primary" asp-controller="Questionnaire" asp-action="Fill" asp-route-id="@questionnaire.Id">Fill</a>
                 </td>

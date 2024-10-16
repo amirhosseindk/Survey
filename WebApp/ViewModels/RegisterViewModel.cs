@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using WebApp.Models;
+﻿using Survey.Application.Dtos.Classes;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.ViewModels
 {
@@ -26,7 +26,7 @@ namespace WebApp.ViewModels
         [Display(Name = "Class")]
         public string SelectedClassName { get; set; }
 
-        public List<Class>? Classes { get; set; }
+        public IEnumerable<ClassDto>? Classes { get; set; }
 
         [Display(Name = "Are you a professor?")]
         public bool IsProfessor { get; set; }

@@ -12,13 +12,16 @@
     {
         <div>
             <h3>@question.Title</h3>
-            @if (question.Type == QuestionType.MultipleChoice && ((MultipleChoiceQuestion)question).Options != null)
+            @if (question.Type == 1 && question.Options != null)
             {
-                var chartLabels = ((MultipleChoiceQuestion)question).Options.Select(o => o.OptionText).ToArray();
-                var chartData = ((MultipleChoiceQuestion)question).Options.Select(o => Model.MultipleChoiceResults.FirstOrDefault(r => r.QuestionId == question.Id && r.AnswerOptionId == o.Id)?.Count ?? 0).ToArray();
+                var chartLabels = question.Options.Select(o => o.OptionText).ToArray();
+                var chartData = question.Options.Select(o => Model.MultipleChoiceResults
+                .Where(r => r.QuestionId == question.Id && r.AnswerText == o.OptionText)
+                .Select(r => r.Count).FirstOrDefault()).ToArray();
+
                 <canvas id="chart-@question.Id" data-chart-type="bar" data-labels='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(chartLabels))' data-data='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(chartData))'></canvas>
             }
-            else if (question.Type == QuestionType.Text)
+            else if (question.Type == 0)
             {
                 <div>تعداد پاسخ‌دهنده‌ها: @(Model.TextQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Count ?? 0)</div>
             }
@@ -38,7 +41,6 @@
 <a asp-controller="StatisticalAnalysis" asp-action="CompareWithCollegeAverage" asp-route-questionnaireId="@Model.Questionnaire.Id" class="btn btn-primary">Compare With College Average</a>
 <a asp-controller="StatisticalAnalysis" asp-action="PerformOneSampleTTest" asp-route-questionnaireId="@Model.Questionnaire.Id" class="btn btn-primary">Perform One-Sample T-Test</a>
 
-<!-- اضافه کردن فایل Chart.js و results.js -->
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/js/results.js"></script>

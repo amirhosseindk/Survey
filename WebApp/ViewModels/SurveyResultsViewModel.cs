@@ -1,10 +1,8 @@
-﻿using WebApp.Models;
-
-namespace WebApp.ViewModels
+﻿namespace WebApp.ViewModels
 {
     public class SurveyResultsViewModel
     {
-        public Questionnaire Questionnaire { get; set; }
+        public Survey.Application.Dtos.Questionnaires.QuestionnaireDto Questionnaire { get; set; }
         public List<MultipleChoiceResult> MultipleChoiceResults { get; set; }
         public List<TextQuestionResult> TextQuestionResults { get; set; }
         public int TotalStudents { get; set; }

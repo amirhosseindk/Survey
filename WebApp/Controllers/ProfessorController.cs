@@ -1,80 +1,54 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApp.Models;
+using Survey.Application.Features.Commands.Universities.Classes;
+using Survey.Application.Features.Commands.Universities.Courses;
+using Survey.Application.Features.Queries.Questionnaires.GetQuestionnaireByProfessorId;
+using Survey.Application.Features.Queries.Universities.Courses;
+using WebApp.Extensions;
 
 namespace WebApp.Controllers
 {
-    [Authorize(Roles = "Professor")]
+    //[Authorize(Roles = "Professor")]
     public class ProfessorController : Controller
     {
-        private readonly UserManager<User> _userManager;
-        private readonly AppDbContext _context;
-
-        public ProfessorController(UserManager<User> userManager, AppDbContext context)
+        private readonly IMediator _mediator;
+        
+        public ProfessorController(IMediator mediator)
         {
-            _userManager = userManager;
-            _context = context;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
-            var courses = await _context.Courses
-                .Where(c => c.ProfessorId == user.Id)
-                .Include(c => c.Classes)
-                .ThenInclude(cl => cl.Questionnaires)
-                .ToListAsync();
-
-            var questionnaires = courses.SelectMany(c => c.Classes)
-                                        .SelectMany(cl => cl.Questionnaires)
-                                        .ToList();
-
-            ViewBag.Courses = courses;
-            return View(questionnaires);
+            var userId = User.GetUserId();
+            var courses = await _mediator.Send(new GetAllCoursesByProfessorIdQuery { ProfessorId = userId });
+            var questionnaires = await _mediator.Send(new GetQuestionnaireByProfessorIdQuery { Id = userId });
+            ViewBag.Courses = courses.Result;
+            return View(questionnaires.Result);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateCourse(string courseName)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var course = new Course { Name = courseName, ProfessorId = user.Id.ToString() };
-            _context.Courses.Add(course);
-            await _context.SaveChangesAsync();
-
+            var userId = User.GetUserId();
+            await _mediator.Send(new CreateCourseCommand { Name = courseName, ProfessorId = userId });
             return RedirectToAction("Index");
         }
 
-        public IActionResult CreateClass()
+        public async Task<IActionResult> CreateClass()
         {
-            var userId = _userManager.GetUserId(User);
-            var courses = _context.Courses
-                .Where(c => c.ProfessorId == userId)
-                .ToList();
-            ViewBag.Courses = courses;
+            var userId = User.GetUserId();
+            var courses = await _mediator.Send(new GetAllCoursesByProfessorIdQuery { ProfessorId = userId });
+            ViewBag.Courses = courses.Result;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateClass(string className, int courseId)
         {
-            var classEntity = new Class { Name = className, CourseId = courseId };
-            _context.Classes.Add(classEntity);
-            await _context.SaveChangesAsync();
-
+            await _mediator.Send(new CreateClassCommand { Name = className, CourseId = courseId });
             return RedirectToAction("Index");
-        }
-
-        public IActionResult CreateQuestionnaire()
-        {
-            var userId = _userManager.GetUserId(User);
-            var courses = _context.Courses
-                .Where(c => c.ProfessorId == userId)
-                .Include(c => c.Classes)
-                .ToList();
-            ViewBag.Courses = courses;
-            return View();
         }
     }
 }

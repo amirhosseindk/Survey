@@ -114,6 +114,21 @@ namespace Survey.University.Repositories
             }
         }
 
+        public async Task<IEnumerable<CourseRepoModel>> GetAllByProfessorIdAsync(string professorId)
+        {
+            var sql = GetAllByProfessorIdSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryAsync<CourseRepoModel>(sql, new { ProfessorId = professorId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting all courses - {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<Dictionary<int, string>> GetClassesByCourseIdAsync(int courseId)
         {
             var sql = GetClassesByCourseIdSQL();
@@ -182,6 +197,11 @@ namespace Survey.University.Repositories
         private string GetAllSQL()
         {
             return "SELECT * FROM Courses";
+        }
+
+        private string GetAllByProfessorIdSQL()
+        {
+            return "SELECT * FROM Courses WHERE ProfessorId = @ProfessorId";
         }
 
         private string GetByIdSQL()

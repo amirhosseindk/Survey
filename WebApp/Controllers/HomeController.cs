@@ -1,41 +1,33 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Survey.Application.Features.Queries.Questionnaires.GetQuestionnairesByStudentId;
+using WebApp.Extensions;
 using WebApp.Models;
 
 namespace WebApp.Controllers
 {
-    [Authorize(Roles = "Student")]
+    //[Authorize(Roles = "Student")]
     public class HomeController : Controller
     {
-        private readonly UserManager<User> _userManager;
-        private readonly AppDbContext _context;
+        private readonly IMediator _mediator;
 
-        public HomeController(UserManager<User> userManager, AppDbContext context)
+        public HomeController(IMediator mediator)
         {
-            _userManager = userManager;
-            _context = context;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var userId = User.GetUserId();
 
-            var classes = await _context.Classes
-                .Where(cl => cl.Students.Any(s => s.Id == user.Id))
-                .Include(cl => cl.Course)
-                .ToListAsync();
+            var questionnaires = await _mediator.Send(new GetQuestionnairesByStudentIdQuery { StudentId = userId});
 
-            var classIds = classes.Select(cl => cl.Id).ToList();
+            // todo course name va class name byd begirim
 
-            var questionnaires = await _context.Questionnaires
-                .Where(q => classIds.Contains(q.ClassId))
-                .Include(q => q.Class)
-                .ThenInclude(cl => cl.Course)
-                .ToListAsync();
-
-            return View(questionnaires);
+            return View(questionnaires.Result);
         }
     }
 }
