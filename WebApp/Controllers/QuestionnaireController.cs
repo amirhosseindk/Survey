@@ -134,12 +134,12 @@ namespace WebApp.Controllers
                 .Count();
 
             var multipleChoiceResults = answersResult.Result
-                .Where(a => a.Type == 1 && !string.IsNullOrEmpty(a.AnswerText))
-                .GroupBy(a => new { a.QuestionId, a.AnswerText })
+                .Where(a => a.Type == 1)
+                .GroupBy(a => new { a.QuestionId, a.AnswerOptionId })
                 .Select(g => new MultipleChoiceResult
                 {
                     QuestionId = g.Key.QuestionId,
-                    AnswerText = g.Key.AnswerText,
+                    AnswerOption = g.Key.AnswerOptionId ?? 0,
                     Count = g.Count()
                 })
                 .ToList();
