@@ -150,7 +150,28 @@ namespace WebApp.Controllers
                 .Select(g => new TextQuestionResult
                 {
                     QuestionId = g.Key,
-                    Count = g.Count()
+                    Count = g.Count(),
+                    Answers = g.Select(a => a.AnswerText).ToList()
+                })
+                .ToList();
+
+            var rangeQuestionAverages = answersResult.Result
+                .Where(a => a.Type == 2)
+                .GroupBy(a => a.QuestionId)
+                .Select(g => new RangeQuestionResult
+                {
+                    QuestionId = g.Key,
+                    Average = g.Average(a => a.AnswerValue ?? 0)
+                })
+                .ToList();
+
+            var degreeQuestionAverages = answersResult.Result
+                .Where(a => a.Type == 3)
+                .GroupBy(a => a.QuestionId)
+                .Select(g => new DegreeQuestionResult
+                {
+                    QuestionId = g.Key,
+                    Average = g.Average(a => a.AnswerValue ?? 0)
                 })
                 .ToList();
 
@@ -160,7 +181,9 @@ namespace WebApp.Controllers
                 MultipleChoiceResults = multipleChoiceResults,
                 TextQuestionResults = textQuestionResults,
                 TotalStudents = totalStudents,
-                AnsweredStudents = answeredStudents
+                AnsweredStudents = answeredStudents,
+                RangeQuestionResults = rangeQuestionAverages,
+                DegreeQuestionResults = degreeQuestionAverages
             });
         }
     }

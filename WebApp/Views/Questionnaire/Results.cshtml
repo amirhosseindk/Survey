@@ -21,7 +21,6 @@
     <!-- Custom Styles -->
     <style>
         :root {
-            /* Light Mode Variables */
             --primary-color: #7fcde7;
             --secondary-color: #ffcbc2;
             --background-color: #f5f8fa;
@@ -30,7 +29,6 @@
             --shadow-color: rgba(0, 0, 0, 0.1);
             --icon-color: #ffeb3b;
             --button-color: #007bff;
-            /* Chart Colors */
             --excellent-color: #28a745;
             --good-color: #7bc96f;
             --average-color: #ffc107;
@@ -38,7 +36,6 @@
         }
 
         body.dark-mode {
-            /* Dark Mode Variables */
             --primary-color: #1e3e62;
             --secondary-color: #282a36;
             --background-color: #0b192c;
@@ -77,7 +74,7 @@
 
         .chart-container {
             position: relative;
-            height: 30vh; /* Smaller height for respondents chart */
+            height: 30vh;
             width: 100%;
         }
 
@@ -126,15 +123,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Home Link with URL redirection -->
                     <li class="nav-item px-3">
                         <a class="nav-link active" href="/Professor/Index"><i class="fa fa-home fa-xl" aria-hidden="true"></i></a>
                     </li>
-                    <!-- Dark Mode Toggle -->
                     <li class="nav-item px-3">
                         <a class="nav-link" href="#" id="toggle-dark-mode"><i class="fa fa-moon fa-xl" aria-hidden="true" id="dark-mode-icon"></i></a>
                     </li>
-                    <!-- Language Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa fa-language fa-xl" aria-hidden="true"></i>
@@ -144,7 +138,6 @@
                             <li><a class="dropdown-item" href="#">English</a></li>
                         </ul>
                     </li>
-                    <!-- User Icon -->
                     <li class="nav-item px-3">
                         <a class="nav-link active" href="#">
                             <i class="fas fa-user-circle fa-xl"></i>
@@ -166,6 +159,7 @@
             {
                 <div class="mb-4">
                     <h3>@question.Title</h3>
+
                     @if (question.Type == 1 && question.Options != null)
                     {
                         var chartLabels = question.Options.Select(o => o.OptionText).ToArray();
@@ -177,7 +171,48 @@
                     }
                     else if (question.Type == 0)
                     {
-                        <p>تعداد پاسخ‌دهنده‌ها: @(Model.TextQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Count ?? 0)</p>
+                        <div class="text-question">
+                            <p>تعداد پاسخ‌دهنده‌ها: @(Model.TextQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Count ?? 0)</p>
+                            <button class="btn btn-link p-0" onclick="toggleAnswers('answers-@question.Id')">مشاهده همه پاسخ‌ها</button>
+
+                            <div id="answers-@question.Id" style="display:none;">
+                                <ul class="list-group mt-2">
+                                    @foreach (var answer in Model.TextQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Answers ?? new List<string>())
+                                    {
+                                        <li class="list-group-item">@answer</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+                    else if (question.Type == 2)
+                    {
+                        var rangeAverage = Model.RangeQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Average ?? 0;
+                        <canvas id="range-chart-@question.Id" data-chart-type="line" data-labels='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(new[] { "میانگین بازه‌ای" }))' data-data='@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(new[] { rangeAverage }))'></canvas>
+                    }
+                    else if (question.Type == 3)
+                    {
+                        var degreeAverage = Model.DegreeQuestionResults.FirstOrDefault(r => r.QuestionId == question.Id)?.Average ?? 0;
+                        <div>
+                            میانگین امتیاز:
+                            @{
+                                int fullStars = (int)degreeAverage;
+                                bool halfStar = degreeAverage - fullStars >= 0.5;
+
+                                for (int i = 0; i < fullStars; i++)
+                                {
+                                    <i class="fa fa-star text-warning"></i>
+                                }
+                                if (halfStar)
+                                {
+                                    <i class="fa fa-star-half-alt text-warning"></i>
+                                }
+                                for (int i = fullStars + (halfStar ? 1 : 0); i < 5; i++)
+                                {
+                                    <i class="fa fa-star text-muted"></i>
+                                }
+                            }
+                        </div>
                     }
                 </div>
             }
@@ -207,7 +242,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Dark Mode Toggle
             document.getElementById("toggle-dark-mode").addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("dark-mode");
@@ -221,13 +255,11 @@
                 }
             });
 
-            // Initialize charts with data attributes
             document.querySelectorAll('canvas').forEach(function (canvas) {
                 const chartType = canvas.dataset.chartType;
                 const labels = JSON.parse(canvas.dataset.labels);
                 const data = JSON.parse(canvas.dataset.data);
 
-                // Define colors based on chart type
                 let backgroundColors = [];
                 let borderColor = getCSSVariable('--primary-color');
 
@@ -266,7 +298,7 @@
                                 display: false
                             }
                         },
-                        scales: chartType === 'bar' ? {
+                        scales: chartType === 'bar' || chartType === 'line' ? {
                             y: {
                                 beginAtZero: true,
                                 ticks: {
@@ -287,6 +319,16 @@
         function getCSSVariable(variableName) {
             return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
         }
+
+        function toggleAnswers(elementId) {
+                const answersContainer = document.getElementById(elementId);
+                if (answersContainer.style.display === "none") {
+                    answersContainer.style.display = "block";
+                } else {
+                    answersContainer.style.display = "none";
+                }
+            }
+
     </script>
 </body>
 </html>
