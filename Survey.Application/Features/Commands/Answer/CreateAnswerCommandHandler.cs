@@ -19,7 +19,14 @@ namespace Survey.Application.Features.Commands.Answer
 
         public async Task<ResultDto<bool>> Handle(CreateAnswerCommand request, CancellationToken cancellationToken)
         {
-            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            //TODO : wtf is this shit and how to fix it ?
+            var transactionOptions = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.FromMinutes(1)
+            };
+
+            using (var transaction = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
             {
                 foreach (var answer in request.Answers)
                 {

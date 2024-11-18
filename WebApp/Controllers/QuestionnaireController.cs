@@ -69,16 +69,17 @@ namespace WebApp.Controllers
             {
                 return NotFound();
             }
-            var answers = await _mediator.Send(new GetAnswersOfStudentQuery { QuestionnaireId = id, StudentId = User.GetUserId() });
-            if (answers.Result.Count() != 0)
-            {
-                _updateAnswers = true;
-                ViewBag.Answers = answers.Result;
-                TempData["UpdateAnswers"] = true;
-            }
 
-            ViewBag.IsAnswered = _updateAnswers;
+            var answers = await _mediator.Send(new GetAnswersOfStudentQuery
+            {
+                QuestionnaireId = id,
+                StudentId = User.GetUserId()
+            });
+
+            ViewBag.IsAnswered = answers.Result.Any();
+            ViewBag.Answers = answers.Result;
             ViewBag.QuestionnaireId = id;
+
             return View(questionnaire.Result);
         }
 
@@ -86,29 +87,37 @@ namespace WebApp.Controllers
         [Route("[controller]/SubmitAnswers/{id}")]
         public async Task<IActionResult> SubmitAnswers(int id, [FromBody] WebApp.Models.AnswerDto answersDto)
         {
+            //TODO : both update and create answer ?!
             if (answersDto == null || (answersDto.CreateAnswers == null && answersDto.UpdateAnswers == null))
             {
-                Console.WriteLine("Received null answers.");
                 return BadRequest("Answers are null.");
             }
 
-            _updateAnswers = TempData.ContainsKey("UpdateAnswers") && (bool)TempData["UpdateAnswers"];
-
-            if (!_updateAnswers)
+            var existingAnswers = await _mediator.Send(new GetAnswersOfStudentQuery
             {
-                var result = await _mediator.Send(new CreateAnswerCommand { QuestionnaireId = id, Answers = answersDto.CreateAnswers });
-                if (result.Result)
-                    return Ok();
-                else
-                    return NotFound();
+                QuestionnaireId = id,
+                StudentId = User.GetUserId()
+            });
+
+            if (existingAnswers.Result.Any())
+            {
+                var result = await _mediator.Send(new UpdateAnswerCommand
+                {
+                    QuestionnaireId = id,
+                    Answers = answersDto.UpdateAnswers
+                });
+
+                return result.Result ? Ok() : NotFound();
             }
             else
             {
-                var result = await _mediator.Send(new UpdateAnswerCommand { QuestionnaireId = id, Answers = answersDto.UpdateAnswers });
-                if (result.Result)
-                    return Ok();
-                else
-                    return NotFound();
+                var result = await _mediator.Send(new CreateAnswerCommand
+                {
+                    QuestionnaireId = id,
+                    Answers = answersDto.CreateAnswers
+                });
+
+                return result.Result ? Ok() : NotFound();
             }
         }
 
