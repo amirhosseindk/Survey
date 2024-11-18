@@ -28,5 +28,6 @@ namespace Survey.University.Contracts
         Task<Course> GetCourseWithClassesByNameAsync(string courseName);
         Task<Class> GetClassWithStudentsByIdAsync(int classId);
         Task<Class> GetClassWithStudentsByNameAsync(string className);
+        Task<Course> GetCourseByClassIdAsync(int classId);
     }
 }

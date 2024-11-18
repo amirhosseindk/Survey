@@ -161,6 +161,21 @@ namespace Survey.University.Repositories
             }
         }
 
+        public async Task<CourseRepoModel> GetByClassIdAsync(int id)
+        {
+            var sql = GetByClassIdSQL();
+            try
+            {
+                using var connection = _readConnectionFactory.CreateConnection();
+                return await connection.QueryFirstOrDefaultAsync<CourseRepoModel>(sql, new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while getting course by ClassID {id} - {ex.Message}");
+                throw;
+            }
+        }
+
         private string GetClassesByCourseNameSQL()
         {
             return @"
@@ -222,6 +237,11 @@ namespace Survey.University.Repositories
                 ProfessorId = @ProfessorId
             WHERE Id = @Id
             ";
+        }
+
+        private string GetByClassIdSQL()
+        {
+            return @"SELECT c.Id,c.Name,c.ProfessorId FROM Courses c INNER JOIN Classes cl ON c.Id = cl.CourseId WHERE cl.Id = @Id;";
         }
     }
 }

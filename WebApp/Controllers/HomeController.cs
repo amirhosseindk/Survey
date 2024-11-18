@@ -1,11 +1,7 @@
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Survey.Application.Features.Queries.Questionnaires.GetQuestionnairesByStudentId;
 using WebApp.Extensions;
-using WebApp.Models;
 
 namespace WebApp.Controllers
 {
@@ -21,12 +17,7 @@ namespace WebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var userId = User.GetUserId();
-
-            var questionnaires = await _mediator.Send(new GetQuestionnairesByStudentIdQuery { StudentId = userId});
-
-            // todo course name va class name byd begirim
-
+            var questionnaires = await _mediator.Send(new GetQuestionnairesByStudentIdQuery { StudentId = User.GetUserId()});
             return View(questionnaires.Result);
         }
     }

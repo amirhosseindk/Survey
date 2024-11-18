@@ -460,5 +460,26 @@ namespace Survey.University.Services
                 throw;
             }
         }
+
+        public async Task<Course> GetCourseByClassIdAsync(int classId)
+        {
+            try
+            {
+                var course = await _courseRepository.GetByClassIdAsync(classId);
+                if (course == null) throw new KeyNotFoundException("Course not found");
+
+                return new Course
+                {
+                    Id = course.Id,
+                    Name = course.Name,
+                    ProfessorId = course.ProfessorId,
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while retrieving course with classId {classId}: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

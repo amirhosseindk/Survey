@@ -18,7 +18,6 @@ namespace WebApp.Controllers
     public class QuestionnaireController : Controller
     {
         private readonly IMediator _mediator;
-        private bool _updateAnswers;
 
         public QuestionnaireController(IMediator mediator)
         {

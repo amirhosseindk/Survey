@@ -4,30 +4,32 @@
     ViewData["Title"] = "Home";
 }
 
-<h1>Questionnaires</h1>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Questionnaires</h1>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Course</th>
-            <th>Class</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var questionnaire in Model)
-        {
-            <tr>
-                <td>@questionnaire.Title</td>
-                <td>@questionnaire.CourseId</td>
-                <td>@questionnaire.ClassId</td>
-                <td>
-                    <a class="btn btn-primary" asp-controller="Questionnaire" asp-action="Fill" asp-route-id="@questionnaire.Id">Fill</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>Title</th>
+                    <th>Course</th>
+                    <th>Class</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var questionnaire in Model)
+                {
+                    <tr>
+                        <td>@questionnaire.Title</td>
+                        <td>@questionnaire.CourseName</td>
+                        <td>@questionnaire.ClassName</td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" asp-controller="Questionnaire" asp-action="Fill" asp-route-id="@questionnaire.Id">Fill</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

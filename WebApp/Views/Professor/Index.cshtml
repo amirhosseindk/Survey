@@ -4,8 +4,6 @@
     ViewData["Title"] = "Professor Home";
 }
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
 <div class="container mt-5">
     <div class="row">
         <!-- Create Course Section -->
@@ -18,7 +16,7 @@
                             <label for="courseName">Course Name</label>
                             <input type="text" id="courseName" name="courseName" class="form-control" required />
                         </div>
-                        <button type="submit" class="btn btn-primary">Create Course</button>
+                        <button type="submit" class="btn btn-primary mt-3">Create Course</button>
                     </form>
                 </div>
             </div>
@@ -29,7 +27,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Create a Class</h5>
-                    <a asp-controller="Professor" asp-action="CreateClass" class="btn btn-primary">Create Class</a>
+                    <a asp-controller="Professor" asp-action="CreateClass" class="btn btn-primary mt-3">Create Class</a>
                 </div>
             </div>
         </div>
@@ -41,7 +39,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Create a Questionnaire</h5>
-                    <a asp-controller="Questionnaire" asp-action="Create" class="btn btn-primary">Create Questionnaire</a>
+                    <a asp-controller="Questionnaire" asp-action="Create" class="btn btn-primary mt-3">Create Questionnaire</a>
                 </div>
             </div>
         </div>
@@ -54,22 +52,20 @@
                 <div class="card-body">
                     <h5 class="card-title">Questionnaires</h5>
                     <form id="questionnaires-form" method="post">
-                        <div class="form-group">
-                            <ul class="list-group">
-                                @foreach (var questionnaire in Model)
-                                {
-                                    <li class="list-group-item">
-                                        <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" data-course-id="@questionnaire.CourseId" data-class-id="@questionnaire.ClassId" class="mr-2" />
-                                        <a asp-controller="Questionnaire" asp-action="Results" asp-route-id="@questionnaire.Id">@questionnaire.Title</a>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                        <div class="btn-group" role="group" aria-label="Statistical Analysis Buttons">
-                            <button type="submit" formaction="/StatisticalAnalysis/PairedTTest" class="btn btn-primary mr-2 mb-2" onclick="return validateSelection('questionnaires-form', 2, 2, true, false)">Paired T-Test</button>
-                            <button type="submit" formaction="/StatisticalAnalysis/CalculateGroupMeans" class="btn btn-primary mr-2 mb-2" onclick="return validateSelection('questionnaires-form', 2, 2, true, false)">Calculate Group Means</button>
-                            <button type="submit" formaction="/StatisticalAnalysis/PerformANOVA" class="btn btn-primary mr-2 mb-2" onclick="return validateSelection('questionnaires-form', 3, Infinity, true, false)">Perform ANOVA</button>
-                            <button type="submit" formaction="/StatisticalAnalysis/PerformRepeatedMeasuresANOVA" class="btn btn-primary mb-2" onclick="return validateSelection('questionnaires-form', 3, Infinity, true, true)">Perform Repeated Measures ANOVA</button>
+                        <ul class="list-group mb-3">
+                            @foreach (var questionnaire in Model)
+                            {
+                                <li class="list-group-item">
+                                    <input type="checkbox" name="questionnaireIds" value="@questionnaire.Id" data-course-id="@questionnaire.CourseId" data-class-id="@questionnaire.ClassId" class="me-2" />
+                                    <a asp-controller="Questionnaire" asp-action="Results" asp-route-id="@questionnaire.Id">@questionnaire.Title</a>
+                                </li>
+                            }
+                        </ul>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="submit" formaction="/StatisticalAnalysis/PairedTTest" class="btn btn-primary">Paired T-Test</button>
+                            <button type="submit" formaction="/StatisticalAnalysis/CalculateGroupMeans" class="btn btn-primary">Calculate Group Means</button>
+                            <button type="submit" formaction="/StatisticalAnalysis/PerformANOVA" class="btn btn-primary">Perform ANOVA</button>
+                            <button type="submit" formaction="/StatisticalAnalysis/PerformRepeatedMeasuresANOVA" class="btn btn-primary">Perform Repeated Measures ANOVA</button>
                         </div>
                     </form>
                 </div>
@@ -77,37 +73,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    function validateSelection(formId, minSelected, maxSelected, checkCourseConsistency, checkClassConsistency) {
-        var form = document.getElementById(formId);
-        var checkboxes = form.querySelectorAll('input[name="questionnaireIds"]:checked');
-        if (checkboxes.length < minSelected || checkboxes.length > maxSelected) {
-            alert(`Please select between ${minSelected} and ${maxSelected} questionnaires.`);
-            return false;
-        }
-        if (checkCourseConsistency) {
-            var courseIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-course-id'));
-            if (new Set(courseIds).size !== 1) {
-                alert('Please select questionnaires from the same course.');
-                return false;
-            }
-        }
-        if (checkClassConsistency) {
-            var classIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-class-id'));
-            if (new Set(classIds).size !== 1) {
-                alert('Please select questionnaires from the same class.');
-                return false;
-            }
-        }
-        return true;
-    }
-
-    document.getElementById('questionnaires-form').addEventListener('submit', function (event) {
-        var submitButton = event.submitter;
-        var validateFunction = new Function('return ' + submitButton.getAttribute('onclick'));
-        if (!validateFunction()) {
-            event.preventDefault();
-        }
-    });
-</script>

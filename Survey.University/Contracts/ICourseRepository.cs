@@ -13,5 +13,6 @@ namespace Survey.University.Contracts
         Task<bool> DeleteAsync(int id);
         Task<Dictionary<int, string>> GetClassesByCourseIdAsync(int courseId);
         Task<Dictionary<int, string>> GetClassesByCourseNameAsync(string courseName);
+        Task<CourseRepoModel> GetByClassIdAsync(int id);
     }
 }
